@@ -24,6 +24,7 @@
   --card: rgba(255,255,255,0.055);
   --card-solid: #211a3a;
   --overlay: rgba(8,6,16,0.72);
+  --nav-h: 78px;
   --safe-t: env(safe-area-inset-top, 0px);
   --safe-b: env(safe-area-inset-bottom, 0px);
 }
@@ -43,13 +44,13 @@ body {
   background: radial-gradient(120% 100% at 15% 0%, var(--bg-1) 0%, var(--bg-2) 55%);
   color: var(--ink);
   font-family: 'Manrope', sans-serif;
-  padding: calc(20px + var(--safe-t)) 20px calc(100px + var(--safe-b));
+  padding: calc(20px + var(--safe-t)) 20px calc(var(--nav-h) + var(--safe-b) + 20px);
   max-width: 480px;
   margin: 0 auto;
   -webkit-font-smoothing: antialiased;
 }
 
-button, input, .item { touch-action: manipulation; }
+button, input, .item, .nav-btn { touch-action: manipulation; }
 
 @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeOut { to { opacity: 0; transform: translateX(24px) scale(0.97); } }
@@ -57,11 +58,17 @@ button, input, .item { touch-action: manipulation; }
 @keyframes shimmer { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
 @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
 @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes blurIn { from { opacity: 0; filter: blur(9px); transform: translateY(6px); } to { opacity: 1; filter: blur(0); transform: translateY(0); } }
+@keyframes screenIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
 /* ---- Header ---- */
 .header { margin-bottom: 22px; }
-.eyebrow { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
-h1 { font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 26px; margin: 0; letter-spacing: -0.01em; }
+.eyebrow { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; animation: blurIn 0.9s ease both; }
+h1 { font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 26px; margin: 0; letter-spacing: -0.01em; animation: blurIn 0.9s ease 0.08s both; }
+
+/* ---- Screens ---- */
+.screen { display: none; }
+.screen.active { display: block; animation: screenIn 0.28s ease both; }
 
 .card {
   background: var(--card);
@@ -90,7 +97,19 @@ h1 { font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 26px
 .up { color: var(--accent-2); }
 .down { color: var(--danger); }
 
-/* ---- Chart ---- */
+/* ---- Mini preview (Inicio) ---- */
+.preview-card { cursor: pointer; }
+.preview-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.preview-head .link { font-size: 11px; color: var(--accent); font-weight: 700; }
+.preview-bars { display: flex; align-items: flex-end; gap: 16px; height: 54px; }
+.preview-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+.preview-bar { width: 100%; max-width: 46px; border-radius: 6px 6px 2px 2px; min-height: 4px; }
+.preview-bar.ingreso { background: var(--accent-2); }
+.preview-bar.gasto { background: var(--danger); }
+.preview-bar-lbl { font-size: 10px; color: var(--muted); }
+.preview-bar-val { font-size: 11px; font-weight: 700; color: var(--ink); }
+
+/* ---- Chart (Analisis) ---- */
 .chart-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
 .legend { display: flex; gap: 14px; }
 .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
@@ -100,10 +119,41 @@ h1 { font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 26px
 .chart-tip b { color: var(--ink); font-weight: 600; }
 .chart-empty { padding: 28px 0 6px; text-align: center; color: var(--muted); font-size: 13px; }
 .bar-group { cursor: pointer; }
-.bar-group rect, .bar-group path { transition: opacity 0.15s ease; }
-.bar-group.dim path, .bar-group.dim rect { opacity: 0.35; }
 
-form { display: grid; gap: 14px; margin-bottom: 36px; }
+.period-toggle {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  padding: 4px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  margin-bottom: 18px;
+}
+.period-indicator {
+  position: absolute; top: 4px; bottom: 4px; left: 0;
+  border-radius: 999px; background: var(--accent);
+  transition: transform 0.28s cubic-bezier(.65,0,.35,1);
+}
+.period-toggle button {
+  position: relative; z-index: 1; min-height: 42px; border-radius: 999px; border: none;
+  background: transparent; color: var(--muted); font-size: 13px; font-weight: 700;
+  font-family: 'Manrope', sans-serif; cursor: pointer; transition: color 0.2s;
+}
+.period-toggle button[aria-selected="true"] { color: #2a1608; }
+
+.stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+.stat-tile { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 12px; }
+.stat-tile .stat-lbl { font-size: 9.5px; letter-spacing: 0.04em; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; line-height: 1.3; }
+.stat-tile .stat-val { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 600; }
+.insight {
+  background: rgba(255,138,92,0.08); border: 1px solid rgba(255,138,92,0.2);
+  border-radius: 16px; padding: 14px 16px; font-size: 12.5px; color: var(--ink); line-height: 1.5;
+}
+.insight b { color: var(--accent); }
+
+form { display: grid; gap: 14px; margin-bottom: 8px; }
 
 /* ---- Segmented tab control ---- */
 .type-toggle {
@@ -183,6 +233,23 @@ input:focus { outline: none; border-color: var(--accent); }
 .btn-add:active { transform: scale(0.97); }
 .btn-add:disabled { opacity: 0.5; }
 
+.btn-ghost {
+  font-family: 'Manrope', sans-serif;
+  background: rgba(255,255,255,0.05);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 13px;
+  min-height: 44px;
+  width: 100%;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s, background 0.15s;
+  margin-top: 6px;
+}
+.btn-ghost:active { transform: scale(0.98); background: rgba(255,255,255,0.09); }
+
 .btn-danger {
   font-family: 'Manrope', sans-serif;
   background: transparent;
@@ -247,7 +314,7 @@ input:focus { outline: none; border-color: var(--accent); }
 
 .toast {
   position: fixed;
-  bottom: calc(26px + var(--safe-b));
+  bottom: calc(var(--nav-h) + var(--safe-b) + 12px);
   left: 50%;
   transform: translateX(-50%) translateY(10px);
   background: var(--accent-2);
@@ -290,70 +357,131 @@ input:focus { outline: none; border-color: var(--accent); }
 }
 .sheet form { margin-bottom: 0; gap: 16px; }
 .sheet-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+
+/* ---- Bottom nav ---- */
+.bottom-nav {
+  position: fixed; left: 0; right: 0; bottom: 0;
+  height: calc(var(--nav-h) + var(--safe-b));
+  padding-bottom: var(--safe-b);
+  background: rgba(20,15,36,0.82);
+  border-top: 1px solid var(--line);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  display: flex;
+  z-index: 25;
+}
+.nav-inner { max-width: 480px; margin: 0 auto; width: 100%; display: flex; }
+.nav-btn {
+  flex: 1; background: none; border: none; color: var(--muted);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  font-family: 'Manrope', sans-serif; font-size: 11px; font-weight: 600; cursor: pointer;
+  transition: color 0.2s, transform 0.15s;
+}
+.nav-btn:active { transform: scale(0.94); }
+.nav-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; transition: stroke 0.2s; }
+.nav-btn.active { color: var(--ink); }
+.nav-btn.active svg { stroke: var(--accent); }
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="eyebrow" id="greeting">Control diario</div>
-  <h1>Registro de gastos</h1>
-</div>
-
-<div class="card">
-  <div class="card-lbl">Total ahorrado</div>
-  <div class="card-num" id="sum-ahorro">$0</div>
-  <div class="card-split">
-    <div><span class="up" id="sum-ingreso">$0</span><span>Ingresos</span></div>
-    <div><span class="down" id="sum-gasto">$0</span><span>Gastos</span></div>
-    <div><span id="sum-disponible">$0</span><span>Disponible</span></div>
+<!-- ===== INICIO ===== -->
+<div class="screen active" id="screen-inicio">
+  <div class="header">
+    <div class="eyebrow" id="greeting">Control diario</div>
+    <h1>Registro de gastos</h1>
   </div>
-</div>
 
-<div class="card">
-  <div class="chart-head">
-    <div class="card-lbl" style="margin-bottom:0">Gastos vs ingresos</div>
-    <div class="legend">
-      <div class="legend-item"><span class="legend-dot" style="background:var(--accent-2)"></span>Ingreso</div>
-      <div class="legend-item"><span class="legend-dot" style="background:var(--danger)"></span>Gasto</div>
+  <div class="card">
+    <div class="card-lbl">Total ahorrado</div>
+    <div class="card-num" id="sum-ahorro">$0</div>
+    <div class="card-split">
+      <div><span class="up" id="sum-ingreso">$0</span><span>Ingresos</span></div>
+      <div><span class="down" id="sum-gasto">$0</span><span>Gastos</span></div>
+      <div><span id="sum-disponible">$0</span><span>Disponible</span></div>
     </div>
   </div>
-  <div class="chart-wrap" id="chart-wrap"></div>
-  <div class="chart-tip" id="chart-tip">Toca una barra para ver el detalle</div>
-</div>
 
-<form id="form-gasto">
-  <div class="type-toggle" role="tablist" aria-label="Tipo de movimiento" id="toggle-add">
-    <div class="tab-indicator"></div>
-    <button type="button" role="tab" data-type="gasto" aria-selected="true">↓ Gasto</button>
-    <button type="button" role="tab" data-type="ingreso" aria-selected="false">↑ Ingreso</button>
-    <button type="button" role="tab" data-type="ahorro" aria-selected="false">● Ahorro</button>
+  <div class="card preview-card" id="preview-card">
+    <div class="preview-head">
+      <div class="card-lbl" style="margin-bottom:0">Este mes</div>
+      <span class="link">Ver análisis ›</span>
+    </div>
+    <div class="preview-bars" id="preview-bars"></div>
   </div>
 
-  <div class="row2">
+  <div class="section-row">
+    <div class="section-label">Movimientos</div>
+    <div class="section-count" id="section-count"></div>
+  </div>
+  <div id="lista">
+    <div class="skeleton"></div>
+    <div class="skeleton" style="opacity:.7"></div>
+    <div class="skeleton" style="opacity:.45"></div>
+  </div>
+  <button type="button" class="btn-ghost" id="btn-ver-mas" style="display:none"></button>
+</div>
+
+<!-- ===== ANALISIS ===== -->
+<div class="screen" id="screen-analisis">
+  <div class="header">
+    <div class="eyebrow">Analítica</div>
+    <h1>Análisis</h1>
+  </div>
+
+  <div class="period-toggle" role="tablist" aria-label="Periodo" id="toggle-periodo">
+    <div class="period-indicator" id="period-indicator"></div>
+    <button type="button" role="tab" data-periodo="quincena" aria-selected="true">Quincenal</button>
+    <button type="button" role="tab" data-periodo="mensual" aria-selected="false">Mensual</button>
+  </div>
+
+  <div class="card">
+    <div class="chart-head">
+      <div class="card-lbl" style="margin-bottom:0">Gastos vs ingresos</div>
+      <div class="legend">
+        <div class="legend-item"><span class="legend-dot" style="background:var(--accent-2)"></span>Ingreso</div>
+        <div class="legend-item"><span class="legend-dot" style="background:var(--danger)"></span>Gasto</div>
+      </div>
+    </div>
+    <div class="chart-wrap" id="chart-wrap"></div>
+    <div class="chart-tip" id="chart-tip">Toca una barra para ver el detalle</div>
+  </div>
+
+  <div class="stat-row" id="stat-row"></div>
+  <div class="insight" id="insight"></div>
+</div>
+
+<!-- ===== AGREGAR ===== -->
+<div class="screen" id="screen-agregar">
+  <div class="header">
+    <div class="eyebrow">Nuevo</div>
+    <h1>Agregar movimiento</h1>
+  </div>
+
+  <form id="form-gasto">
+    <div class="type-toggle" role="tablist" aria-label="Tipo de movimiento" id="toggle-add">
+      <div class="tab-indicator"></div>
+      <button type="button" role="tab" data-type="gasto" aria-selected="true">↓ Gasto</button>
+      <button type="button" role="tab" data-type="ingreso" aria-selected="false">↑ Ingreso</button>
+      <button type="button" role="tab" data-type="ahorro" aria-selected="false">● Ahorro</button>
+    </div>
+
+    <div class="row2">
+      <div>
+        <label class="field-label" for="monto">Monto</label>
+        <input type="number" id="monto" step="0.01" inputmode="decimal" placeholder="0.00" required>
+      </div>
+      <div>
+        <label class="field-label" for="fecha">Fecha</label>
+        <input type="date" id="fecha" required>
+      </div>
+    </div>
     <div>
-      <label class="field-label" for="monto">Monto</label>
-      <input type="number" id="monto" step="0.01" inputmode="decimal" placeholder="0.00" required>
+      <label class="field-label" for="nota">Nota</label>
+      <input type="text" id="nota" placeholder="ej. transporte, quincena, etc.">
     </div>
-    <div>
-      <label class="field-label" for="fecha">Fecha</label>
-      <input type="date" id="fecha" required>
-    </div>
-  </div>
-  <div>
-    <label class="field-label" for="nota">Nota</label>
-    <input type="text" id="nota" placeholder="ej. transporte, quincena, etc.">
-  </div>
-  <button type="submit" class="btn-add" id="btn-add">Agregar</button>
-</form>
-
-<div class="section-row">
-  <div class="section-label">Movimientos</div>
-  <div class="section-count" id="section-count"></div>
-</div>
-<div id="lista">
-  <div class="skeleton"></div>
-  <div class="skeleton" style="opacity:.7"></div>
-  <div class="skeleton" style="opacity:.45"></div>
+    <button type="submit" class="btn-add" id="btn-add">Agregar</button>
+  </form>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -394,16 +522,37 @@ input:focus { outline: none; border-color: var(--accent); }
   </div>
 </div>
 
+<nav class="bottom-nav">
+  <div class="nav-inner">
+    <button class="nav-btn active" data-screen="inicio">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+      <span>Inicio</span>
+    </button>
+    <button class="nav-btn" data-screen="analisis">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/></svg>
+      <span>Análisis</span>
+    </button>
+    <button class="nav-btn" data-screen="agregar">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
+      <span>Agregar</span>
+    </button>
+  </div>
+</nav>
+
 <script>
 let gastos = [];
 let editandoId = null;
 let datosCargados = false;
+let mostrarTodos = false;
+let modoAnalisis = 'quincena';
 
+const LIMITE_LISTA = 10;
 const tipos = ['gasto', 'ingreso', 'ahorro'];
 const coloresTab = { gasto: 'var(--danger)', ingreso: 'var(--accent-2)', ahorro: 'var(--accent)' };
 const etiquetas = { gasto: 'Gasto', ingreso: 'Ingreso', ahorro: 'Ahorro' };
 const signos = { gasto: '−', ingreso: '+', ahorro: '→' };
 const iconos = { gasto: '↓', ingreso: '↑', ahorro: '●' };
+const mesesCortos = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 
 document.getElementById('fecha').valueAsDate = new Date();
 
@@ -411,7 +560,23 @@ const hora = new Date().getHours();
 document.getElementById('greeting').textContent =
   (hora < 12 ? 'Buenos días' : hora < 19 ? 'Buenas tardes' : 'Buenas noches');
 
-// --- Tabs: delegated listener, works for both the add form and the edit sheet ---
+// --- Navegación entre pantallas (tipo app, con animación) ---
+document.querySelectorAll('.nav-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    const destino = btn.dataset.screen;
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b === btn));
+    document.querySelectorAll('.screen').forEach(function(s) {
+      s.classList.toggle('active', s.id === 'screen-' + destino);
+    });
+    window.scrollTo(0, 0);
+  });
+});
+function irA(pantalla) {
+  document.querySelector('.nav-btn[data-screen="' + pantalla + '"]').click();
+}
+document.getElementById('preview-card').addEventListener('click', function() { irA('analisis'); });
+
+// --- Tabs: delegated listener, reutilizado por el form de agregar y la hoja de edición ---
 function crearToggle(containerEl) {
   const indicator = containerEl.querySelector('.tab-indicator');
   let actual = 'gasto';
@@ -437,9 +602,31 @@ const toggleAdd = crearToggle(document.getElementById('toggle-add'));
 const toggleEdit = crearToggle(document.getElementById('toggle-edit'));
 toggleAdd.set('gasto');
 toggleEdit.set('gasto');
-window.addEventListener('resize', () => {
+
+// --- Toggle quincena / mensual en Análisis ---
+const togglePeriodoEl = document.getElementById('toggle-periodo');
+const periodIndicator = document.getElementById('period-indicator');
+function setPeriodo(p) {
+  modoAnalisis = p;
+  const btn = togglePeriodoEl.querySelector('button[data-periodo="' + p + '"]');
+  periodIndicator.style.width = btn.offsetWidth + 'px';
+  periodIndicator.style.transform = 'translateX(' + btn.offsetLeft + 'px)';
+  togglePeriodoEl.querySelectorAll('button').forEach(b => {
+    b.setAttribute('aria-selected', b.dataset.periodo === p ? 'true' : 'false');
+  });
+  renderAnalisis();
+}
+togglePeriodoEl.addEventListener('click', function(e) {
+  const btn = e.target.closest('button[data-periodo]');
+  if (!btn) return;
+  setPeriodo(btn.dataset.periodo);
+});
+setPeriodo('quincena');
+
+window.addEventListener('resize', function() {
   toggleAdd.set(toggleAdd.get());
   toggleEdit.set(toggleEdit.get());
+  setPeriodo(modoAnalisis);
 });
 
 function cargarDatos() {
@@ -489,6 +676,7 @@ document.getElementById('form-gasto').addEventListener('submit', function(e) {
     toggleAdd.set('gasto');
     btn.disabled = false;
     btn.textContent = 'Agregar';
+    irA('inicio');
   }).withFailureHandler(function() {
     showToast('Error al guardar', true);
     btn.disabled = false;
@@ -584,28 +772,81 @@ function fmtCompact(n) {
   return '$' + Math.round(Math.abs(n));
 }
 
-// --- Gráfica: gasto vs ingreso agrupados por día (barras, un solo eje) ---
-function renderChart() {
+function diasEnMes(y, m) { return new Date(y, m + 1, 0).getDate(); }
+
+function periodoDe(fechaStr, modo) {
+  const d = new Date(fechaStr + 'T00:00:00');
+  if (isNaN(d)) return null;
+  const y = d.getFullYear(), m = d.getMonth(), day = d.getDate();
+  if (modo === 'mensual') {
+    return { key: y + '-' + m, label: mesesCortos[m] + ' ' + String(y).slice(2), start: new Date(y, m, 1).getTime() };
+  }
+  const q = day <= 15 ? 0 : 1;
+  const label = (q === 0 ? '1-15' : ('16-' + diasEnMes(y, m))) + ' ' + mesesCortos[m];
+  return { key: y + '-' + m + '-' + q, label: label, start: new Date(y, m, q === 0 ? 1 : 16).getTime() };
+}
+
+function agruparPorPeriodo(modo) {
+  const porPeriodo = {};
+  gastos.forEach(function(g) {
+    if (g.tipo !== 'gasto' && g.tipo !== 'ingreso') return;
+    const p = periodoDe(g.fecha, modo);
+    if (!p) return;
+    if (!porPeriodo[p.key]) porPeriodo[p.key] = { label: p.label, start: p.start, ingreso: 0, gasto: 0 };
+    porPeriodo[p.key][g.tipo] += Number(g.monto) || 0;
+  });
+  return Object.values(porPeriodo).sort(function(a, b) { return a.start - b.start; });
+}
+
+// --- Vista previa en Inicio: ingreso vs gasto del mes actual ---
+function renderPreview() {
+  const now = new Date();
+  let ingreso = 0, gasto = 0;
+  gastos.forEach(function(g) {
+    const d = new Date(g.fecha + 'T00:00:00');
+    if (isNaN(d) || d.getFullYear() !== now.getFullYear() || d.getMonth() !== now.getMonth()) return;
+    if (g.tipo === 'ingreso') ingreso += Number(g.monto) || 0;
+    if (g.tipo === 'gasto') gasto += Number(g.monto) || 0;
+  });
+  const max = Math.max(1, ingreso, gasto);
+  const wrap = document.getElementById('preview-bars');
+  wrap.innerHTML =
+    '<div class="preview-bar-col">' +
+      '<span class="preview-bar-val">' + fmtCompact(ingreso) + '</span>' +
+      '<div class="preview-bar ingreso" style="height:' + Math.max(6, (ingreso / max) * 100) + '%"></div>' +
+      '<span class="preview-bar-lbl">Ingreso</span>' +
+    '</div>' +
+    '<div class="preview-bar-col">' +
+      '<span class="preview-bar-val">' + fmtCompact(gasto) + '</span>' +
+      '<div class="preview-bar gasto" style="height:' + Math.max(6, (gasto / max) * 100) + '%"></div>' +
+      '<span class="preview-bar-lbl">Gasto</span>' +
+    '</div>';
+}
+
+// --- Análisis: gráfica quincenal/mensual + estadísticas ---
+function renderAnalisis() {
   const wrap = document.getElementById('chart-wrap');
   const tip = document.getElementById('chart-tip');
-  const porDia = {};
-  gastos.forEach(g => {
-    if (g.tipo !== 'gasto' && g.tipo !== 'ingreso') return;
-    if (!porDia[g.fecha]) porDia[g.fecha] = { ingreso: 0, gasto: 0 };
-    porDia[g.fecha][g.tipo] += Number(g.monto) || 0;
-  });
-  const dias = Object.keys(porDia).sort().slice(-7);
+  const statRow = document.getElementById('stat-row');
+  const insight = document.getElementById('insight');
+  if (!wrap) return;
 
-  if (dias.length === 0) {
-    wrap.innerHTML = '<div class="chart-empty">Agrega un gasto o ingreso para ver la gráfica</div>';
+  const periodos = agruparPorPeriodo(modoAnalisis).slice(-6);
+  tip.textContent = 'Toca una barra para ver el detalle';
+
+  if (periodos.length === 0) {
+    wrap.innerHTML = '<div class="chart-empty">Agrega un gasto o ingreso para ver el análisis</div>';
     tip.textContent = '';
+    statRow.innerHTML = '';
+    insight.style.display = 'none';
     return;
   }
+  insight.style.display = 'block';
 
-  const W = 320, H = 150, padB = 22, padT = 14;
-  const maxVal = Math.max(1, ...dias.map(d => Math.max(porDia[d].ingreso, porDia[d].gasto)));
-  const groupW = W / dias.length;
-  const barW = Math.min(20, groupW / 2 - 4);
+  const W = 320, H = 150, padT = 14;
+  const maxVal = Math.max(1, ...periodos.map(function(p) { return Math.max(p.ingreso, p.gasto); }));
+  const groupW = W / periodos.length;
+  const barW = Math.min(28, groupW / 2 - 5);
   const gap = 2;
 
   function topRoundedPath(x, yTop, w, yBase, r) {
@@ -620,29 +861,24 @@ function renderChart() {
       ' L' + x + ',' + yBase + ' Z';
   }
 
-  let svg = '<svg viewBox="0 0 ' + W + ' ' + (H + padB) + '" width="100%" height="' + (H + padB) + '" preserveAspectRatio="xMidYMid meet">';
-  // gridlines
+  let svg = '<svg viewBox="0 0 ' + W + ' ' + (H + 22) + '" width="100%" height="' + (H + 22) + '" preserveAspectRatio="xMidYMid meet">';
   [0, 0.5, 1].forEach(function(f) {
     const y = padT + (H - padT) * (1 - f);
     svg += '<line x1="0" y1="' + y + '" x2="' + W + '" y2="' + y + '" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>';
   });
 
-  dias.forEach(function(dia, i) {
+  periodos.forEach(function(p, i) {
     const cx = i * groupW + groupW / 2;
     const xIngreso = cx - barW - gap / 2;
     const xGasto = cx + gap / 2;
-    const vIngreso = porDia[dia].ingreso;
-    const vGasto = porDia[dia].gasto;
-    const yIngreso = padT + (H - padT) * (1 - vIngreso / maxVal);
-    const yGasto = padT + (H - padT) * (1 - vGasto / maxVal);
+    const yIngreso = padT + (H - padT) * (1 - p.ingreso / maxVal);
+    const yGasto = padT + (H - padT) * (1 - p.gasto / maxVal);
 
-    svg += '<g class="bar-group" data-dia="' + dia + '" data-i="' + vIngreso + '" data-g="' + vGasto + '">';
+    svg += '<g class="bar-group" data-label="' + p.label + '" data-i="' + p.ingreso + '" data-g="' + p.gasto + '">';
     svg += '<rect x="' + (cx - groupW / 2) + '" y="0" width="' + groupW + '" height="' + H + '" fill="transparent"/>';
-    if (vIngreso > 0) svg += '<path d="' + topRoundedPath(xIngreso, yIngreso, barW, H, 4) + '" fill="var(--accent-2)"/>';
-    if (vGasto > 0) svg += '<path d="' + topRoundedPath(xGasto, yGasto, barW, H, 4) + '" fill="var(--danger)"/>';
-    const d = new Date(dia + 'T00:00:00');
-    const label = isNaN(d) ? '' : d.getDate();
-    svg += '<text x="' + cx + '" y="' + (H + 15) + '" text-anchor="middle" font-size="9" fill="var(--muted)" font-family="Manrope, sans-serif">' + label + '</text>';
+    if (p.ingreso > 0) svg += '<path d="' + topRoundedPath(xIngreso, yIngreso, barW, H, 4) + '" fill="var(--accent-2)"/>';
+    if (p.gasto > 0) svg += '<path d="' + topRoundedPath(xGasto, yGasto, barW, H, 4) + '" fill="var(--danger)"/>';
+    svg += '<text x="' + cx + '" y="' + (H + 16) + '" text-anchor="middle" font-size="9" fill="var(--muted)" font-family="Manrope, sans-serif">' + p.label + '</text>';
     svg += '</g>';
   });
 
@@ -651,26 +887,47 @@ function renderChart() {
 
   wrap.querySelectorAll('.bar-group').forEach(function(g) {
     g.addEventListener('click', function() {
-      const dia = g.getAttribute('data-dia');
+      const label = g.getAttribute('data-label');
       const vi = parseFloat(g.getAttribute('data-i'));
       const vg = parseFloat(g.getAttribute('data-g'));
-      const d = new Date(dia + 'T00:00:00');
-      const fechaTxt = isNaN(d) ? dia : d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
-      tip.innerHTML = '<b>' + fechaTxt + '</b> · Ingreso ' + fmtCompact(vi) + ' · Gasto ' + fmtCompact(vg);
+      tip.innerHTML = '<b>' + label + '</b> · Ingreso ' + fmtCompact(vi) + ' · Gasto ' + fmtCompact(vg);
     });
   });
+
+  const totalIngresoAll = gastos.filter(function(g) { return g.tipo === 'ingreso'; }).reduce(function(s, g) { return s + Number(g.monto); }, 0);
+  const totalGastoAll = gastos.filter(function(g) { return g.tipo === 'gasto'; }).reduce(function(s, g) { return s + Number(g.monto); }, 0);
+  const totalAhorroAll = gastos.filter(function(g) { return g.tipo === 'ahorro'; }).reduce(function(s, g) { return s + Number(g.monto); }, 0);
+  const promIngreso = periodos.reduce(function(s, p) { return s + p.ingreso; }, 0) / periodos.length;
+  const promGasto = periodos.reduce(function(s, p) { return s + p.gasto; }, 0) / periodos.length;
+  const tasaAhorro = totalIngresoAll > 0 ? (totalAhorroAll / totalIngresoAll) * 100 : 0;
+
+  statRow.innerHTML =
+    '<div class="stat-tile"><div class="stat-lbl">Ingreso prom.</div><div class="stat-val" style="color:var(--accent-2)">' + fmtCompact(promIngreso) + '</div></div>' +
+    '<div class="stat-tile"><div class="stat-lbl">Gasto prom.</div><div class="stat-val" style="color:var(--danger)">' + fmtCompact(promGasto) + '</div></div>' +
+    '<div class="stat-tile"><div class="stat-lbl">Tasa de ahorro</div><div class="stat-val">' + tasaAhorro.toFixed(0) + '%</div></div>';
+
+  const peorPeriodo = periodos.reduce(function(a, b) { return b.gasto > a.gasto ? b : a; }, periodos[0]);
+  const periodoTxt = modoAnalisis === 'mensual' ? 'mes' : 'quincena';
+  if (peorPeriodo.gasto > 0) {
+    insight.innerHTML = 'Tu ' + periodoTxt + ' con más gasto fue <b>' + peorPeriodo.label + '</b>, con ' + fmt(peorPeriodo.gasto) + ' en salidas.';
+  } else {
+    insight.innerHTML = 'Aún no registras gastos en este periodo.';
+  }
 }
 
 function render() {
   const lista = document.getElementById('lista');
+  const btnVerMas = document.getElementById('btn-ver-mas');
   document.getElementById('section-count').textContent = gastos.length
     ? gastos.length + (gastos.length === 1 ? ' movimiento' : ' movimientos')
     : '';
 
   if (gastos.length === 0) {
     lista.innerHTML = '<div class="empty">Sin movimientos todavía</div>';
+    btnVerMas.style.display = 'none';
   } else {
-    const items = gastos.map(function(g, i) {
+    const visibles = mostrarTodos ? gastos : gastos.slice(0, LIMITE_LISTA);
+    const items = visibles.map(function(g, i) {
       try {
         return '<div class="item" data-id="' + g.id + '" id="item-' + g.id + '" style="animation-delay:' + (Math.min(i, 8) * 0.03) + 's">' +
           '<div class="left">' +
@@ -690,6 +947,13 @@ function render() {
     lista.querySelectorAll('.item').forEach(function(el) {
       el.addEventListener('click', function() { abrirDetalle(el.dataset.id); });
     });
+
+    if (gastos.length > LIMITE_LISTA) {
+      btnVerMas.style.display = 'block';
+      btnVerMas.textContent = mostrarTodos ? 'Ver menos' : 'Ver más (' + (gastos.length - LIMITE_LISTA) + ')';
+    } else {
+      btnVerMas.style.display = 'none';
+    }
   }
 
   const totalIngreso = gastos.filter(g => g.tipo === 'ingreso').reduce((s, g) => s + Number(g.monto), 0);
@@ -702,8 +966,14 @@ function render() {
   document.getElementById('sum-ahorro').textContent = fmt(totalAhorro);
   document.getElementById('sum-disponible').textContent = fmt(disponible);
 
-  renderChart();
+  renderPreview();
+  renderAnalisis();
 }
+
+document.getElementById('btn-ver-mas').addEventListener('click', function() {
+  mostrarTodos = !mostrarTodos;
+  render();
+});
 
 cargarDatos();
 </script>
