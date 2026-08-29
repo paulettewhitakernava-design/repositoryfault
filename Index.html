@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --bg-1: #1b1330;
+    --bg-2: #0d0b17;
+    --ink: #f5f2ff;
+    --muted: #948da8;
+    --accent: #ff8a5c;
+    --accent-2: #7cf5c4;
+    --info: #8fb8ff;
+    --danger: #ff8a8a;
+    --line: rgba(255,255,255,0.10);
+    --line-soft: rgba(255,255,255,0.06);
+    --card: rgba(255,255,255,0.055);
+    --card-solid: #221a3a;
+    --safe-b: env(safe-area-inset-bottom, 0px);
+    --safe-t: env(safe-area-inset-top, 0px);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: radial-gradient(120% 90% at 15% 0%, var(--bg-1) 0%, var(--bg-2) 55%);
+    color: var(--ink);
+    font-family: 'Manrope', sans-serif;
+    padding: calc(28px + var(--safe-t)) 20px calc(120px + var(--safe-b));
+    max-width: 480px;
+    margin: 0 auto;
+    -webkit-font-smoothing: antialiased;
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeOut { to { opacity: 0; transform: translateX(24px) scale(0.97); } }
+  @keyframes pop { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+  .eyebrow { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  h1 { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 25px; margin: 0; letter-spacing: -0.01em; }
+  .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-2); box-shadow: 0 0 0 4px rgba(124,245,196,0.15); }
+
+  /* ---- Filter tabs (view switcher) ---- */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 4px;
+    margin-bottom: 18px;
+    position: relative;
+  }
+  .tabs button {
+    flex: 1;
+    position: relative;
+    z-index: 1;
+    padding: 11px 4px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Manrope', sans-serif;
+    font-size: 12.5px;
+    font-weight: 700;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: color 0.2s;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .tabs button.active { color: #16101f; }
+  .tabs .thumb {
+    position: absolute;
+    top: 4px; bottom: 4px; left: 4px;
+    width: calc(25% - 4px);
+    border-radius: 12px;
+    background: var(--ink);
+    transition: transform 0.28s cubic-bezier(.4,0,.2,1), background 0.2s;
+    z-index: 0;
+  }
+  .tabs .thumb.gasto { background: var(--danger); }
+  .tabs .thumb.ingreso { background: var(--accent-2); }
+  .tabs .thumb.ahorro { background: var(--accent); }
+  .tabs .thumb.todos { background: var(--ink); }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: 26px 24px;
+    margin-bottom: 28px;
+    animation: rise 0.5s ease both;
+    backdrop-filter: blur(8px);
+  }
+  .card-lbl { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+  .card-num {
+    font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 42px; letter-spacing: -0.03em; line-height: 1;
+    background: linear-gradient(90deg, var(--ink), var(--accent-2) 130%);
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .card-split { display: flex; gap: 18px; margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
+  .card-split div span:first-child { display: block; font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 600; }
+  .card-split div span:last-child { display: block; font-size: 10.5px; color: var(--muted); margin-top: 3px; }
+  .up { color: var(--accent-2); }
+  .down { color: var(--danger); }
+
+  .section-label { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+  .count-pill { background: var(--card); border: 1px solid var(--line); padding: 2px 9px; border-radius: 999px; font-size: 10.5px; color: var(--ink); letter-spacing: 0; }
+
+  .item { padding: 15px 0; border-bottom: 1px solid var(--line-soft); display: flex; justify-content: space-between; align-items: center; animation: rise 0.4s ease both; gap: 10px; }
+  .item.removing { animation: fadeOut 0.25s ease forwards; }
+  .item .left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+  .badge { flex: none; width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 17px; }
+  .badge.gasto { background: rgba(255,138,138,0.14); }
+  .badge.ingreso { background: rgba(124,245,196,0.14); }
+  .badge.ahorro { background: rgba(255,138,92,0.14); }
+  .txt { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .item .monto { font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .item .monto.gasto { color: var(--danger); }
+  .item .monto.ingreso { color: var(--accent-2); }
+  .item .monto.ahorro { color: var(--accent); }
+  .item .meta { font-size: 12px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .item .del {
+    flex: none; background: var(--card); border: 1px solid var(--line); color: var(--muted); font-size: 16px;
+    width: 34px; height: 34px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .item .del:active { color: var(--danger); border-color: var(--danger); transform: scale(0.92); }
+
+  .empty { padding: 40px 0; text-align: center; color: var(--muted); font-size: 13px; }
+  .empty .emoji { font-size: 28px; display: block; margin-bottom: 10px; }
+
+  /* ---- Sheet / add form ---- */
+  .fab {
+    position: fixed;
+    right: 20px;
+    bottom: calc(24px + var(--safe-b));
+    width: 58px; height: 58px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #1c0f08;
+    border: none;
+    font-size: 28px;
+    font-weight: 500;
+    box-shadow: 0 12px 28px -8px rgba(255,138,92,0.55);
+    cursor: pointer;
+    z-index: 20;
+    transition: transform 0.15s;
+    display: flex; align-items: center; justify-content: center;
+    line-height: 1;
+  }
+  .fab:active { transform: scale(0.92); }
+
+  .overlay {
+    position: fixed; inset: 0; background: rgba(6,4,12,0.6);
+    backdrop-filter: blur(2px);
+    opacity: 0; pointer-events: none; transition: opacity 0.25s;
+    z-index: 29;
+  }
+  .overlay.show { opacity: 1; pointer-events: auto; }
+
+  .sheet {
+    position: fixed; left: 0; right: 0; bottom: 0;
+    max-width: 480px; margin: 0 auto;
+    background: var(--card-solid);
+    border: 1px solid var(--line);
+    border-bottom: none;
+    border-radius: 26px 26px 0 0;
+    padding: 12px 22px calc(26px + var(--safe-b));
+    transform: translateY(102%);
+    transition: transform 0.32s cubic-bezier(.32,.72,0,1);
+    z-index: 30;
+  }
+  .sheet.show { transform: translateY(0); }
+  .sheet-handle { width: 40px; height: 4px; background: var(--line); border-radius: 999px; margin: 6px auto 16px; }
+  .sheet-title { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 600; margin: 0 0 18px; }
+
+  form { display: grid; gap: 16px; }
+  .type-toggle { display: flex; gap: 8px; margin-bottom: 2px; }
+  .type-toggle button {
+    flex: 1; padding: 11px 0; border-radius: 999px; border: 1px solid var(--line); background: transparent;
+    color: var(--muted); font-size: 12.5px; font-weight: 700; font-family: 'Manrope', sans-serif; cursor: pointer; transition: all 0.2s;
+  }
+  .type-toggle button.active[data-type="gasto"] { background: var(--danger); border-color: var(--danger); color: #2a0d0d; }
+  .type-toggle button.active[data-type="ingreso"] { background: var(--accent-2); border-color: var(--accent-2); color: #06231a; }
+  .type-toggle button.active[data-type="ahorro"] { background: var(--accent); border-color: var(--accent); color: #2a1608; }
+
+  .field-label { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; display: block; }
+  input {
+    width: 100%; padding: 11px 2px; border: none; border-bottom: 1px solid var(--line); background: transparent;
+    color: var(--ink); font-size: 16px; font-family: 'Manrope', sans-serif; transition: border-color 0.2s;
+  }
+  input:focus { outline: none; border-color: var(--accent); }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+  .btn-add {
+    font-family: 'Manrope', sans-serif; background: var(--accent); color: #1c0f08; border: none; padding: 16px;
+    border-radius: 999px; font-size: 14.5px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 8px 24px -8px rgba(255,138,92,0.5); transition: transform 0.15s;
+    margin-top: 4px;
+  }
+  .btn-add:active { transform: scale(0.97); }
+  .btn-add:disabled { opacity: 0.5; }
+
+  .toast {
+    position: fixed; bottom: calc(26px + var(--safe-b)); left: 50%; transform: translateX(-50%) translateY(10px);
+    background: var(--accent-2); color: #06231a; padding: 11px 20px; border-radius: 999px;
+    font-size: 13px; font-weight: 700; opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none;
+    z-index: 40; white-space: nowrap;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .skeleton { height: 60px; border-radius: 14px; background: linear-gradient(90deg, var(--card) 0%, var(--line) 50%, var(--card) 100%); background-size: 200% 100%; animation: shimmer 1.3s infinite; margin-bottom: 10px; }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="eyebrow">Control diario</div>
+    <h1>Registro de gastos</h1>
+  </div>
+  <div class="status-dot" title="Conectado"></div>
+</div>
+
+<div class="card">
+  <div class="card-lbl" id="card-title-lbl">Total ahorrado</div>
+  <div class="card-num" id="sum-main">$0</div>
+  <div class="card-split">
+    <div><span class="up" id="sum-ingreso">$0</span><span>Ingresos</span></div>
+    <div><span class="down" id="sum-gasto">$0</span><span>Gastos</span></div>
+    <div><span id="sum-disponible">$0</span><span>Disponible</span></div>
+  </div>
+</div>
+
+<div class="tabs" id="tabs">
+  <div class="thumb todos" id="tabs-thumb"></div>
+  <button type="button" class="active" data-filter="todos">Todos</button>
+  <button type="button" data-filter="gasto">Gastos</button>
+  <button type="button" data-filter="ingreso">Ingresos</button>
+  <button type="button" data-filter="ahorro">Ahorros</button>
+</div>
+
+<div class="section-label">
+  <span>Movimientos</span>
+  <span class="count-pill" id="count-pill">0</span>
+</div>
+<div id="lista">
+  <div class="skeleton"></div>
+  <div class="skeleton"></div>
+  <div class="skeleton"></div>
+</div>
+
+<button type="button" class="fab" id="fab" aria-label="Agregar movimiento">+</button>
+<div class="overlay" id="overlay"></div>
+
+<div class="sheet" id="sheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-title">Nuevo movimiento</div>
+  <form id="form-gasto">
+    <div class="type-toggle" id="type-toggle">
+      <button type="button" data-type="gasto" class="active">Gasto</button>
+      <button type="button" data-type="ingreso">Ingreso</button>
+      <button type="button" data-type="ahorro">Ahorro</button>
+    </div>
+    <div class="row2">
+      <div>
+        <label class="field-label">Monto</label>
+        <input type="number" inputmode="decimal" id="monto" step="0.01" placeholder="0.00" required>
+      </div>
+      <div>
+        <label class="field-label">Fecha</label>
+        <input type="date" id="fecha" required>
+      </div>
+    </div>
+    <div>
+      <label class="field-label">Nota</label>
+      <input type="text" id="nota" placeholder="ej. transporte, quincena, etc.">
+    </div>
+    <button type="submit" class="btn-add" id="btn-add">Agregar</button>
+  </form>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let gastos = [];
+  let tipoActual = 'gasto';
+  let filtroActual = 'todos';
+
+  document.getElementById('fecha').valueAsDate = new Date();
+
+  /* ---- Add-type toggle (inside the sheet) ---- */
+  document.getElementById('type-toggle').querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', function() {
+      this.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      tipoActual = this.dataset.type;
+    });
+  });
+
+  /* ---- Filter tabs (Todos / Gastos / Ingresos / Ahorros) ---- */
+  const tabsEl = document.getElementById('tabs');
+  const thumb = document.getElementById('tabs-thumb');
+  const tabButtons = Array.from(tabsEl.querySelectorAll('button'));
+
+  function moveThumb(btn) {
+    const idx = tabButtons.indexOf(btn);
+    thumb.style.transform = 'translateX(' + (idx * 100) + '%)';
+    thumb.className = 'thumb ' + (btn.dataset.filter === 'todos' ? 'todos' : btn.dataset.filter);
+  }
+
+  tabButtons.forEach(btn => {
+    btn.addEventListener('click', function() {
+      tabButtons.forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      filtroActual = this.dataset.filter;
+      moveThumb(this);
+      render();
+    });
+  });
+
+  /* ---- Bottom sheet open/close ---- */
+  const sheet = document.getElementById('sheet');
+  const overlay = document.getElementById('overlay');
+  function openSheet() {
+    sheet.classList.add('show');
+    overlay.classList.add('show');
+  }
+  function closeSheet() {
+    sheet.classList.remove('show');
+    overlay.classList.remove('show');
+  }
+  document.getElementById('fab').addEventListener('click', openSheet);
+  overlay.addEventListener('click', closeSheet);
+
+  function cargarDatos() {
+    google.script.run.withSuccessHandler(function(data) {
+      gastos = data;
+      render();
+    }).withFailureHandler(function() {
+      document.getElementById('lista').innerHTML = '<div class="empty">No se pudo cargar la información</div>';
+    }).obtenerMovimientos();
+  }
+
+  document.getElementById('form-gasto').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const monto = parseFloat(document.getElementById('monto').value);
+    const fecha = document.getElementById('fecha').value;
+    const nota = document.getElementById('nota').value;
+    if (!monto || monto <= 0) return;
+
+    const mov = { id: Date.now(), monto, fecha, nota, tipo: tipoActual };
+    const btn = document.getElementById('btn-add');
+    btn.disabled = true;
+    btn.textContent = 'Guardando...';
+
+    google.script.run.withSuccessHandler(function() {
+      gastos.unshift(mov);
+      render();
+      showToast('Movimiento agregado');
+      document.getElementById('form-gasto').reset();
+      document.getElementById('fecha').valueAsDate = new Date();
+      btn.disabled = false;
+      btn.textContent = 'Agregar';
+      closeSheet();
+    }).withFailureHandler(function() {
+      showToast('Error al guardar');
+      btn.disabled = false;
+      btn.textContent = 'Agregar';
+    }).guardarMovimiento(mov);
+  });
+
+  function eliminarGasto(id) {
+    const el = document.getElementById('item-' + id);
+    if (el) el.classList.add('removing');
+    google.script.run.withSuccessHandler(function() {
+      setTimeout(() => {
+        gastos = gastos.filter(g => g.id !== id);
+        render();
+      }, 220);
+    }).withFailureHandler(function() {
+      showToast('Error al borrar');
+      if (el) el.classList.remove('removing');
+    }).eliminarMovimiento(id);
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => t.classList.remove('show'), 1600);
+  }
+
+  function fmt(n) {
+    const sign = n < 0 ? '-' : '';
+    return sign + '$' + Math.abs(n).toLocaleString('es-MX', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  const etiquetas = { gasto: 'Gasto', ingreso: 'Ingreso', ahorro: 'Ahorro' };
+  const signos = { gasto: '−', ingreso: '+', ahorro: '→' };
+  const iconos = { gasto: '↓', ingreso: '↑', ahorro: '☆' };
+  const cardTitulo = { todos: 'Disponible', gasto: 'Total en gastos', ingreso: 'Total en ingresos', ahorro: 'Total ahorrado' };
+
+  function render() {
+    const lista = document.getElementById('lista');
+    const visibles = filtroActual === 'todos' ? gastos : gastos.filter(g => g.tipo === filtroActual);
+
+    document.getElementById('count-pill').textContent = visibles.length;
+
+    if (visibles.length === 0) {
+      lista.innerHTML = '<div class="empty"><span class="emoji">📭</span>Sin movimientos' + (filtroActual !== 'todos' ? ' de ' + etiquetas[filtroActual].toLowerCase() : '') + ' todavía</div>';
+    } else {
+      lista.innerHTML = visibles.map((g, i) => `
+        <div class="item" id="item-${g.id}" style="animation-delay:${Math.min(i,8) * 0.03}s">
+          <div class="left">
+            <div class="badge ${g.tipo}">${iconos[g.tipo]}</div>
+            <div class="txt">
+              <span class="monto ${g.tipo}">${signos[g.tipo]} ${fmt(g.monto)}</span>
+              <span class="meta">${etiquetas[g.tipo]}${g.nota ? ' — ' + g.nota : ''} · ${g.fecha}</span>
+            </div>
+          </div>
+          <button class="del" onclick="eliminarGasto(${g.id})" aria-label="Borrar">✕</button>
+        </div>
+      `).join('');
+    }
+
+    const totalIngreso = gastos.filter(g => g.tipo === 'ingreso').reduce((s, g) => s + Number(g.monto), 0);
+    const totalGasto = gastos.filter(g => g.tipo === 'gasto').reduce((s, g) => s + Number(g.monto), 0);
+    const totalAhorro = gastos.filter(g => g.tipo === 'ahorro').reduce((s, g) => s + Number(g.monto), 0);
+    const disponible = totalIngreso - totalGasto - totalAhorro;
+
+    document.getElementById('sum-ingreso').textContent = fmt(totalIngreso);
+    document.getElementById('sum-gasto').textContent = fmt(totalGasto);
+    document.getElementById('sum-disponible').textContent = fmt(disponible);
+
+    document.getElementById('card-title-lbl').textContent = cardTitulo[filtroActual];
+    const mainVal = { todos: disponible, gasto: totalGasto, ingreso: totalIngreso, ahorro: totalAhorro }[filtroActual];
+    document.getElementById('sum-main').textContent = fmt(mainVal);
+  }
+
+  cargarDatos();
+</script>
+
+</body>
+</html>
