@@ -1,7 +1,42 @@
-function doGet() {
-  return HtmlService.createHtmlOutputFromFile('Index')
-    .setTitle('Registro de gastos')
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover');
+function doGet(e) {
+  const action = (e && e.parameter && e.parameter.action) || 'list';
+  let result;
+  try {
+    if (action === 'list') {
+      result = { ok: true, data: obtenerMovimientos() };
+    } else {
+      result = { ok: false, error: 'Acción no soportada: ' + action };
+    }
+  } catch (err) {
+    result = { ok: false, error: String(err) };
+  }
+  return responderJSON(result);
+}
+
+function doPost(e) {
+  let result;
+  try {
+    const body = JSON.parse(e.postData.contents);
+    if (body.action === 'add') {
+      guardarMovimiento(body.mov);
+      result = { ok: true };
+    } else if (body.action === 'update') {
+      actualizarMovimiento(body.mov);
+      result = { ok: true };
+    } else if (body.action === 'delete') {
+      eliminarMovimiento(body.id);
+      result = { ok: true };
+    } else {
+      result = { ok: false, error: 'Acción no soportada: ' + body.action };
+    }
+  } catch (err) {
+    result = { ok: false, error: String(err) };
+  }
+  return responderJSON(result);
+}
+
+function responderJSON(obj) {
+  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
 
 function getSheet() {
