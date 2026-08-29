@@ -35,19 +35,30 @@ html {
   -webkit-text-size-adjust: 100%;
   background: var(--bg-2);
   height: 100%;
+  overflow: hidden;
 }
 
 body {
   margin: 0;
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
   background: radial-gradient(120% 100% at 15% 0%, var(--bg-1) 0%, var(--bg-2) 55%);
   color: var(--ink);
   font-family: 'Manrope', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#scroll {
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
   padding: calc(20px + var(--safe-t)) 20px calc(var(--nav-h) + var(--safe-b) + 20px);
   max-width: 480px;
   margin: 0 auto;
-  -webkit-font-smoothing: antialiased;
 }
 
 button, input, .item, .nav-btn { touch-action: manipulation; }
@@ -384,6 +395,7 @@ input:focus { outline: none; border-color: var(--accent); }
 </style>
 </head>
 <body>
+<div id="scroll">
 
 <!-- ===== INICIO ===== -->
 <div class="screen active" id="screen-inicio">
@@ -484,6 +496,8 @@ input:focus { outline: none; border-color: var(--accent); }
   </form>
 </div>
 
+</div>
+
 <div class="toast" id="toast"></div>
 
 <div class="overlay" id="overlay">
@@ -568,7 +582,7 @@ document.querySelectorAll('.nav-btn').forEach(function(btn) {
     document.querySelectorAll('.screen').forEach(function(s) {
       s.classList.toggle('active', s.id === 'screen-' + destino);
     });
-    window.scrollTo(0, 0);
+    document.getElementById('scroll').scrollTo(0, 0);
   });
 });
 function irA(pantalla) {
