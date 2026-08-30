@@ -554,7 +554,7 @@ input:focus { outline: none; border-color: var(--accent); }
 
 <script>
 // Pega aquí la URL /exec de tu Apps Script (Implementar → Nueva implementación → Aplicación web)
-const API_URL = 'PEGA_AQUI_TU_URL_DE_APPS_SCRIPT';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwgr_LvBHYWnXt76xdjjdYiPJkaVY0VLRUEO9hi4HShL3AB2HWshxteM6UqA0y0i-vg/exec';
 
 function apiGet(action) {
   return fetch(API_URL + '?action=' + encodeURIComponent(action)).then(function(r) { return r.json(); });
