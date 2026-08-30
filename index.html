@@ -6,9 +6,10 @@
 <meta name="theme-color" content="#0f0d1a">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Gastos">
+<meta name="apple-mobile-web-app-title" content="Kashly">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="apple-touch-icon" href="icon-192.png">
+<title>Kashly</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Manrope:wght@400;500;600;700&display=swap');
 
@@ -134,7 +135,7 @@ h1 { font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 26px
   background: rgba(255,255,255,0.04);
   border: 1px solid var(--line);
   border-radius: 999px;
-  margin-bottom: 18px;
+  margin-top: 16px;
 }
 .period-indicator {
   position: absolute; top: 4px; bottom: 4px; left: 0;
@@ -219,6 +220,24 @@ input {
   min-height: 22px;
 }
 input:focus { outline: none; border-color: var(--accent); }
+select {
+  width: 100%;
+  padding: 12px 24px 12px 2px;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  font-size: 16px;
+  font-family: 'Manrope', sans-serif;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23928cae' stroke-width='2'%3E%3Cpath d='M5 8l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 2px center;
+  background-size: 16px;
+}
+select:focus { outline: none; border-color: var(--accent); }
+select option { background: var(--card-solid); color: var(--ink); }
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 
 .btn-add {
@@ -363,6 +382,17 @@ input:focus { outline: none; border-color: var(--accent); }
 .sheet form { margin-bottom: 0; gap: 16px; }
 .sheet-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
 
+/* ---- Presupuesto por categoría ---- */
+.budget-row { padding: 12px 0; cursor: pointer; }
+.budget-row-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; font-size: 13px; }
+.budget-cat { font-weight: 600; }
+.budget-amt { color: var(--muted); font-variant-numeric: tabular-nums; }
+.budget-amt b { color: var(--ink); font-weight: 600; }
+.budget-bar { height: 6px; border-radius: 999px; background: rgba(255,255,255,0.07); overflow: hidden; }
+.budget-bar-fill { height: 100%; border-radius: 999px; background: var(--accent-2); transition: width 0.3s ease; }
+.budget-bar-fill.over { background: var(--danger); }
+.sheet-text { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 4px; }
+
 /* ---- Bottom nav ---- */
 .bottom-nav {
   position: fixed; left: 0; right: 0; bottom: 0;
@@ -387,16 +417,57 @@ input:focus { outline: none; border-color: var(--accent); }
 .nav-btn svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; transition: stroke 0.2s; }
 .nav-btn.active { color: var(--ink); }
 .nav-btn.active svg { stroke: var(--accent); }
+
+/* ---- Splash ---- */
+.splash {
+  position: fixed; inset: 0; z-index: 100;
+  background: var(--bg-2);
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.4s ease;
+}
+.splash.hide { opacity: 0; pointer-events: none; }
+.splash-mark { display: flex; align-items: center; gap: 10px; animation: rise 0.5s ease both; }
+.splash-mark svg { width: 34px; height: 34px; color: var(--accent); }
+.splash-word { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 28px; letter-spacing: 0.03em; color: var(--ink); }
+
+/* ---- Barra de perfil ---- */
+.profile-btn {
+  position: fixed; top: calc(14px + var(--safe-t)); right: 20px; z-index: 26;
+  width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line);
+  background: rgba(255,255,255,0.06); color: var(--ink);
+  font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 14px;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+.profile-btn:active { transform: scale(0.93); }
 </style>
 </head>
 <body>
+
+<div class="splash" id="splash">
+  <div class="splash-mark">
+    <span class="splash-word">KASHLY</span>
+    <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M30 38 L40 38 L32 20 Z"/>
+      <path d="M70 38 L60 38 L68 20 Z"/>
+      <circle cx="50" cy="50" r="20"/>
+      <circle cx="43" cy="50" r="1.6" fill="currentColor"/>
+      <circle cx="57" cy="50" r="1.6" fill="currentColor"/>
+      <ellipse cx="50" cy="80" rx="20" ry="14"/>
+      <ellipse cx="72" cy="66" rx="6" ry="9"/>
+    </svg>
+  </div>
+</div>
+
+<button type="button" class="profile-btn" id="profile-btn">?</button>
+
 <div id="scroll">
 
 <!-- ===== INICIO ===== -->
 <div class="screen active" id="screen-inicio">
   <div class="header">
     <div class="eyebrow" id="greeting">Control diario</div>
-    <h1>Registro de gastos</h1>
+    <h1>Kashly</h1>
   </div>
 
   <div class="card">
@@ -415,6 +486,22 @@ input:focus { outline: none; border-color: var(--accent); }
       <span class="link">Ver análisis ›</span>
     </div>
     <div class="preview-bars" id="preview-bars"></div>
+  </div>
+
+  <div class="card" id="presupuesto-setup-card" style="display:none">
+    <div class="card-lbl">Presupuesto por categoría</div>
+    <div style="font-size:12.5px;color:var(--muted);margin:6px 0 14px;line-height:1.5">Define cuánto quieres ahorrar al mes y Kashly reparte lo demás entre tus categorías de gasto, automáticamente.</div>
+    <label class="field-label" for="meta-ahorro-input">Meta de ahorro mensual</label>
+    <input type="number" id="meta-ahorro-input" placeholder="0.00" step="0.01">
+    <button type="button" class="btn-add" id="btn-guardar-meta" style="margin-top:16px">Guardar</button>
+  </div>
+
+  <div class="card" id="presupuesto-card" style="display:none">
+    <div class="chart-head">
+      <div class="card-lbl" style="margin-bottom:0">Presupuesto del mes</div>
+      <span class="link" id="btn-editar-meta" style="cursor:pointer">Meta: <span id="meta-ahorro-txt">$0</span> ›</span>
+    </div>
+    <div id="presupuesto-list"></div>
   </div>
 
   <div class="section-row">
@@ -436,12 +523,6 @@ input:focus { outline: none; border-color: var(--accent); }
     <h1>Análisis</h1>
   </div>
 
-  <div class="period-toggle" role="tablist" aria-label="Periodo" id="toggle-periodo">
-    <div class="period-indicator" id="period-indicator"></div>
-    <button type="button" role="tab" data-periodo="quincena" aria-selected="true">Quincenal</button>
-    <button type="button" role="tab" data-periodo="mensual" aria-selected="false">Mensual</button>
-  </div>
-
   <div class="card">
     <div class="chart-head">
       <div class="card-lbl" style="margin-bottom:0">Gastos vs ingresos</div>
@@ -449,6 +530,11 @@ input:focus { outline: none; border-color: var(--accent); }
         <div class="legend-item"><span class="legend-dot" style="background:var(--accent-2)"></span>Ingreso</div>
         <div class="legend-item"><span class="legend-dot" style="background:var(--danger)"></span>Gasto</div>
       </div>
+    </div>
+    <div class="period-toggle" role="tablist" aria-label="Periodo" id="toggle-periodo">
+      <div class="period-indicator" id="period-indicator"></div>
+      <button type="button" role="tab" data-periodo="quincena" aria-selected="true">Quincenal</button>
+      <button type="button" role="tab" data-periodo="mensual" aria-selected="false">Mensual</button>
     </div>
     <div class="chart-wrap" id="chart-wrap"></div>
     <div class="chart-tip" id="chart-tip">Toca una barra para ver el detalle</div>
@@ -473,6 +559,10 @@ input:focus { outline: none; border-color: var(--accent); }
       <button type="button" role="tab" data-type="ahorro" aria-selected="false">● Ahorro</button>
     </div>
 
+    <div id="campo-categoria-add" style="display:none">
+      <label class="field-label" for="categoria">Categoría</label>
+      <select id="categoria"></select>
+    </div>
     <div class="row2">
       <div>
         <label class="field-label" for="monto">Monto</label>
@@ -509,6 +599,10 @@ input:focus { outline: none; border-color: var(--accent); }
         <button type="button" role="tab" data-type="ingreso" aria-selected="false">↑ Ingreso</button>
         <button type="button" role="tab" data-type="ahorro" aria-selected="false">● Ahorro</button>
       </div>
+      <div id="campo-categoria-edit" style="display:none">
+        <label class="field-label" for="edit-categoria">Categoría</label>
+        <select id="edit-categoria"></select>
+      </div>
       <div class="row2">
         <div>
           <label class="field-label" for="edit-monto">Monto</label>
@@ -528,6 +622,52 @@ input:focus { outline: none; border-color: var(--accent); }
         <button type="submit" class="btn-add" id="btn-guardar">Guardar</button>
       </div>
     </form>
+  </div>
+</div>
+
+<div class="overlay" id="overlay-cat">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <h2 id="cat-titulo">Categoría</h2>
+      <button type="button" class="sheet-close" id="cat-close" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="sheet-text" id="cat-info"></div>
+    <label class="field-label" for="cat-monto">Límite mensual</label>
+    <input type="number" id="cat-monto" step="0.01" inputmode="decimal">
+    <div class="sheet-actions">
+      <button type="button" class="btn-ghost" id="cat-auto" style="margin-top:0">Automático</button>
+      <button type="button" class="btn-add" id="cat-guardar">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay-cierre">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <h2>Cierre de mes</h2>
+    </div>
+    <div class="sheet-text" id="cierre-texto"></div>
+    <div class="sheet-actions">
+      <button type="button" class="btn-ghost" id="cierre-no" style="margin-top:0">No, gracias</button>
+      <button type="button" class="btn-add" id="cierre-si">Sí, guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay-perfil">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <h2>Tu cuenta</h2>
+      <button type="button" class="sheet-close" id="perfil-close" aria-label="Cerrar">✕</button>
+    </div>
+    <label class="field-label" for="perfil-nombre">Nombre</label>
+    <input type="text" id="perfil-nombre" placeholder="Tu nombre">
+    <label class="field-label" for="perfil-correo" style="margin-top:14px">Correo</label>
+    <input type="email" id="perfil-correo" placeholder="tucorreo@ejemplo.com">
+    <button type="button" class="btn-add" id="perfil-guardar" style="margin-top:16px">Guardar</button>
   </div>
 </div>
 
@@ -576,6 +716,24 @@ const etiquetas = { gasto: 'Gasto', ingreso: 'Ingreso', ahorro: 'Ahorro' };
 const signos = { gasto: '−', ingreso: '+', ahorro: '→' };
 const iconos = { gasto: '↓', ingreso: '↑', ahorro: '●' };
 const mesesCortos = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const mesesLargos = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+const CATEGORIAS = ['alimentacion', 'suscripciones', 'transporte', 'salud', 'educacion', 'cuidado_personal', 'entretenimiento'];
+const etiquetasCat = {
+  alimentacion: 'Alimentación', suscripciones: 'Suscripciones', transporte: 'Transporte',
+  salud: 'Salud', educacion: 'Educación', cuidado_personal: 'Cuidado personal', entretenimiento: 'Entretenimiento'
+};
+let config = {};
+let categoriaEnEdicion = null;
+
+CATEGORIAS.forEach(function(c) {
+  const opt1 = document.createElement('option');
+  opt1.value = c; opt1.textContent = etiquetasCat[c];
+  document.getElementById('categoria').appendChild(opt1);
+  const opt2 = document.createElement('option');
+  opt2.value = c; opt2.textContent = etiquetasCat[c];
+  document.getElementById('edit-categoria').appendChild(opt2);
+});
 
 document.getElementById('fecha').valueAsDate = new Date();
 
@@ -617,7 +775,7 @@ function irA(pantalla) {
 document.getElementById('preview-card').addEventListener('click', function() { irA('analisis'); });
 
 // --- Tabs: delegated listener, reutilizado por el form de agregar y la hoja de edición ---
-function crearToggle(containerEl) {
+function crearToggle(containerEl, onChange) {
   const indicator = containerEl.querySelector('.tab-indicator');
   let actual = 'gasto';
   function set(tipo) {
@@ -629,6 +787,7 @@ function crearToggle(containerEl) {
     containerEl.querySelectorAll('button').forEach(b => {
       b.setAttribute('aria-selected', b.dataset.type === tipo ? 'true' : 'false');
     });
+    if (onChange) onChange(tipo);
   }
   containerEl.addEventListener('click', function(e) {
     const btn = e.target.closest('button[data-type]');
@@ -638,10 +797,47 @@ function crearToggle(containerEl) {
   return { set: set, get: () => actual };
 }
 
-const toggleAdd = crearToggle(document.getElementById('toggle-add'));
-const toggleEdit = crearToggle(document.getElementById('toggle-edit'));
+const toggleAdd = crearToggle(document.getElementById('toggle-add'), function(tipo) {
+  document.getElementById('campo-categoria-add').style.display = tipo === 'gasto' ? 'block' : 'none';
+});
+const toggleEdit = crearToggle(document.getElementById('toggle-edit'), function(tipo) {
+  document.getElementById('campo-categoria-edit').style.display = tipo === 'gasto' ? 'block' : 'none';
+});
 toggleAdd.set('gasto');
 toggleEdit.set('gasto');
+
+// --- Splash: se desvanece un momento después de cargar ---
+setTimeout(function() {
+  document.getElementById('splash').classList.add('hide');
+}, 1100);
+
+// --- Botón de perfil ---
+document.getElementById('profile-btn').addEventListener('click', function() {
+  document.getElementById('perfil-nombre').value = config.perfilNombre || '';
+  document.getElementById('perfil-correo').value = config.perfilCorreo || '';
+  document.getElementById('overlay-perfil').classList.add('show');
+});
+document.getElementById('perfil-close').addEventListener('click', function() {
+  document.getElementById('overlay-perfil').classList.remove('show');
+});
+document.getElementById('overlay-perfil').addEventListener('click', function(e) {
+  if (e.target.id === 'overlay-perfil') this.classList.remove('show');
+});
+document.getElementById('perfil-guardar').addEventListener('click', function() {
+  const nombre = document.getElementById('perfil-nombre').value.trim();
+  const correo = document.getElementById('perfil-correo').value.trim();
+  config.perfilNombre = nombre;
+  config.perfilCorreo = correo;
+  actualizarBotonPerfil();
+  document.getElementById('overlay-perfil').classList.remove('show');
+  showToast('Perfil guardado');
+  apiPost({ action: 'set-config', key: 'perfilNombre', value: nombre });
+  apiPost({ action: 'set-config', key: 'perfilCorreo', value: correo });
+});
+function actualizarBotonPerfil() {
+  const inicial = (config.perfilNombre || '').trim().charAt(0).toUpperCase();
+  document.getElementById('profile-btn').textContent = inicial || '?';
+}
 
 // --- Toggle quincena / mensual en Análisis ---
 const togglePeriodoEl = document.getElementById('toggle-periodo');
@@ -670,10 +866,18 @@ window.addEventListener('resize', function() {
 });
 
 function cargarDatos() {
-  apiGet('list').then(function(res) {
+  Promise.all([apiGet('list'), apiGet('config')]).then(function(res) {
     datosCargados = true;
-    if (res && res.ok) { gastos = res.data || []; render(); }
-    else mostrarErrorCarga();
+    const resMov = res[0], resCfg = res[1];
+    if (resMov && resMov.ok) {
+      gastos = resMov.data || [];
+      config = (resCfg && resCfg.ok && resCfg.data) || {};
+      actualizarBotonPerfil();
+      render();
+      revisarCierreDeMes();
+    } else {
+      mostrarErrorCarga();
+    }
   }).catch(function() {
     datosCargados = true;
     mostrarErrorCarga();
@@ -702,7 +906,9 @@ document.getElementById('form-gasto').addEventListener('submit', function(e) {
   const nota = document.getElementById('nota').value;
   if (!monto || monto <= 0) return;
 
-  const mov = { id: String(Date.now()), monto, fecha, nota, tipo: toggleAdd.get() };
+  const tipo = toggleAdd.get();
+  const categoria = tipo === 'gasto' ? document.getElementById('categoria').value : '';
+  const mov = { id: String(Date.now()), monto, fecha, nota, tipo, categoria };
   const btn = document.getElementById('btn-add');
   btn.disabled = true;
   btn.textContent = 'Guardando...';
@@ -733,6 +939,7 @@ function abrirDetalle(id) {
   document.getElementById('edit-monto').value = mov.monto;
   document.getElementById('edit-fecha').value = mov.fecha;
   document.getElementById('edit-nota').value = mov.nota || '';
+  document.getElementById('edit-categoria').value = mov.categoria || CATEGORIAS[0];
   toggleEdit.set(mov.tipo);
   document.getElementById('overlay').classList.add('show');
 }
@@ -755,7 +962,9 @@ document.getElementById('form-edit').addEventListener('submit', function(e) {
   const nota = document.getElementById('edit-nota').value;
   if (!monto || monto <= 0) return;
 
-  const mov = { id: editandoId, monto, fecha, nota, tipo: toggleEdit.get() };
+  const tipoEdit = toggleEdit.get();
+  const categoriaEdit = tipoEdit === 'gasto' ? document.getElementById('edit-categoria').value : '';
+  const mov = { id: editandoId, monto, fecha, nota, tipo: tipoEdit, categoria: categoriaEdit };
   const btn = document.getElementById('btn-guardar');
   btn.disabled = true;
   btn.textContent = 'Guardando...';
@@ -1011,6 +1220,211 @@ function render() {
 
   renderPreview();
   renderAnalisis();
+  renderPresupuesto();
+}
+
+function hoyISO() {
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+}
+
+function mesKeyDe(fechaStr) {
+  const d = new Date(fechaStr + 'T00:00:00');
+  if (isNaN(d)) return null;
+  return d.getFullYear() + '-' + d.getMonth();
+}
+
+function totalesDelMes(mesKey) {
+  let ingreso = 0, gasto = 0, ahorro = 0;
+  gastos.forEach(function(g) {
+    if (mesKeyDe(g.fecha) !== mesKey) return;
+    if (g.tipo === 'ingreso') ingreso += Number(g.monto) || 0;
+    if (g.tipo === 'gasto') gasto += Number(g.monto) || 0;
+    if (g.tipo === 'ahorro') ahorro += Number(g.monto) || 0;
+  });
+  return { ingreso: ingreso, gasto: gasto, ahorro: ahorro };
+}
+
+// --- Presupuesto por categoría: reparte el dinero disponible para gastar
+// (ingreso del mes − meta de ahorro) según qué tanto has gastado por
+// categoría en meses anteriores, con un piso parejo para las que no usas
+// aún. El usuario puede editar cualquier categoría a mano. ---
+function calcularPresupuesto() {
+  const now = new Date();
+  const mesKey = now.getFullYear() + '-' + now.getMonth();
+  const metaAhorro = Number(config.metaAhorro) || 0;
+  const t = totalesDelMes(mesKey);
+  const disponibleGasto = Math.max(0, t.ingreso - metaAhorro);
+
+  const historial = {};
+  let totalHist = 0;
+  gastos.forEach(function(g) {
+    if (g.tipo !== 'gasto' || !g.categoria) return;
+    if (mesKeyDe(g.fecha) === mesKey) return;
+    historial[g.categoria] = (historial[g.categoria] || 0) + (Number(g.monto) || 0);
+    totalHist += Number(g.monto) || 0;
+  });
+
+  const overrides = (config.categoriaOverrides && config.categoriaOverrides[mesKey]) || {};
+  const gastadoPorCat = {};
+  CATEGORIAS.forEach(function(c) { gastadoPorCat[c] = 0; });
+  gastos.forEach(function(g) {
+    if (g.tipo !== 'gasto' || mesKeyDe(g.fecha) !== mesKey) return;
+    if (gastadoPorCat.hasOwnProperty(g.categoria)) gastadoPorCat[g.categoria] += Number(g.monto) || 0;
+  });
+
+  const filas = CATEGORIAS.map(function(c) {
+    let sugerido;
+    if (totalHist > 0) {
+      const prop = 0.7 * ((historial[c] || 0) / totalHist) + 0.3 * (1 / CATEGORIAS.length);
+      sugerido = Math.round(disponibleGasto * prop);
+    } else {
+      sugerido = Math.round(disponibleGasto / CATEGORIAS.length);
+    }
+    const tieneManual = overrides.hasOwnProperty(c);
+    const limite = tieneManual ? Number(overrides[c]) : sugerido;
+    return { cat: c, limite: limite, sugerido: sugerido, gastado: gastadoPorCat[c], manual: tieneManual };
+  });
+
+  return { mesKey: mesKey, metaAhorro: metaAhorro, disponibleGasto: disponibleGasto, filas: filas, ingresoMes: t.ingreso };
+}
+
+function renderPresupuesto() {
+  const setupCard = document.getElementById('presupuesto-setup-card');
+  const card = document.getElementById('presupuesto-card');
+  const metaDefinida = config.metaAhorro !== undefined && config.metaAhorro !== null && config.metaAhorro !== '';
+  if (!metaDefinida) {
+    setupCard.style.display = 'block';
+    card.style.display = 'none';
+    return;
+  }
+  setupCard.style.display = 'none';
+  card.style.display = 'block';
+
+  const p = calcularPresupuesto();
+  document.getElementById('meta-ahorro-txt').textContent = fmtCompact(p.metaAhorro);
+
+  const list = document.getElementById('presupuesto-list');
+  list.innerHTML = p.filas.map(function(f) {
+    const pct = f.limite > 0 ? Math.min(100, (f.gastado / f.limite) * 100) : (f.gastado > 0 ? 100 : 0);
+    const over = f.gastado > f.limite;
+    return '<div class="budget-row" data-cat="' + f.cat + '">' +
+      '<div class="budget-row-top">' +
+        '<span class="budget-cat">' + etiquetasCat[f.cat] + '</span>' +
+        '<span class="budget-amt"><b>' + fmtCompact(f.gastado) + '</b> de ' + fmtCompact(f.limite) + '</span>' +
+      '</div>' +
+      '<div class="budget-bar"><div class="budget-bar-fill' + (over ? ' over' : '') + '" style="width:' + pct + '%"></div></div>' +
+    '</div>';
+  }).join('');
+
+  list.querySelectorAll('.budget-row').forEach(function(row) {
+    row.addEventListener('click', function() { abrirEditarCategoria(row.dataset.cat); });
+  });
+}
+
+document.getElementById('btn-guardar-meta').addEventListener('click', function() {
+  const val = parseFloat(document.getElementById('meta-ahorro-input').value);
+  if (isNaN(val) || val < 0) { showToast('Ingresa una meta válida', true); return; }
+  config.metaAhorro = val;
+  renderPresupuesto();
+  showToast('Meta guardada');
+  apiPost({ action: 'set-config', key: 'metaAhorro', value: val });
+});
+document.getElementById('btn-editar-meta').addEventListener('click', function() {
+  document.getElementById('presupuesto-card').style.display = 'none';
+  document.getElementById('presupuesto-setup-card').style.display = 'block';
+  document.getElementById('meta-ahorro-input').value = config.metaAhorro || '';
+});
+
+function guardarOverrides() {
+  apiPost({ action: 'set-config', key: 'categoriaOverrides', value: config.categoriaOverrides || {} });
+}
+
+function abrirEditarCategoria(cat) {
+  categoriaEnEdicion = cat;
+  const p = calcularPresupuesto();
+  const fila = p.filas.find(function(f) { return f.cat === cat; });
+  document.getElementById('cat-titulo').textContent = etiquetasCat[cat];
+  document.getElementById('cat-info').textContent =
+    'Llevas gastado ' + fmt(fila.gastado) + ' este mes. Sugerido automático: ' + fmt(fila.sugerido) + '.';
+  document.getElementById('cat-monto').value = fila.limite;
+  document.getElementById('overlay-cat').classList.add('show');
+}
+document.getElementById('cat-close').addEventListener('click', function() {
+  document.getElementById('overlay-cat').classList.remove('show');
+});
+document.getElementById('overlay-cat').addEventListener('click', function(e) {
+  if (e.target.id === 'overlay-cat') this.classList.remove('show');
+});
+document.getElementById('cat-auto').addEventListener('click', function() {
+  const p = calcularPresupuesto();
+  if (config.categoriaOverrides && config.categoriaOverrides[p.mesKey]) {
+    delete config.categoriaOverrides[p.mesKey][categoriaEnEdicion];
+  }
+  guardarOverrides();
+  renderPresupuesto();
+  document.getElementById('overlay-cat').classList.remove('show');
+  showToast('Vuelto a automático');
+});
+document.getElementById('cat-guardar').addEventListener('click', function() {
+  const nuevo = parseFloat(document.getElementById('cat-monto').value);
+  if (isNaN(nuevo) || nuevo < 0) { showToast('Monto inválido', true); return; }
+  const p = calcularPresupuesto();
+  const totalOtros = p.filas.filter(function(f) { return f.cat !== categoriaEnEdicion; })
+    .reduce(function(s, f) { return s + f.limite; }, 0);
+  if (totalOtros + nuevo > p.disponibleGasto + 0.5) {
+    showToast('Excede tu presupuesto por ' + fmt(totalOtros + nuevo - p.disponibleGasto), true);
+    return;
+  }
+  if (!config.categoriaOverrides) config.categoriaOverrides = {};
+  if (!config.categoriaOverrides[p.mesKey]) config.categoriaOverrides[p.mesKey] = {};
+  config.categoriaOverrides[p.mesKey][categoriaEnEdicion] = nuevo;
+  guardarOverrides();
+  renderPresupuesto();
+  document.getElementById('overlay-cat').classList.remove('show');
+  showToast('Categoría actualizada');
+});
+
+// --- Cierre de mes: pregunta si mover el disponible del mes pasado a ahorro ---
+function revisarCierreDeMes() {
+  const now = new Date();
+  const mesActualKey = now.getFullYear() + '-' + now.getMonth();
+  if (config.lastRolloverPrompt === mesActualKey) return;
+
+  const mesAnterior = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const mesAnteriorKey = mesAnterior.getFullYear() + '-' + mesAnterior.getMonth();
+  const t = totalesDelMes(mesAnteriorKey);
+  const disponibleAnterior = t.ingreso - t.gasto - t.ahorro;
+
+  if ((t.ingreso === 0 && t.gasto === 0) || disponibleAnterior <= 0) {
+    marcarCierreVisto(mesActualKey);
+    return;
+  }
+
+  document.getElementById('cierre-texto').textContent =
+    '¿Quieres mover tus ' + fmt(disponibleAnterior) + ' disponibles de ' + mesesLargos[mesAnterior.getMonth()] + ' a tu Total ahorrado?';
+  document.getElementById('overlay-cierre').classList.add('show');
+
+  document.getElementById('cierre-si').onclick = function() {
+    const mov = { id: String(Date.now()), monto: disponibleAnterior, fecha: hoyISO(), nota: 'Cierre de ' + mesesLargos[mesAnterior.getMonth()], tipo: 'ahorro', categoria: '' };
+    apiPost({ action: 'add', mov: mov }).then(function(res) {
+      if (res && res.ok) {
+        gastos.unshift(mov);
+        render();
+        showToast('Se guardó ' + fmt(disponibleAnterior));
+      }
+    });
+    marcarCierreVisto(mesActualKey);
+    document.getElementById('overlay-cierre').classList.remove('show');
+  };
+  document.getElementById('cierre-no').onclick = function() {
+    marcarCierreVisto(mesActualKey);
+    document.getElementById('overlay-cierre').classList.remove('show');
+  };
+}
+function marcarCierreVisto(mesKey) {
+  config.lastRolloverPrompt = mesKey;
+  apiPost({ action: 'set-config', key: 'lastRolloverPrompt', value: mesKey });
 }
 
 document.getElementById('btn-ver-mas').addEventListener('click', function() {
