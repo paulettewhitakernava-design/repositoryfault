@@ -35,16 +35,14 @@ html {
   -webkit-text-size-adjust: 100%;
   background: var(--bg-2);
   height: 100%;
-  overflow: hidden;
+  overscroll-behavior-y: contain;
 }
 
 body {
   margin: 0;
-  height: 100%;
-  height: 100dvh;
-  overflow: hidden;
-  position: fixed;
-  inset: 0;
+  min-height: 100%;
+  min-height: 100dvh;
+  overscroll-behavior-y: contain;
   background: radial-gradient(120% 100% at 15% 0%, var(--bg-1) 0%, var(--bg-2) 55%);
   color: var(--ink);
   font-family: 'Manrope', sans-serif;
@@ -52,10 +50,6 @@ body {
 }
 
 #scroll {
-  height: 100%;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
   padding: calc(20px + var(--safe-t)) 20px calc(var(--nav-h) + var(--safe-b) + 20px);
   max-width: 480px;
   margin: 0 auto;
@@ -586,13 +580,13 @@ const mesesCortos = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct'
 document.getElementById('fecha').valueAsDate = new Date();
 
 (function() {
-  const scrollEl = document.getElementById('scroll');
+  const scrollEl = document.scrollingElement || document.documentElement;
   let startY = 0;
   document.addEventListener('touchstart', function(e) {
     startY = e.touches[0].clientY;
   }, { passive: true });
   document.addEventListener('touchmove', function(e) {
-    if (!e.target.closest('#scroll')) { e.preventDefault(); return; }
+    if (e.target.closest('.bottom-nav, .overlay')) { e.preventDefault(); return; }
     const y = e.touches[0].clientY;
     const arrastraAbajo = y > startY;
     const arrastraArriba = y < startY;
@@ -614,7 +608,7 @@ document.querySelectorAll('.nav-btn').forEach(function(btn) {
     document.querySelectorAll('.screen').forEach(function(s) {
       s.classList.toggle('active', s.id === 'screen-' + destino);
     });
-    document.getElementById('scroll').scrollTo(0, 0);
+    window.scrollTo(0, 0);
   });
 });
 function irA(pantalla) {
