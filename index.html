@@ -427,7 +427,7 @@ select option { background: var(--card-solid); color: var(--ink); }
 }
 .splash.hide { opacity: 0; pointer-events: none; }
 .splash-mark { display: flex; align-items: center; gap: 10px; animation: rise 0.5s ease both; }
-.splash-mark svg { width: 34px; height: 34px; color: var(--accent); }
+.splash-mark svg { width: 40px; height: 40px; color: var(--ink); }
 .splash-word { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 28px; letter-spacing: 0.03em; color: var(--ink); }
 
 /* ---- Barra de perfil ---- */
@@ -447,14 +447,15 @@ select option { background: var(--card-solid); color: var(--ink); }
 <div class="splash" id="splash">
   <div class="splash-mark">
     <span class="splash-word">KASHLY</span>
-    <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M30 38 L40 38 L32 20 Z"/>
-      <path d="M70 38 L60 38 L68 20 Z"/>
-      <circle cx="50" cy="50" r="20"/>
-      <circle cx="43" cy="50" r="1.6" fill="currentColor"/>
-      <circle cx="57" cy="50" r="1.6" fill="currentColor"/>
-      <ellipse cx="50" cy="80" rx="20" ry="14"/>
-      <ellipse cx="72" cy="66" rx="6" ry="9"/>
+    <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M 30,18 C 27,24 26,29 27,35 C 24,41 23,47 23,53 L 23,68 C 23,77 30,83 39,83 L 60,83 C 70,83 77,76 77,66 C 77,58 77,50 77,43 C 77,37 75,33 72,30 C 73,26 72,21 70,17 L 61,29 C 57,28 53,27.5 50,27.5 C 46,27.5 42,28 38,29 Z"/>
+      <circle cx="41" cy="48" r="2.4" fill="currentColor" stroke="none"/>
+      <circle cx="58" cy="48" r="2.4" fill="currentColor" stroke="none"/>
+      <path d="M 40,56 C 34,56 32,59 32,63 L 32,73"/>
+      <circle cx="78" cy="61" r="7.5"/>
+      <path d="M 70,58 L 76,58"/>
+      <circle cx="40" cy="83" r="6.5"/>
+      <circle cx="62" cy="83" r="6.5"/>
     </svg>
   </div>
 </div>
