@@ -427,6 +427,30 @@ select option { background: var(--card-solid); color: var(--ink); }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); animation: pop 0.25s ease; }
 .toast.error { background: var(--danger); color: #2a0d0d; }
 
+.offline-banner {
+  display: none;
+  position: fixed;
+  top: calc(var(--safe-t) + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: calc(100% - 40px);
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(20,15,36,0.92);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 9px 16px;
+  border-radius: 999px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 35;
+  text-align: center;
+  box-shadow: 0 8px 20px -8px rgba(0,0,0,0.5);
+}
+
 /* ---- Bottom sheets ---- */
 .overlay {
   position: fixed; inset: 0; background: var(--overlay);
@@ -867,6 +891,7 @@ select option { background: var(--card-solid); color: var(--ink); }
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="offline-banner" id="offline-banner"></div>
 
 <div class="overlay" id="overlay">
   <div class="sheet">
@@ -1067,6 +1092,87 @@ function apiPost(payload) {
   }).then(function(r) { return r.json(); });
 }
 
+// --- Modo sin conexión: los movimientos y ajustes se guardan de inmediato en
+// el dispositivo (localStorage) y se muestran al instante, sin esperar red.
+// Si no hay internet, el cambio se encola y se reintenta solo al reconectar
+// (evento 'online') o cada 30s. Los ids de movimiento se generan aquí mismo
+// (Date.now()), así que no hay que esperar respuesta del servidor para nada. ---
+const LS_GASTOS = 'kashly_cache_gastos';
+const LS_CONFIG = 'kashly_cache_config';
+const LS_QUEUE = 'kashly_queue';
+let procesandoCola = false;
+
+function guardarCacheLocal() {
+  try {
+    localStorage.setItem(LS_GASTOS, JSON.stringify(gastos));
+    localStorage.setItem(LS_CONFIG, JSON.stringify(config));
+  } catch (e) { /* almacenamiento no disponible, se ignora */ }
+}
+function leerCacheLocal() {
+  try {
+    const g = localStorage.getItem(LS_GASTOS);
+    const c = localStorage.getItem(LS_CONFIG);
+    return { gastos: g ? JSON.parse(g) : null, config: c ? JSON.parse(c) : null };
+  } catch (e) { return { gastos: null, config: null }; }
+}
+function leerCola() {
+  try { return JSON.parse(localStorage.getItem(LS_QUEUE) || '[]'); } catch (e) { return []; }
+}
+function guardarCola(cola) {
+  try { localStorage.setItem(LS_QUEUE, JSON.stringify(cola)); } catch (e) { /* ignorado */ }
+  actualizarIndicadorOffline();
+}
+function encolar(payload) {
+  const cola = leerCola();
+  cola.push(payload);
+  guardarCola(cola);
+}
+function procesarCola() {
+  if (procesandoCola) return;
+  const cola = leerCola();
+  if (cola.length === 0) return;
+  procesandoCola = true;
+  const siguiente = cola[0];
+  apiPost(siguiente).then(function(res) {
+    procesandoCola = false;
+    if (res && res.ok) {
+      guardarCola(cola.slice(1));
+      procesarCola();
+    }
+  }).catch(function() {
+    procesandoCola = false;
+  });
+}
+function guardarConSincronizacion(payload) {
+  guardarCacheLocal();
+  apiPost(payload).catch(function() { encolar(payload); });
+}
+function actualizarIndicadorOffline() {
+  const pendientes = leerCola().length;
+  const el = document.getElementById('offline-banner');
+  if (!el) return;
+  if (!navigator.onLine) {
+    el.style.display = 'flex';
+    el.textContent = pendientes > 0
+      ? 'Sin conexión — ' + pendientes + ' cambio' + (pendientes === 1 ? '' : 's') + ' pendiente' + (pendientes === 1 ? '' : 's') + ' de guardar'
+      : 'Sin conexión — viendo tus datos guardados';
+  } else if (pendientes > 0) {
+    el.style.display = 'flex';
+    el.textContent = 'Guardando ' + pendientes + ' cambio' + (pendientes === 1 ? '' : 's') + ' pendiente' + (pendientes === 1 ? '' : 's') + '...';
+  } else {
+    el.style.display = 'none';
+  }
+}
+window.addEventListener('online', function() { actualizarIndicadorOffline(); procesarCola(); });
+window.addEventListener('offline', actualizarIndicadorOffline);
+setInterval(procesarCola, 30000);
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('sw.js').catch(function() { /* sin soporte, la app sigue funcionando en línea */ });
+  });
+}
+
 let gastos = [];
 let editandoId = null;
 let datosCargados = false;
@@ -1127,7 +1233,7 @@ function cargarCategorias() {
 function guardarCategorias() {
   const arr = CATEGORIAS.map(function(id) { return { id: id, label: etiquetasCat[id] }; });
   config.categorias = arr;
-  apiPost({ action: 'set-config', key: 'categorias', value: arr });
+  guardarConSincronizacion({ action: 'set-config', key: 'categorias', value: arr });
 }
 function poblarSelectsCategoria() {
   ['categoria', 'edit-categoria'].forEach(function(id) {
@@ -1290,8 +1396,8 @@ document.getElementById('perfil-guardar').addEventListener('click', function() {
   config.perfilNombre = nombre;
   config.perfilCorreo = correo;
   showToast('Perfil guardado');
-  apiPost({ action: 'set-config', key: 'perfilNombre', value: nombre });
-  apiPost({ action: 'set-config', key: 'perfilCorreo', value: correo });
+  guardarConSincronizacion({ action: 'set-config', key: 'perfilNombre', value: nombre });
+  guardarConSincronizacion({ action: 'set-config', key: 'perfilCorreo', value: correo });
 });
 
 // --- Saldo Ahorrado: mismo ajuste, dos accesos (Inicio y Agregar) ---
@@ -1313,7 +1419,7 @@ document.getElementById('saldo-guardar').addEventListener('click', function() {
   config.saldoAhorrado = val;
   render();
   showToast('Saldo ahorrado actualizado');
-  apiPost({ action: 'set-config', key: 'saldoAhorrado', value: val });
+  guardarConSincronizacion({ action: 'set-config', key: 'saldoAhorrado', value: val });
   document.getElementById('overlay-saldo').classList.remove('show');
 });
 
@@ -1342,11 +1448,11 @@ function aplicarYGuardarMeta(val, freq, dia1, dia2, semanaDia) {
   actualizarTextosPeriodo();
   render();
   showToast('Meta guardada');
-  apiPost({ action: 'set-config', key: 'metaAhorro', value: val });
-  apiPost({ action: 'set-config', key: 'frecuenciaPago', value: freq });
-  apiPost({ action: 'set-config', key: 'quincenaDia1', value: config.quincenaDia1 || 1 });
-  apiPost({ action: 'set-config', key: 'quincenaDia2', value: config.quincenaDia2 || 16 });
-  apiPost({ action: 'set-config', key: 'semanaDia', value: config.semanaDia !== undefined ? config.semanaDia : 5 });
+  guardarConSincronizacion({ action: 'set-config', key: 'metaAhorro', value: val });
+  guardarConSincronizacion({ action: 'set-config', key: 'frecuenciaPago', value: freq });
+  guardarConSincronizacion({ action: 'set-config', key: 'quincenaDia1', value: config.quincenaDia1 || 1 });
+  guardarConSincronizacion({ action: 'set-config', key: 'quincenaDia2', value: config.quincenaDia2 || 16 });
+  guardarConSincronizacion({ action: 'set-config', key: 'semanaDia', value: config.semanaDia !== undefined ? config.semanaDia : 5 });
 }
 
 document.getElementById('btn-guardar-meta-ajustes').addEventListener('click', function() {
@@ -1364,7 +1470,7 @@ document.getElementById('btn-guardar-saldo-ajustes').addEventListener('click', f
   config.saldoAhorrado = val;
   render();
   showToast('Saldo ahorrado actualizado');
-  apiPost({ action: 'set-config', key: 'saldoAhorrado', value: val });
+  guardarConSincronizacion({ action: 'set-config', key: 'saldoAhorrado', value: val });
 });
 
 // --- Editar meta desde el Presupuesto: sheet propio, no manda a Ajustes ---
@@ -1455,7 +1561,7 @@ function onCambioFiltro(key, checked) {
   config.analisisFiltros[key] = checked;
   aplicarFiltros();
   renderFiltrosUI();
-  apiPost({ action: 'set-config', key: 'analisisFiltros', value: config.analisisFiltros });
+  guardarConSincronizacion({ action: 'set-config', key: 'analisisFiltros', value: config.analisisFiltros });
 }
 document.getElementById('btn-filtros').addEventListener('click', function() {
   document.getElementById('overlay-filtros').classList.add('show');
@@ -1496,8 +1602,8 @@ function aplicarOrdenYFiltrosInicio() {
   });
 }
 function guardarInicioConfig() {
-  apiPost({ action: 'set-config', key: 'inicioOrden', value: config.inicioOrden || ordenInicioActual() });
-  apiPost({ action: 'set-config', key: 'inicioFiltros', value: config.inicioFiltros || {} });
+  guardarConSincronizacion({ action: 'set-config', key: 'inicioOrden', value: config.inicioOrden || ordenInicioActual() });
+  guardarConSincronizacion({ action: 'set-config', key: 'inicioFiltros', value: config.inicioFiltros || {} });
 }
 function renderFiltrosInicioUI() {
   const orden = ordenInicioActual();
@@ -1591,34 +1697,55 @@ window.addEventListener('resize', function() {
   togglePresu.set(togglePresu.get());
 });
 
+function iniciarConDatos(datosGastos, datosConfig, offline) {
+  gastos = datosGastos || [];
+  config = datosConfig || {};
+  cargarCategorias();
+  poblarSelectsCategoria();
+  renderAjustesCategorias();
+  cargarFormAjustes();
+  actualizarTextosPeriodo();
+  renderFiltrosUI();
+  aplicarFiltros();
+  aplicarOrdenYFiltrosInicio();
+  render();
+  actualizarIndicadorOffline();
+  if (!offline) {
+    guardarCacheLocal();
+    revisarCierre();
+    procesarCola();
+  }
+}
+
 function cargarDatos() {
   Promise.all([apiGet('list'), apiGet('config')]).then(function(res) {
     datosCargados = true;
     const resMov = res[0], resCfg = res[1];
     if (resMov && resMov.ok) {
-      gastos = resMov.data || [];
-      config = (resCfg && resCfg.ok && resCfg.data) || {};
-      cargarCategorias();
-      poblarSelectsCategoria();
-      renderAjustesCategorias();
-      cargarFormAjustes();
-      actualizarTextosPeriodo();
-      renderFiltrosUI();
-      aplicarFiltros();
-      aplicarOrdenYFiltrosInicio();
-      render();
-      revisarCierre();
+      iniciarConDatos(resMov.data || [], (resCfg && resCfg.ok && resCfg.data) || {}, false);
     } else {
-      mostrarErrorCarga();
+      usarCacheOMostrarError();
     }
   }).catch(function() {
     datosCargados = true;
-    mostrarErrorCarga();
+    usarCacheOMostrarError();
   });
 
   setTimeout(function() {
-    if (!datosCargados) mostrarErrorCarga();
+    if (!datosCargados) usarCacheOMostrarError();
   }, 20000);
+}
+
+// --- Sin internet en la primera carga: usa lo último guardado en el
+// dispositivo, si existe, en vez de dejar la app en blanco. ---
+function usarCacheOMostrarError() {
+  const cache = leerCacheLocal();
+  if (cache.gastos) {
+    iniciarConDatos(cache.gastos, cache.config || {}, true);
+    showToast('Sin conexión — mostrando tus datos guardados', true);
+  } else {
+    mostrarErrorCarga();
+  }
 }
 
 function mostrarErrorCarga() {
@@ -1642,25 +1769,23 @@ document.getElementById('form-gasto').addEventListener('submit', function(e) {
   const tipo = toggleAdd.get();
   const categoria = tipo === 'gasto' ? document.getElementById('categoria').value : '';
   const mov = { id: String(Date.now()), monto, fecha, nota, tipo, categoria };
-  const btn = document.getElementById('btn-add');
-  btn.disabled = true;
-  btn.textContent = 'Guardando...';
+
+  // Se guarda de inmediato en el dispositivo y se muestra al instante; si no
+  // hay internet, el envío se encola y se reintenta solo (ver apiPost/encolar).
+  gastos.unshift(mov);
+  guardarCacheLocal();
+  render();
+  document.getElementById('form-gasto').reset();
+  document.getElementById('fecha').valueAsDate = new Date();
+  toggleAdd.set('gasto');
+  irA('inicio');
 
   apiPost({ action: 'add', mov: mov }).then(function(res) {
     if (!res || !res.ok) throw new Error(res && res.error);
-    gastos.unshift(mov);
-    render();
     showToast('Movimiento agregado');
-    document.getElementById('form-gasto').reset();
-    document.getElementById('fecha').valueAsDate = new Date();
-    toggleAdd.set('gasto');
-    btn.disabled = false;
-    btn.textContent = 'Agregar';
-    irA('inicio');
   }).catch(function() {
-    showToast('Error al guardar', true);
-    btn.disabled = false;
-    btn.textContent = 'Agregar';
+    encolar({ action: 'add', mov: mov });
+    showToast('Sin conexión: se guardará cuando vuelvas a tener internet', true);
   });
 });
 
@@ -1704,15 +1829,15 @@ function attachSwipe(itemEl) {
 }
 
 function eliminarMovimientoDirecto(id) {
+  gastos = gastos.filter(function(g) { return String(g.id) !== String(id); });
+  guardarCacheLocal();
+  render();
   apiPost({ action: 'delete', id: id }).then(function(res) {
     if (!res || !res.ok) throw new Error();
-    gastos = gastos.filter(function(g) { return String(g.id) !== String(id); });
-    render();
     showToast('Movimiento eliminado');
   }).catch(function() {
-    showToast('No se pudo borrar', true);
-    const el = document.getElementById('item-' + id);
-    if (el) { el.style.transform = 'translateX(0)'; el.classList.remove('swiped'); }
+    encolar({ action: 'delete', id: id });
+    showToast('Sin conexión: se borrará cuando vuelvas a tener internet', true);
   });
 }
 
@@ -1750,45 +1875,37 @@ document.getElementById('form-edit').addEventListener('submit', function(e) {
   const tipoEdit = toggleEdit.get();
   const categoriaEdit = tipoEdit === 'gasto' ? document.getElementById('edit-categoria').value : '';
   const mov = { id: editandoId, monto, fecha, nota, tipo: tipoEdit, categoria: categoriaEdit };
-  const btn = document.getElementById('btn-guardar');
-  btn.disabled = true;
-  btn.textContent = 'Guardando...';
+
+  const idx = gastos.findIndex(g => String(g.id) === String(mov.id));
+  if (idx !== -1) gastos[idx] = mov;
+  guardarCacheLocal();
+  render();
+  cerrarDetalle();
 
   apiPost({ action: 'update', mov: mov }).then(function(res) {
     if (!res || !res.ok) throw new Error(res && res.error);
-    const idx = gastos.findIndex(g => String(g.id) === String(mov.id));
-    if (idx !== -1) gastos[idx] = mov;
-    render();
     showToast('Movimiento actualizado');
-    btn.disabled = false;
-    btn.textContent = 'Guardar';
-    cerrarDetalle();
   }).catch(function() {
-    showToast('Error al guardar', true);
-    btn.disabled = false;
-    btn.textContent = 'Guardar';
+    encolar({ action: 'update', mov: mov });
+    showToast('Sin conexión: se guardará cuando vuelvas a tener internet', true);
   });
 });
 
 document.getElementById('btn-eliminar').addEventListener('click', function() {
   if (!editandoId) return;
   const id = editandoId;
-  const btn = this;
-  btn.disabled = true;
-  btn.textContent = 'Eliminando...';
+
+  gastos = gastos.filter(g => String(g.id) !== String(id));
+  guardarCacheLocal();
+  render();
+  cerrarDetalle();
 
   apiPost({ action: 'delete', id: id }).then(function(res) {
     if (!res || !res.ok) throw new Error(res && res.error);
-    gastos = gastos.filter(g => String(g.id) !== String(id));
-    render();
-    btn.disabled = false;
-    btn.textContent = 'Eliminar';
-    cerrarDetalle();
     showToast('Movimiento eliminado');
   }).catch(function() {
-    btn.disabled = false;
-    btn.textContent = 'Eliminar';
-    showToast('No se pudo borrar', true);
+    encolar({ action: 'delete', id: id });
+    showToast('Sin conexión: se borrará cuando vuelvas a tener internet', true);
   });
 });
 
@@ -2370,7 +2487,7 @@ function renderPresupuesto() {
 }
 
 function guardarOverrides() {
-  apiPost({ action: 'set-config', key: 'categoriaOverrides', value: config.categoriaOverrides || {} });
+  guardarConSincronizacion({ action: 'set-config', key: 'categoriaOverrides', value: config.categoriaOverrides || {} });
 }
 
 function abrirEditarCategoria(cat) {
@@ -2455,13 +2572,16 @@ function revisarCierre() {
 
   document.getElementById('cierre-si').onclick = function() {
     const mov = { id: String(Date.now()), monto: disponibleAnterior, fecha: hoyISO(), nota: 'Cierre de ' + periodoAnterior.label, tipo: 'ahorro', categoria: '' };
+    gastos.unshift(mov);
+    guardarCacheLocal();
+    render();
     apiPost({ action: 'add', mov: mov }).then(function(res) {
       if (res && res.ok) {
-        gastos.unshift(mov);
-        render();
         showToast('Se guardó ' + fmt(disponibleAnterior));
+      } else {
+        encolar({ action: 'add', mov: mov });
       }
-    });
+    }).catch(function() { encolar({ action: 'add', mov: mov }); });
     marcarCierreVisto(claveVisto);
     document.getElementById('overlay-cierre').classList.remove('show');
   };
@@ -2472,7 +2592,7 @@ function revisarCierre() {
 }
 function marcarCierreVisto(clave) {
   config.lastRolloverPrompt = clave;
-  apiPost({ action: 'set-config', key: 'lastRolloverPrompt', value: clave });
+  guardarConSincronizacion({ action: 'set-config', key: 'lastRolloverPrompt', value: clave });
 }
 
 document.getElementById('btn-ver-mas').addEventListener('click', function() {
