@@ -337,19 +337,46 @@ select option { background: var(--card-solid); color: var(--ink); }
 .section-label { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
 .section-count { font-size: 11px; color: var(--muted); }
 
+.item-wrap {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  animation: rise 0.4s ease both;
+}
+.item-delete-bg {
+  position: absolute;
+  inset: 0;
+  background: var(--danger);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.item-delete-btn {
+  width: 76px;
+  height: 100%;
+  border: none;
+  background: none;
+  color: #2a0d0d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.item-delete-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; }
 .item {
+  position: relative;
+  z-index: 1;
+  background: var(--bg-2);
   padding: 16px 4px;
   border-bottom: 1px solid var(--line);
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 10px;
-  animation: rise 0.4s ease both;
   cursor: pointer;
-  border-radius: 12px;
-  transition: background 0.15s;
+  touch-action: pan-y;
+  transition: transform 0.2s ease;
 }
-.item:active { background: rgba(255,255,255,0.04); }
 .item.removing { animation: fadeOut 0.25s ease forwards; }
 .item .left { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .item .icon {
@@ -554,7 +581,9 @@ select option { background: var(--card-solid); color: var(--ink); }
       <button type="button" role="tab" data-periodo="quincena" aria-selected="false">Quincenal</button>
       <button type="button" role="tab" data-periodo="mensual" aria-selected="true">Mensual</button>
     </div>
-    <div class="sheet-text" id="presupuesto-resumen" style="margin-top:12px"></div>
+    <div class="card-lbl" id="gasto-permitido-lbl" style="margin-top:18px">Gasto permitido</div>
+    <div class="card-num" id="gasto-permitido-num" style="font-size:30px;margin-bottom:2px">$0</div>
+    <div class="sheet-text" id="presupuesto-resumen" style="margin-top:2px"></div>
     <div id="presupuesto-list"></div>
     <div id="presupuesto-alertas"></div>
   </div>
@@ -1299,6 +1328,58 @@ document.getElementById('form-gasto').addEventListener('submit', function(e) {
   });
 });
 
+// --- Deslizar un movimiento revela un botón de eliminar (como listas nativas) ---
+const REVEAL_DELETE = 76;
+function attachSwipe(itemEl) {
+  let startX = 0, startY = 0, currentX = 0, dragging = false, decided = false, isHorizontal = false;
+  itemEl.addEventListener('touchstart', function(e) {
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    dragging = true; decided = false; isHorizontal = false;
+    itemEl.style.transition = 'none';
+  }, { passive: true });
+  itemEl.addEventListener('touchmove', function(e) {
+    if (!dragging) return;
+    const x = e.touches[0].clientX, y = e.touches[0].clientY;
+    const dx = x - startX, dy = y - startY;
+    if (!decided) {
+      if (Math.abs(dx) > 6 || Math.abs(dy) > 6) { decided = true; isHorizontal = Math.abs(dx) > Math.abs(dy); }
+    }
+    if (decided && isHorizontal) {
+      if (e.cancelable) e.preventDefault();
+      const base = itemEl.classList.contains('swiped') ? -REVEAL_DELETE : 0;
+      currentX = Math.min(0, Math.max(-REVEAL_DELETE - 20, base + dx));
+      itemEl.style.transform = 'translateX(' + currentX + 'px)';
+    }
+  }, { passive: false });
+  itemEl.addEventListener('touchend', function() {
+    dragging = false;
+    itemEl.style.transition = 'transform 0.2s ease';
+    if (decided && isHorizontal) {
+      if (currentX < -REVEAL_DELETE / 2) {
+        itemEl.style.transform = 'translateX(-' + REVEAL_DELETE + 'px)';
+        itemEl.classList.add('swiped');
+      } else {
+        itemEl.style.transform = 'translateX(0)';
+        itemEl.classList.remove('swiped');
+      }
+    }
+  });
+}
+
+function eliminarMovimientoDirecto(id) {
+  apiPost({ action: 'delete', id: id }).then(function(res) {
+    if (!res || !res.ok) throw new Error();
+    gastos = gastos.filter(function(g) { return String(g.id) !== String(id); });
+    render();
+    showToast('Movimiento eliminado');
+  }).catch(function() {
+    showToast('No se pudo borrar', true);
+    const el = document.getElementById('item-' + id);
+    if (el) { el.style.transform = 'translateX(0)'; el.classList.remove('swiped'); }
+  });
+}
+
 // --- Detalle / edición de un movimiento ---
 function abrirDetalle(id) {
   const mov = gastos.find(g => String(g.id) === String(id));
@@ -1423,15 +1504,34 @@ function periodoDe(fechaStr, modo) {
     return { key: y + '-' + m, label: mesesCortos[m] + ' ' + String(y).slice(2), start: new Date(y, m, 1).getTime() };
   }
 
-  // quincenal (personalizable)
+  // quincenal (personalizable). Soporta que la 2da quincena "cruce" el fin de
+  // mes (ej. dia1=28, dia2=11: una quincena va del 28 al 10, la otra del 11 al 27).
   let dia1 = Number(config.quincenaDia1) || 1;
   let dia2 = Number(config.quincenaDia2) || 16;
-  if (dia2 <= dia1) dia2 = dia1 + 1;
-  const q = (day >= dia1 && day < dia2) ? 0 : 1;
-  const inicioDia = q === 0 ? dia1 : dia2;
-  const finDia = q === 0 ? dia2 - 1 : diasEnMes(y, m);
-  const label = inicioDia + '-' + finDia + ' ' + mesesCortos[m];
-  return { key: y + '-' + m + '-' + q, label: label, start: new Date(y, m, inicioDia).getTime() };
+  if (dia1 === dia2) dia2 = dia1 < 28 ? dia1 + 1 : 1;
+  const dHoy = new Date(y, m, day).getTime();
+  const startAEsteMes = new Date(y, m, dia1).getTime();
+  const startBEsteMes = new Date(y, m, dia2).getTime();
+  let start, qId;
+  if (dia1 < dia2) {
+    if (dHoy >= startAEsteMes && dHoy < startBEsteMes) { start = startAEsteMes; qId = 0; }
+    else if (dHoy >= startBEsteMes) { start = startBEsteMes; qId = 1; }
+    else { start = new Date(y, m - 1, dia2).getTime(); qId = 1; }
+  } else {
+    if (dHoy >= startBEsteMes && dHoy < startAEsteMes) { start = startBEsteMes; qId = 1; }
+    else if (dHoy >= startAEsteMes) { start = startAEsteMes; qId = 0; }
+    else { start = new Date(y, m - 1, dia1).getTime(); qId = 0; }
+  }
+  const inicio = new Date(start);
+  const sy = inicio.getFullYear(), sm = inicio.getMonth();
+  let fin;
+  if (dia1 < dia2) {
+    fin = qId === 0 ? new Date(sy, sm, dia2 - 1) : new Date(sy, sm + 1, dia1 - 1);
+  } else {
+    fin = qId === 1 ? new Date(sy, sm, dia1 - 1) : new Date(sy, sm + 1, dia2 - 1);
+  }
+  const label = inicio.getDate() + ' ' + mesesCortos[sm] + '-' + fin.getDate() + ' ' + mesesCortos[fin.getMonth()];
+  return { key: sy + '-' + sm + '-' + qId, label: label, start: start };
 }
 
 function agruparPorPeriodo(modo) {
@@ -1675,15 +1775,20 @@ function render() {
     const visibles = mostrarTodos ? gastos : gastos.slice(0, LIMITE_LISTA);
     const items = visibles.map(function(g, i) {
       try {
-        return '<div class="item" data-id="' + g.id + '" id="item-' + g.id + '" style="animation-delay:' + (Math.min(i, 8) * 0.03) + 's">' +
-          '<div class="left">' +
-            '<div class="icon ' + g.tipo + '">' + (iconos[g.tipo] || '•') + '</div>' +
-            '<div class="text">' +
-              '<span class="monto ' + g.tipo + '">' + (signos[g.tipo] || '') + ' ' + fmt(g.monto) + '</span>' +
-              '<span class="meta">' + (etiquetas[g.tipo] || g.tipo) + (g.nota ? ' — ' + g.nota : '') + ' · ' + g.fecha + '</span>' +
+        return '<div class="item-wrap" data-id="' + g.id + '" style="animation-delay:' + (Math.min(i, 8) * 0.03) + 's">' +
+          '<div class="item-delete-bg"><button type="button" class="item-delete-btn" data-id="' + g.id + '" aria-label="Eliminar">' +
+            '<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>' +
+          '</button></div>' +
+          '<div class="item" data-id="' + g.id + '" id="item-' + g.id + '">' +
+            '<div class="left">' +
+              '<div class="icon ' + g.tipo + '">' + (iconos[g.tipo] || '•') + '</div>' +
+              '<div class="text">' +
+                '<span class="monto ' + g.tipo + '">' + (signos[g.tipo] || '') + ' ' + fmt(g.monto) + '</span>' +
+                '<span class="meta">' + (etiquetas[g.tipo] || g.tipo) + (g.nota ? ' — ' + g.nota : '') + ' · ' + g.fecha + '</span>' +
+              '</div>' +
             '</div>' +
+            '<span class="chev">›</span>' +
           '</div>' +
-          '<span class="chev">›</span>' +
         '</div>';
       } catch (err) {
         return '';
@@ -1691,7 +1796,21 @@ function render() {
     }).join('');
     lista.innerHTML = items;
     lista.querySelectorAll('.item').forEach(function(el) {
-      el.addEventListener('click', function() { abrirDetalle(el.dataset.id); });
+      attachSwipe(el);
+      el.addEventListener('click', function() {
+        if (el.classList.contains('swiped')) {
+          el.style.transform = 'translateX(0)';
+          el.classList.remove('swiped');
+          return;
+        }
+        abrirDetalle(el.dataset.id);
+      });
+    });
+    lista.querySelectorAll('.item-delete-btn').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        eliminarMovimientoDirecto(btn.dataset.id);
+      });
     });
 
     if (gastos.length > LIMITE_LISTA) {
@@ -1836,8 +1955,13 @@ function renderPresupuesto() {
   const resumenEl = document.getElementById('presupuesto-resumen');
   const list = document.getElementById('presupuesto-list');
   const alertas = document.getElementById('presupuesto-alertas');
+  const gastoPermitidoLbl = document.getElementById('gasto-permitido-lbl');
+  const gastoPermitidoNum = document.getElementById('gasto-permitido-num');
+  const etiquetaPeriodo = modoPresupuesto === 'quincena' ? nombreFrecuenciaCorta().toLowerCase() : 'mensual';
+  gastoPermitidoLbl.textContent = 'Gasto permitido (' + etiquetaPeriodo + ')';
 
   if (p.disponibleGasto <= 0) {
+    gastoPermitidoNum.textContent = fmt(0);
     resumenEl.innerHTML = 'Todavía no completas lo suficiente para ahorrar esta meta, sigue registrando tus ingresos. Ingresos: ' + fmt(p.ingresoPeriodo) +
       ' <button type="button" class="info-btn" id="btn-info-nadap">?</button>';
     list.innerHTML = '';
@@ -1848,7 +1972,8 @@ function renderPresupuesto() {
     return;
   }
 
-  resumenEl.textContent = 'Tienes ' + fmt(p.disponibleGasto) + ' para gastar en ' + (modoPresupuesto === 'quincena' ? 'esta ' + nombreFrecuenciaCorta().toLowerCase() : p.periodoLabel) + '.';
+  gastoPermitidoNum.textContent = fmt(p.disponibleGasto);
+  resumenEl.textContent = 'Ingresaste ' + fmt(p.ingresoPeriodo) + ' y tu meta de ahorro para ' + p.periodoLabel + ' es ' + fmt(p.metaAhorroPeriodo) + '.';
 
   list.innerHTML = p.filas.map(function(f) {
     const pct = f.limite > 0 ? Math.min(100, (f.gastado / f.limite) * 100) : (f.gastado > 0 ? 100 : 0);
