@@ -485,9 +485,15 @@ select option { background: var(--card-solid); color: var(--ink); }
 
   <div class="card" id="presupuesto-card" style="display:none">
     <div class="chart-head">
-      <div class="card-lbl" style="margin-bottom:0">Presupuesto del mes</div>
+      <div class="card-lbl" style="margin-bottom:0">Presupuesto</div>
       <span class="link" id="btn-editar-meta" style="cursor:pointer">Meta: <span id="meta-ahorro-txt">$0</span> ›</span>
     </div>
+    <div class="period-toggle" role="tablist" aria-label="Periodo del presupuesto" id="toggle-periodo-presu">
+      <div class="period-indicator" id="period-indicator-presu"></div>
+      <button type="button" role="tab" data-periodo="quincena" aria-selected="false">Quincenal</button>
+      <button type="button" role="tab" data-periodo="mensual" aria-selected="true">Mensual</button>
+    </div>
+    <div class="sheet-text" id="presupuesto-resumen" style="margin-top:12px"></div>
     <div id="presupuesto-list"></div>
   </div>
 
@@ -695,6 +701,7 @@ let editandoId = null;
 let datosCargados = false;
 let mostrarTodos = false;
 let modoAnalisis = 'quincena';
+let modoPresupuesto = 'mensual';
 
 const LIMITE_LISTA = 10;
 const tipos = ['gasto', 'ingreso', 'ahorro'];
@@ -826,30 +833,46 @@ function actualizarBotonPerfil() {
   document.getElementById('profile-btn').textContent = inicial || '?';
 }
 
-// --- Toggle quincena / mensual en Análisis ---
-const togglePeriodoEl = document.getElementById('toggle-periodo');
-const periodIndicator = document.getElementById('period-indicator');
-function setPeriodo(p) {
-  modoAnalisis = p;
-  const btn = togglePeriodoEl.querySelector('button[data-periodo="' + p + '"]');
-  periodIndicator.style.width = btn.offsetWidth + 'px';
-  periodIndicator.style.transform = 'translateX(' + btn.offsetLeft + 'px)';
-  togglePeriodoEl.querySelectorAll('button').forEach(b => {
-    b.setAttribute('aria-selected', b.dataset.periodo === p ? 'true' : 'false');
+// --- Toggle quincena / mensual: reutilizado en Análisis y en Presupuesto ---
+function crearTogglePeriodo(toggleEl, indicatorEl, onChange) {
+  let actual = 'quincena';
+  function set(p) {
+    actual = p;
+    const btn = toggleEl.querySelector('button[data-periodo="' + p + '"]');
+    indicatorEl.style.width = btn.offsetWidth + 'px';
+    indicatorEl.style.transform = 'translateX(' + btn.offsetLeft + 'px)';
+    toggleEl.querySelectorAll('button').forEach(function(b) {
+      b.setAttribute('aria-selected', b.dataset.periodo === p ? 'true' : 'false');
+    });
+    if (onChange) onChange(p);
+  }
+  toggleEl.addEventListener('click', function(e) {
+    const btn = e.target.closest('button[data-periodo]');
+    if (!btn) return;
+    set(btn.dataset.periodo);
   });
-  renderAnalisis();
+  return { set: set, get: function() { return actual; } };
 }
-togglePeriodoEl.addEventListener('click', function(e) {
-  const btn = e.target.closest('button[data-periodo]');
-  if (!btn) return;
-  setPeriodo(btn.dataset.periodo);
-});
-setPeriodo('quincena');
+
+const togglePeriodo = crearTogglePeriodo(
+  document.getElementById('toggle-periodo'),
+  document.getElementById('period-indicator'),
+  function(p) { modoAnalisis = p; renderAnalisis(); }
+);
+togglePeriodo.set('quincena');
+
+const togglePresu = crearTogglePeriodo(
+  document.getElementById('toggle-periodo-presu'),
+  document.getElementById('period-indicator-presu'),
+  function(p) { modoPresupuesto = p; renderPresupuesto(); }
+);
+togglePresu.set('mensual');
 
 window.addEventListener('resize', function() {
   toggleAdd.set(toggleAdd.get());
   toggleEdit.set(toggleEdit.get());
-  setPeriodo(modoAnalisis);
+  togglePeriodo.set(togglePeriodo.get());
+  togglePresu.set(togglePresu.get());
 });
 
 function cargarDatos() {
@@ -1233,47 +1256,77 @@ function totalesDelMes(mesKey) {
 }
 
 // --- Presupuesto por categoría: reparte el dinero disponible para gastar
-// (ingreso del mes − meta de ahorro) según qué tanto has gastado por
-// categoría en meses anteriores, con un piso parejo para las que no usas
-// aún. El usuario puede editar cualquier categoría a mano. ---
-function calcularPresupuesto() {
-  const now = new Date();
-  const mesKey = now.getFullYear() + '-' + now.getMonth();
-  const metaAhorro = Number(config.metaAhorro) || 0;
-  const t = totalesDelMes(mesKey);
-  const disponibleGasto = Math.max(0, t.ingreso - metaAhorro);
+// (ingreso del periodo − meta de ahorro) según qué tanto has gastado por
+// categoría históricamente, con un piso parejo para las que no usas aún.
+// Si editas una categoría a mano, el resto se reacomoda solo entre las que
+// siguen en automático, para que la suma de las 7 siempre dé exacto el
+// presupuesto disponible. ---
+function calcularPresupuesto(modo) {
+  const periodo = periodoDe(hoyISO(), modo);
+  const metaAhorroMensual = Number(config.metaAhorro) || 0;
+  const metaAhorroPeriodo = modo === 'quincena' ? metaAhorroMensual / 2 : metaAhorroMensual;
 
+  let ingresoPeriodo = 0;
+  gastos.forEach(function(g) {
+    if (g.tipo !== 'ingreso') return;
+    const p = periodoDe(g.fecha, modo);
+    if (p && p.key === periodo.key) ingresoPeriodo += Number(g.monto) || 0;
+  });
+  const disponibleGasto = Math.max(0, ingresoPeriodo - metaAhorroPeriodo);
+
+  // historial de gasto por categoría, de todo el tiempo, fuera del periodo actual
   const historial = {};
   let totalHist = 0;
   gastos.forEach(function(g) {
     if (g.tipo !== 'gasto' || !g.categoria) return;
-    if (mesKeyDe(g.fecha) === mesKey) return;
+    const p = periodoDe(g.fecha, modo);
+    if (p && p.key === periodo.key) return;
     historial[g.categoria] = (historial[g.categoria] || 0) + (Number(g.monto) || 0);
     totalHist += Number(g.monto) || 0;
   });
 
-  const overrides = (config.categoriaOverrides && config.categoriaOverrides[mesKey]) || {};
   const gastadoPorCat = {};
   CATEGORIAS.forEach(function(c) { gastadoPorCat[c] = 0; });
   gastos.forEach(function(g) {
-    if (g.tipo !== 'gasto' || mesKeyDe(g.fecha) !== mesKey) return;
+    if (g.tipo !== 'gasto') return;
+    const p = periodoDe(g.fecha, modo);
+    if (!p || p.key !== periodo.key) return;
     if (gastadoPorCat.hasOwnProperty(g.categoria)) gastadoPorCat[g.categoria] += Number(g.monto) || 0;
   });
 
-  const filas = CATEGORIAS.map(function(c) {
-    let sugerido;
-    if (totalHist > 0) {
-      const prop = 0.7 * ((historial[c] || 0) / totalHist) + 0.3 * (1 / CATEGORIAS.length);
-      sugerido = Math.round(disponibleGasto * prop);
-    } else {
-      sugerido = Math.round(disponibleGasto / CATEGORIAS.length);
-    }
-    const tieneManual = overrides.hasOwnProperty(c);
-    const limite = tieneManual ? Number(overrides[c]) : sugerido;
-    return { cat: c, limite: limite, sugerido: sugerido, gastado: gastadoPorCat[c], manual: tieneManual };
+  const overrideKey = modo + ':' + periodo.key;
+  const overrides = (config.categoriaOverrides && config.categoriaOverrides[overrideKey]) || {};
+
+  const pesoBase = {};
+  CATEGORIAS.forEach(function(c) {
+    pesoBase[c] = totalHist > 0
+      ? 0.7 * ((historial[c] || 0) / totalHist) + 0.3 * (1 / CATEGORIAS.length)
+      : 1 / CATEGORIAS.length;
   });
 
-  return { mesKey: mesKey, metaAhorro: metaAhorro, disponibleGasto: disponibleGasto, filas: filas, ingresoMes: t.ingreso };
+  const automaticas = CATEGORIAS.filter(function(c) { return !overrides.hasOwnProperty(c); });
+  const sumaManual = CATEGORIAS.reduce(function(s, c) {
+    return overrides.hasOwnProperty(c) ? s + Number(overrides[c]) : s;
+  }, 0);
+  const restante = Math.max(0, disponibleGasto - sumaManual);
+  const pesoAutoTotal = automaticas.reduce(function(s, c) { return s + pesoBase[c]; }, 0);
+
+  const filas = CATEGORIAS.map(function(c) {
+    let limite;
+    if (overrides.hasOwnProperty(c)) {
+      limite = Number(overrides[c]);
+    } else if (pesoAutoTotal > 0) {
+      limite = Math.round(restante * (pesoBase[c] / pesoAutoTotal));
+    } else {
+      limite = 0;
+    }
+    return { cat: c, limite: limite, gastado: gastadoPorCat[c], manual: overrides.hasOwnProperty(c) };
+  });
+
+  return {
+    modo: modo, periodoLabel: periodo.label, overrideKey: overrideKey,
+    metaAhorroPeriodo: metaAhorroPeriodo, disponibleGasto: disponibleGasto, filas: filas
+  };
 }
 
 function renderPresupuesto() {
@@ -1288,8 +1341,10 @@ function renderPresupuesto() {
   setupCard.style.display = 'none';
   card.style.display = 'block';
 
-  const p = calcularPresupuesto();
-  document.getElementById('meta-ahorro-txt').textContent = fmtCompact(p.metaAhorro);
+  const p = calcularPresupuesto(modoPresupuesto);
+  document.getElementById('meta-ahorro-txt').textContent = fmtCompact(Number(config.metaAhorro) || 0);
+  document.getElementById('presupuesto-resumen').textContent =
+    'Tienes ' + fmt(p.disponibleGasto) + ' para gastar en ' + (modoPresupuesto === 'quincena' ? 'esta quincena' : p.periodoLabel) + '.';
 
   const list = document.getElementById('presupuesto-list');
   list.innerHTML = p.filas.map(function(f) {
@@ -1297,7 +1352,7 @@ function renderPresupuesto() {
     const over = f.gastado > f.limite;
     return '<div class="budget-row" data-cat="' + f.cat + '">' +
       '<div class="budget-row-top">' +
-        '<span class="budget-cat">' + etiquetasCat[f.cat] + '</span>' +
+        '<span class="budget-cat">' + etiquetasCat[f.cat] + (f.manual ? ' •' : '') + '</span>' +
         '<span class="budget-amt"><b>' + fmtCompact(f.gastado) + '</b> de ' + fmtCompact(f.limite) + '</span>' +
       '</div>' +
       '<div class="budget-bar"><div class="budget-bar-fill' + (over ? ' over' : '') + '" style="width:' + pct + '%"></div></div>' +
@@ -1329,11 +1384,12 @@ function guardarOverrides() {
 
 function abrirEditarCategoria(cat) {
   categoriaEnEdicion = cat;
-  const p = calcularPresupuesto();
+  const p = calcularPresupuesto(modoPresupuesto);
   const fila = p.filas.find(function(f) { return f.cat === cat; });
   document.getElementById('cat-titulo').textContent = etiquetasCat[cat];
   document.getElementById('cat-info').textContent =
-    'Llevas gastado ' + fmt(fila.gastado) + ' este mes. Sugerido automático: ' + fmt(fila.sugerido) + '.';
+    'Llevas gastado ' + fmt(fila.gastado) + ' en ' + p.periodoLabel + '. ' +
+    (fila.manual ? 'Este límite lo pusiste tú a mano.' : 'Este límite lo calculó Kashly automáticamente.');
   document.getElementById('cat-monto').value = fila.limite;
   document.getElementById('overlay-cat').classList.add('show');
 }
@@ -1344,9 +1400,9 @@ document.getElementById('overlay-cat').addEventListener('click', function(e) {
   if (e.target.id === 'overlay-cat') this.classList.remove('show');
 });
 document.getElementById('cat-auto').addEventListener('click', function() {
-  const p = calcularPresupuesto();
-  if (config.categoriaOverrides && config.categoriaOverrides[p.mesKey]) {
-    delete config.categoriaOverrides[p.mesKey][categoriaEnEdicion];
+  const p = calcularPresupuesto(modoPresupuesto);
+  if (config.categoriaOverrides && config.categoriaOverrides[p.overrideKey]) {
+    delete config.categoriaOverrides[p.overrideKey][categoriaEnEdicion];
   }
   guardarOverrides();
   renderPresupuesto();
@@ -1356,16 +1412,19 @@ document.getElementById('cat-auto').addEventListener('click', function() {
 document.getElementById('cat-guardar').addEventListener('click', function() {
   const nuevo = parseFloat(document.getElementById('cat-monto').value);
   if (isNaN(nuevo) || nuevo < 0) { showToast('Monto inválido', true); return; }
-  const p = calcularPresupuesto();
-  const totalOtros = p.filas.filter(function(f) { return f.cat !== categoriaEnEdicion; })
-    .reduce(function(s, f) { return s + f.limite; }, 0);
-  if (totalOtros + nuevo > p.disponibleGasto + 0.5) {
-    showToast('Excede tu presupuesto por ' + fmt(totalOtros + nuevo - p.disponibleGasto), true);
+  const p = calcularPresupuesto(modoPresupuesto);
+  const overrides = (config.categoriaOverrides && config.categoriaOverrides[p.overrideKey]) || {};
+  let sumaOtrosManuales = 0;
+  Object.keys(overrides).forEach(function(c) {
+    if (c !== categoriaEnEdicion) sumaOtrosManuales += Number(overrides[c]);
+  });
+  if (sumaOtrosManuales + nuevo > p.disponibleGasto + 0.5) {
+    showToast('Excede tu presupuesto por ' + fmt(sumaOtrosManuales + nuevo - p.disponibleGasto), true);
     return;
   }
   if (!config.categoriaOverrides) config.categoriaOverrides = {};
-  if (!config.categoriaOverrides[p.mesKey]) config.categoriaOverrides[p.mesKey] = {};
-  config.categoriaOverrides[p.mesKey][categoriaEnEdicion] = nuevo;
+  if (!config.categoriaOverrides[p.overrideKey]) config.categoriaOverrides[p.overrideKey] = {};
+  config.categoriaOverrides[p.overrideKey][categoriaEnEdicion] = nuevo;
   guardarOverrides();
   renderPresupuesto();
   document.getElementById('overlay-cat').classList.remove('show');
