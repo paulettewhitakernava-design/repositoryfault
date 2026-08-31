@@ -69,6 +69,7 @@ button, input, .item, .nav-btn { touch-action: manipulation; }
 
 /* ---- Header ---- */
 .header { margin-bottom: 22px; }
+.header-row { display: flex; align-items: flex-end; justify-content: space-between; }
 .eyebrow { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; animation: blurIn 0.9s ease both; }
 h1 { font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 26px; margin: 0; letter-spacing: -0.01em; animation: blurIn 0.9s ease 0.08s both; }
 
@@ -87,8 +88,8 @@ h1 { font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 26px
   -webkit-backdrop-filter: blur(10px);
 }
 .card-lbl { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
-.card-num {
-  font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 44px;
+.card-lbl-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.card-num { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 44px;
   letter-spacing: -0.03em; line-height: 1;
   background: linear-gradient(90deg, var(--ink), var(--accent-2) 130%);
   -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
@@ -102,6 +103,22 @@ h1 { font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 26px
 .card-split div span:last-child { display: block; font-size: 11px; color: var(--muted); margin-top: 3px; }
 .up { color: var(--accent-2); }
 .down { color: var(--danger); }
+
+.icon-btn {
+  width: 28px; height: 28px; border-radius: 50%; border: none; flex-shrink: 0;
+  background: rgba(255,255,255,0.08); color: var(--muted);
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.icon-btn:active { transform: scale(0.9); }
+.icon-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+.info-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 50%;
+  background: rgba(255,255,255,0.12); color: var(--ink);
+  font-size: 11px; font-weight: 700; border: none; cursor: pointer;
+  vertical-align: middle; margin-left: 4px; padding: 0;
+}
 
 /* ---- Mini preview (Inicio) ---- */
 .preview-card { cursor: pointer; }
@@ -125,6 +142,23 @@ h1 { font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 26px
 .chart-tip b { color: var(--ink); font-weight: 600; }
 .chart-empty { padding: 28px 0 6px; text-align: center; color: var(--muted); font-size: 13px; }
 .bar-group { cursor: pointer; }
+
+.filter-btn {
+  width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line);
+  background: rgba(255,255,255,0.06); color: var(--ink); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.filter-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+.filter-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 0; border-bottom: 1px solid var(--line); }
+.filter-row:last-child { border-bottom: none; }
+.filter-row span { font-size: 14px; }
+.switch { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
+.switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+.switch .slider { position: absolute; inset: 0; background: rgba(255,255,255,0.14); border-radius: 999px; transition: .2s; cursor: pointer; }
+.switch .slider:before { content: ""; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; transition: .2s; }
+.switch input:checked + .slider { background: var(--accent-2); }
+.switch input:checked + .slider:before { transform: translateX(18px); }
+.switch input:disabled + .slider { opacity: 0.5; }
 
 .period-toggle {
   position: relative;
@@ -150,6 +184,7 @@ h1 { font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 26px
 .period-toggle button[aria-selected="true"] { color: #2a1608; }
 
 .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+.stat-row-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
 .stat-tile { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 14px 12px; }
 .stat-tile .stat-lbl { font-size: 9.5px; letter-spacing: 0.04em; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; line-height: 1.3; }
 .stat-tile .stat-val { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 600; }
@@ -162,24 +197,33 @@ h1 { font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 26px
 form { display: grid; gap: 14px; margin-bottom: 8px; }
 
 /* ---- Segmented tab control ---- */
+.toggle-row { display: flex; gap: 8px; align-items: stretch; margin-bottom: 6px; }
+.toggle-row .type-toggle { flex: 1; margin-bottom: 0; }
+.btn-saldo {
+  flex-shrink: 0; padding: 0 16px; border-radius: 999px; border: 1px solid var(--line);
+  background: rgba(255,255,255,0.05); color: var(--ink); font-size: 12px; font-weight: 700;
+  font-family: 'Manrope', sans-serif; cursor: pointer; white-space: nowrap;
+}
+.btn-saldo:active { transform: scale(0.96); }
+
 .type-toggle {
   position: relative;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 4px;
   padding: 4px;
   background: rgba(255,255,255,0.04);
   border: 1px solid var(--line);
   border-radius: 999px;
-  margin-bottom: 6px;
 }
+.type-toggle.type-toggle-3 { grid-template-columns: repeat(3, 1fr); }
 .tab-indicator {
   position: absolute;
   top: 4px; bottom: 4px; left: 0;
-  width: calc((100% - 8px) / 3);
+  width: calc((100% - 8px) / 2);
   border-radius: 999px;
   background: var(--danger);
-  transition: transform 0.28s cubic-bezier(.65,0,.35,1), background-color 0.28s ease;
+  transition: transform 0.28s cubic-bezier(.65,0,.35,1), background-color 0.28s ease, width 0.28s ease;
   z-index: 0;
 }
 .type-toggle button {
@@ -356,7 +400,7 @@ select option { background: var(--card-solid); color: var(--ink); }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); animation: pop 0.25s ease; }
 .toast.error { background: var(--danger); color: #2a0d0d; }
 
-/* ---- Edit bottom sheet ---- */
+/* ---- Bottom sheets ---- */
 .overlay {
   position: fixed; inset: 0; background: var(--overlay);
   z-index: 40; display: none; align-items: flex-end; justify-content: center;
@@ -365,6 +409,8 @@ select option { background: var(--card-solid); color: var(--ink); }
 .overlay.show { display: flex; }
 .sheet {
   width: 100%; max-width: 480px;
+  max-height: 85vh;
+  overflow-y: auto;
   background: var(--card-solid);
   border: 1px solid var(--line);
   border-bottom: none;
@@ -381,6 +427,7 @@ select option { background: var(--card-solid); color: var(--ink); }
 }
 .sheet form { margin-bottom: 0; gap: 16px; }
 .sheet-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+.sheet-text { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 4px; }
 
 /* ---- Presupuesto por categoría ---- */
 .budget-row { padding: 12px 0; cursor: pointer; }
@@ -391,7 +438,20 @@ select option { background: var(--card-solid); color: var(--ink); }
 .budget-bar { height: 6px; border-radius: 999px; background: rgba(255,255,255,0.07); overflow: hidden; }
 .budget-bar-fill { height: 100%; border-radius: 999px; background: var(--accent-2); transition: width 0.3s ease; }
 .budget-bar-fill.over { background: var(--danger); }
-.sheet-text { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 4px; }
+
+.budget-alert {
+  background: rgba(255,138,138,0.1); border: 1px solid rgba(255,138,138,0.28);
+  border-radius: 14px; padding: 12px 14px; font-size: 12.5px; color: var(--ink);
+  line-height: 1.5; margin-top: 10px;
+}
+.budget-alert b { color: var(--danger); }
+.budget-alert .btn-ghost { margin-top: 10px; }
+
+/* ---- Ajustes ---- */
+.ajustes-cat-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.ajustes-cat-chip { padding: 8px 14px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px solid var(--line); font-size: 12px; }
+.acerca-txt { font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+.campo-oculto { display: none; }
 
 /* ---- Bottom nav ---- */
 .bottom-nav {
@@ -405,8 +465,9 @@ select option { background: var(--card-solid); color: var(--ink); }
   display: flex;
   align-items: flex-start;
   z-index: 25;
+  overflow: visible;
 }
-.nav-inner { max-width: 480px; margin: 0 auto; width: 100%; display: flex; padding-top: 10px; }
+.nav-inner { max-width: 480px; margin: 0 auto; width: 100%; display: flex; padding-top: 10px; overflow: visible; }
 .nav-btn {
   flex: 1; background: none; border: none; color: var(--muted);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
@@ -418,6 +479,16 @@ select option { background: var(--card-solid); color: var(--ink); }
 .nav-btn.active { color: var(--ink); }
 .nav-btn.active svg { stroke: var(--accent); }
 
+.nav-btn.fab { justify-content: flex-start; }
+.fab-circle {
+  width: 54px; height: 54px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent), #ff5c9e);
+  display: flex; align-items: center; justify-content: center;
+  margin-top: -30px;
+  box-shadow: 0 10px 26px -8px rgba(255,138,92,0.65);
+}
+.fab-circle svg { width: 24px; height: 24px; stroke: #1c0f08; stroke-width: 2.4; }
+
 /* ---- Splash ---- */
 .splash {
   position: fixed; inset: 0; z-index: 100;
@@ -427,17 +498,6 @@ select option { background: var(--card-solid); color: var(--ink); }
 }
 .splash.hide { opacity: 0; pointer-events: none; }
 .splash-mark { width: 260px; height: auto; animation: rise 0.5s ease both; }
-
-/* ---- Barra de perfil ---- */
-.profile-btn {
-  position: fixed; top: calc(14px + var(--safe-t)); right: 20px; z-index: 26;
-  width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line);
-  background: rgba(255,255,255,0.06); color: var(--ink);
-  font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 14px;
-  display: flex; align-items: center; justify-content: center; cursor: pointer;
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-}
-.profile-btn:active { transform: scale(0.93); }
 </style>
 </head>
 <body>
@@ -445,8 +505,6 @@ select option { background: var(--card-solid); color: var(--ink); }
 <div class="splash" id="splash">
   <img class="splash-mark" src="icon-512.png" alt="Kashly">
 </div>
-
-<button type="button" class="profile-btn" id="profile-btn">?</button>
 
 <div id="scroll">
 
@@ -458,7 +516,12 @@ select option { background: var(--card-solid); color: var(--ink); }
   </div>
 
   <div class="card">
-    <div class="card-lbl">Total ahorrado</div>
+    <div class="card-lbl-row">
+      <div class="card-lbl" style="margin-bottom:0">Total ahorrado</div>
+      <button type="button" class="icon-btn" id="btn-editar-saldo" aria-label="Editar saldo ahorrado">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      </button>
+    </div>
     <div class="card-num" id="sum-ahorro">$0</div>
     <div class="card-split">
       <div><span class="up" id="sum-ingreso">$0</span><span>Ingresos</span></div>
@@ -477,10 +540,8 @@ select option { background: var(--card-solid); color: var(--ink); }
 
   <div class="card" id="presupuesto-setup-card" style="display:none">
     <div class="card-lbl">Presupuesto por categoría</div>
-    <div style="font-size:12.5px;color:var(--muted);margin:6px 0 14px;line-height:1.5">Define cuánto quieres ahorrar al mes y Kashly reparte lo demás entre tus categorías de gasto, automáticamente.</div>
-    <label class="field-label" for="meta-ahorro-input">Meta de ahorro mensual</label>
-    <input type="number" id="meta-ahorro-input" placeholder="0.00" step="0.01">
-    <button type="button" class="btn-add" id="btn-guardar-meta" style="margin-top:16px">Guardar</button>
+    <div style="font-size:12.5px;color:var(--muted);margin:6px 0 14px;line-height:1.5">Configura tu meta de ahorro y tu frecuencia de pago en Ajustes para que Kashly reparta tu presupuesto automáticamente.</div>
+    <button type="button" class="btn-add" id="btn-ir-ajustes-presu">Ir a Ajustes</button>
   </div>
 
   <div class="card" id="presupuesto-card" style="display:none">
@@ -495,6 +556,7 @@ select option { background: var(--card-solid); color: var(--ink); }
     </div>
     <div class="sheet-text" id="presupuesto-resumen" style="margin-top:12px"></div>
     <div id="presupuesto-list"></div>
+    <div id="presupuesto-alertas"></div>
   </div>
 
   <div class="section-row">
@@ -512,11 +574,18 @@ select option { background: var(--card-solid); color: var(--ink); }
 <!-- ===== ANALISIS ===== -->
 <div class="screen" id="screen-analisis">
   <div class="header">
-    <div class="eyebrow">Analítica</div>
-    <h1>Análisis</h1>
+    <div class="header-row">
+      <div>
+        <div class="eyebrow">Analítica</div>
+        <h1>Análisis</h1>
+      </div>
+      <button type="button" class="filter-btn" id="btn-filtros" aria-label="Filtros">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M8 12h8"/><path d="M11 18h2"/></svg>
+      </button>
+    </div>
   </div>
 
-  <div class="card">
+  <div class="card" id="chart-section-gastosingresos">
     <div class="chart-head">
       <div class="card-lbl" style="margin-bottom:0">Gastos vs ingresos</div>
       <div class="legend">
@@ -534,7 +603,22 @@ select option { background: var(--card-solid); color: var(--ink); }
   </div>
 
   <div class="stat-row" id="stat-row"></div>
-  <div class="insight" id="insight"></div>
+  <div class="insight" id="insight" style="margin-bottom:20px"></div>
+
+  <div class="card" id="chart-section-categoria">
+    <div class="card-lbl">Gasto por categoría</div>
+    <div class="chart-wrap" id="cat-chart-wrap" style="margin-top:10px"></div>
+  </div>
+
+  <div class="card" id="chart-section-promedios">
+    <div class="card-lbl">Promedio de gasto</div>
+    <div class="stat-row-2" id="promedios-wrap" style="margin-top:10px"></div>
+  </div>
+
+  <div class="card" id="chart-section-ahorro">
+    <div class="card-lbl">Ahorro a través del tiempo</div>
+    <div class="chart-wrap" id="ahorro-chart-wrap" style="margin-top:10px"></div>
+  </div>
 </div>
 
 <!-- ===== AGREGAR ===== -->
@@ -545,11 +629,13 @@ select option { background: var(--card-solid); color: var(--ink); }
   </div>
 
   <form id="form-gasto">
-    <div class="type-toggle" role="tablist" aria-label="Tipo de movimiento" id="toggle-add">
-      <div class="tab-indicator"></div>
-      <button type="button" role="tab" data-type="gasto" aria-selected="true">↓ Gasto</button>
-      <button type="button" role="tab" data-type="ingreso" aria-selected="false">↑ Ingreso</button>
-      <button type="button" role="tab" data-type="ahorro" aria-selected="false">● Ahorro</button>
+    <div class="toggle-row">
+      <div class="type-toggle" role="tablist" aria-label="Tipo de movimiento" id="toggle-add">
+        <div class="tab-indicator"></div>
+        <button type="button" role="tab" data-type="gasto" aria-selected="true">↓ Gasto</button>
+        <button type="button" role="tab" data-type="ingreso" aria-selected="false">↑ Ingreso</button>
+      </div>
+      <button type="button" class="btn-saldo" id="btn-saldo-agregar">Saldo Ahorrado</button>
     </div>
 
     <div id="campo-categoria-add" style="display:none">
@@ -574,6 +660,86 @@ select option { background: var(--card-solid); color: var(--ink); }
   </form>
 </div>
 
+<!-- ===== AJUSTES ===== -->
+<div class="screen" id="screen-ajustes">
+  <div class="header">
+    <div class="eyebrow">Tu cuenta</div>
+    <h1>Ajustes</h1>
+  </div>
+
+  <div class="card">
+    <div class="card-lbl">Perfil</div>
+    <label class="field-label" for="perfil-nombre" style="margin-top:10px">Nombre</label>
+    <input type="text" id="perfil-nombre" placeholder="Tu nombre">
+    <label class="field-label" for="perfil-correo" style="margin-top:14px">Correo</label>
+    <input type="email" id="perfil-correo" placeholder="tucorreo@ejemplo.com">
+    <button type="button" class="btn-add" id="perfil-guardar" style="margin-top:16px">Guardar</button>
+  </div>
+
+  <div class="card">
+    <div class="card-lbl">Meta de ahorro</div>
+    <label class="field-label" for="meta-ahorro-input" style="margin-top:10px">Meta de ahorro mensual</label>
+    <input type="number" id="meta-ahorro-input" placeholder="0.00" step="0.01">
+
+    <label class="field-label" for="frecuencia-pago" style="margin-top:14px">¿Cómo es tu fecha de pago?</label>
+    <select id="frecuencia-pago">
+      <option value="quincenal">Quincenal</option>
+      <option value="semanal">Semanal</option>
+      <option value="mensual">Mensual</option>
+    </select>
+
+    <div id="campo-frecuencia-quincenal" style="margin-top:14px">
+      <div class="row2">
+        <div>
+          <label class="field-label" for="quincena-dia1">1ra quincena empieza el día</label>
+          <input type="number" id="quincena-dia1" min="1" max="31" placeholder="1">
+        </div>
+        <div>
+          <label class="field-label" for="quincena-dia2">2da quincena empieza el día</label>
+          <input type="number" id="quincena-dia2" min="1" max="31" placeholder="16">
+        </div>
+      </div>
+    </div>
+
+    <div id="campo-frecuencia-semanal" class="campo-oculto" style="margin-top:14px">
+      <label class="field-label" for="semana-dia">Tu semana de pago empieza el</label>
+      <select id="semana-dia">
+        <option value="1">Lunes</option>
+        <option value="2">Martes</option>
+        <option value="3">Miércoles</option>
+        <option value="4">Jueves</option>
+        <option value="5">Viernes</option>
+        <option value="6">Sábado</option>
+        <option value="0">Domingo</option>
+      </select>
+    </div>
+
+    <button type="button" class="btn-add" id="btn-guardar-meta-ajustes" style="margin-top:16px">Guardar</button>
+  </div>
+
+  <div class="card">
+    <div class="card-lbl">Saldo ahorrado <button type="button" class="info-btn" id="btn-info-saldo">?</button></div>
+    <label class="field-label" for="saldo-ahorrado-input" style="margin-top:10px">Dinero que ya tenías ahorrado antes de usar Kashly</label>
+    <input type="number" id="saldo-ahorrado-input" placeholder="0.00" step="0.01">
+    <button type="button" class="btn-add" id="btn-guardar-saldo-ajustes" style="margin-top:16px">Guardar</button>
+  </div>
+
+  <div class="card">
+    <div class="card-lbl">Categorías</div>
+    <div class="ajustes-cat-list" id="ajustes-categorias"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-lbl">Qué mostrar en Análisis</div>
+    <div id="ajustes-filtros" style="margin-top:6px"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-lbl">Acerca de</div>
+    <div class="acerca-txt">Kashly · v1.0<br>Tu control de gastos, ingresos y presupuesto.</div>
+  </div>
+</div>
+
 </div>
 
 <div class="toast" id="toast"></div>
@@ -586,7 +752,7 @@ select option { background: var(--card-solid); color: var(--ink); }
       <button type="button" class="sheet-close" id="sheet-close" aria-label="Cerrar">✕</button>
     </div>
     <form id="form-edit">
-      <div class="type-toggle" role="tablist" aria-label="Tipo de movimiento" id="toggle-edit">
+      <div class="type-toggle type-toggle-3" role="tablist" aria-label="Tipo de movimiento" id="toggle-edit">
         <div class="tab-indicator"></div>
         <button type="button" role="tab" data-type="gasto" aria-selected="true">↓ Gasto</button>
         <button type="button" role="tab" data-type="ingreso" aria-selected="false">↑ Ingreso</button>
@@ -626,7 +792,7 @@ select option { background: var(--card-solid); color: var(--ink); }
       <button type="button" class="sheet-close" id="cat-close" aria-label="Cerrar">✕</button>
     </div>
     <div class="sheet-text" id="cat-info"></div>
-    <label class="field-label" for="cat-monto">Límite mensual</label>
+    <label class="field-label" for="cat-monto">Límite del periodo</label>
     <input type="number" id="cat-monto" step="0.01" inputmode="decimal">
     <div class="sheet-actions">
       <button type="button" class="btn-ghost" id="cat-auto" style="margin-top:0">Automático</button>
@@ -635,11 +801,23 @@ select option { background: var(--card-solid); color: var(--ink); }
   </div>
 </div>
 
+<div class="overlay" id="overlay-cubrir">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <h2>Cubrir exceso</h2>
+      <button type="button" class="sheet-close" id="cubrir-close" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="sheet-text" id="cubrir-info"></div>
+    <div id="cubrir-lista"></div>
+  </div>
+</div>
+
 <div class="overlay" id="overlay-cierre">
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-head">
-      <h2>Cierre de mes</h2>
+      <h2>Cierre de periodo</h2>
     </div>
     <div class="sheet-text" id="cierre-texto"></div>
     <div class="sheet-actions">
@@ -649,18 +827,39 @@ select option { background: var(--card-solid); color: var(--ink); }
   </div>
 </div>
 
-<div class="overlay" id="overlay-perfil">
+<div class="overlay" id="overlay-saldo">
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-head">
-      <h2>Tu cuenta</h2>
-      <button type="button" class="sheet-close" id="perfil-close" aria-label="Cerrar">✕</button>
+      <h2>Saldo ahorrado <button type="button" class="info-btn" id="btn-info-saldo-2">?</button></h2>
+      <button type="button" class="sheet-close" id="saldo-close" aria-label="Cerrar">✕</button>
     </div>
-    <label class="field-label" for="perfil-nombre">Nombre</label>
-    <input type="text" id="perfil-nombre" placeholder="Tu nombre">
-    <label class="field-label" for="perfil-correo" style="margin-top:14px">Correo</label>
-    <input type="email" id="perfil-correo" placeholder="tucorreo@ejemplo.com">
-    <button type="button" class="btn-add" id="perfil-guardar" style="margin-top:16px">Guardar</button>
+    <div class="sheet-text">Dinero que ya tenías ahorrado antes de usar Kashly. No afecta tus ingresos, gastos ni disponible.</div>
+    <label class="field-label" for="saldo-monto">Monto</label>
+    <input type="number" id="saldo-monto" step="0.01" inputmode="decimal">
+    <button type="button" class="btn-add" id="saldo-guardar" style="margin-top:16px">Guardar</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay-info">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <h2 id="info-titulo">Info</h2>
+      <button type="button" class="sheet-close" id="info-close" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="sheet-text" id="info-texto"></div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay-filtros">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <h2>Filtrar gráficas</h2>
+      <button type="button" class="sheet-close" id="filtros-close" aria-label="Cerrar">✕</button>
+    </div>
+    <div id="filtros-lista"></div>
   </div>
 </div>
 
@@ -674,9 +873,14 @@ select option { background: var(--card-solid); color: var(--ink); }
       <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/></svg>
       <span>Análisis</span>
     </button>
-    <button class="nav-btn" data-screen="agregar">
-      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
-      <span>Agregar</span>
+    <button class="nav-btn fab" data-screen="agregar" aria-label="Agregar">
+      <span class="fab-circle">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      </span>
+    </button>
+    <button class="nav-btn" data-screen="ajustes">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 0 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 0 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1Z"/></svg>
+      <span>Ajustes</span>
     </button>
   </div>
 </nav>
@@ -711,12 +915,18 @@ const signos = { gasto: '−', ingreso: '+', ahorro: '→' };
 const iconos = { gasto: '↓', ingreso: '↑', ahorro: '●' };
 const mesesCortos = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 const mesesLargos = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const diasSemana = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 
 const CATEGORIAS = ['alimentacion', 'suscripciones', 'transporte', 'salud', 'educacion', 'cuidado_personal', 'entretenimiento'];
 const etiquetasCat = {
   alimentacion: 'Alimentación', suscripciones: 'Suscripciones', transporte: 'Transporte',
   salud: 'Salud', educacion: 'Educación', cuidado_personal: 'Cuidado personal', entretenimiento: 'Entretenimiento'
 };
+const FILTROS_DEF = [
+  { key: 'categoria', label: 'Gasto por categoría', seccion: 'chart-section-categoria' },
+  { key: 'promedios', label: 'Promedio de gasto', seccion: 'chart-section-promedios' },
+  { key: 'ahorro', label: 'Ahorro a través del tiempo', seccion: 'chart-section-ahorro' }
+];
 let config = {};
 let categoriaEnEdicion = null;
 
@@ -728,6 +938,9 @@ CATEGORIAS.forEach(function(c) {
   opt2.value = c; opt2.textContent = etiquetasCat[c];
   document.getElementById('edit-categoria').appendChild(opt2);
 });
+document.getElementById('ajustes-categorias').innerHTML = CATEGORIAS.map(function(c) {
+  return '<span class="ajustes-cat-chip">' + etiquetasCat[c] + '</span>';
+}).join('');
 
 document.getElementById('fecha').valueAsDate = new Date();
 
@@ -767,6 +980,27 @@ function irA(pantalla) {
   document.querySelector('.nav-btn[data-screen="' + pantalla + '"]').click();
 }
 document.getElementById('preview-card').addEventListener('click', function() { irA('analisis'); });
+document.getElementById('btn-ir-ajustes-presu').addEventListener('click', function() { irA('ajustes'); });
+
+// --- Info genérico (sheets con "?") ---
+function mostrarInfo(titulo, texto) {
+  document.getElementById('info-titulo').textContent = titulo;
+  document.getElementById('info-texto').textContent = texto;
+  document.getElementById('overlay-info').classList.add('show');
+}
+document.getElementById('info-close').addEventListener('click', function() {
+  document.getElementById('overlay-info').classList.remove('show');
+});
+document.getElementById('overlay-info').addEventListener('click', function(e) {
+  if (e.target.id === 'overlay-info') this.classList.remove('show');
+});
+document.getElementById('btn-info-saldo').addEventListener('click', function() {
+  mostrarInfo('Saldo ahorrado', 'Dinero que ya tenías ahorrado antes de usar Kashly. No afecta tus ingresos, gastos ni disponible — se suma directo a tu Total ahorrado.');
+});
+document.getElementById('btn-info-saldo-2').addEventListener('click', function(e) {
+  e.stopPropagation();
+  mostrarInfo('Saldo ahorrado', 'Dinero que ya tenías ahorrado antes de usar Kashly. No afecta tus ingresos, gastos ni disponible — se suma directo a tu Total ahorrado.');
+});
 
 // --- Tabs: delegated listener, reutilizado por el form de agregar y la hoja de edición ---
 function crearToggle(containerEl, onChange) {
@@ -775,6 +1009,7 @@ function crearToggle(containerEl, onChange) {
   function set(tipo) {
     actual = tipo;
     const btn = containerEl.querySelector('button[data-type="' + tipo + '"]');
+    if (!btn) return;
     indicator.style.width = btn.offsetWidth + 'px';
     indicator.style.transform = 'translateX(' + btn.offsetLeft + 'px)';
     indicator.style.background = coloresTab[tipo];
@@ -805,33 +1040,153 @@ setTimeout(function() {
   document.getElementById('splash').classList.add('hide');
 }, 1100);
 
-// --- Botón de perfil ---
-document.getElementById('profile-btn').addEventListener('click', function() {
-  document.getElementById('perfil-nombre').value = config.perfilNombre || '';
-  document.getElementById('perfil-correo').value = config.perfilCorreo || '';
-  document.getElementById('overlay-perfil').classList.add('show');
-});
-document.getElementById('perfil-close').addEventListener('click', function() {
-  document.getElementById('overlay-perfil').classList.remove('show');
-});
-document.getElementById('overlay-perfil').addEventListener('click', function(e) {
-  if (e.target.id === 'overlay-perfil') this.classList.remove('show');
-});
+// --- Perfil (ahora vive en Ajustes) ---
 document.getElementById('perfil-guardar').addEventListener('click', function() {
   const nombre = document.getElementById('perfil-nombre').value.trim();
   const correo = document.getElementById('perfil-correo').value.trim();
   config.perfilNombre = nombre;
   config.perfilCorreo = correo;
-  actualizarBotonPerfil();
-  document.getElementById('overlay-perfil').classList.remove('show');
   showToast('Perfil guardado');
   apiPost({ action: 'set-config', key: 'perfilNombre', value: nombre });
   apiPost({ action: 'set-config', key: 'perfilCorreo', value: correo });
 });
-function actualizarBotonPerfil() {
-  const inicial = (config.perfilNombre || '').trim().charAt(0).toUpperCase();
-  document.getElementById('profile-btn').textContent = inicial || '?';
+
+// --- Saldo Ahorrado: mismo ajuste, dos accesos (Inicio y Agregar) ---
+function abrirSaldo() {
+  document.getElementById('saldo-monto').value = Number(config.saldoAhorrado) || 0;
+  document.getElementById('overlay-saldo').classList.add('show');
 }
+document.getElementById('btn-editar-saldo').addEventListener('click', abrirSaldo);
+document.getElementById('btn-saldo-agregar').addEventListener('click', abrirSaldo);
+document.getElementById('saldo-close').addEventListener('click', function() {
+  document.getElementById('overlay-saldo').classList.remove('show');
+});
+document.getElementById('overlay-saldo').addEventListener('click', function(e) {
+  if (e.target.id === 'overlay-saldo') this.classList.remove('show');
+});
+document.getElementById('saldo-guardar').addEventListener('click', function() {
+  const val = parseFloat(document.getElementById('saldo-monto').value);
+  if (isNaN(val) || val < 0) { showToast('Monto inválido', true); return; }
+  config.saldoAhorrado = val;
+  render();
+  showToast('Saldo ahorrado actualizado');
+  apiPost({ action: 'set-config', key: 'saldoAhorrado', value: val });
+  document.getElementById('overlay-saldo').classList.remove('show');
+});
+
+// --- Frecuencia de pago: mostrar/ocultar campos según selección ---
+document.getElementById('frecuencia-pago').addEventListener('change', function() {
+  actualizarCamposFrecuencia(this.value);
+});
+function actualizarCamposFrecuencia(freq) {
+  document.getElementById('campo-frecuencia-quincenal').classList.toggle('campo-oculto', freq !== 'quincenal');
+  document.getElementById('campo-frecuencia-semanal').classList.toggle('campo-oculto', freq !== 'semanal');
+}
+
+document.getElementById('btn-guardar-meta-ajustes').addEventListener('click', function() {
+  const val = parseFloat(document.getElementById('meta-ahorro-input').value);
+  if (isNaN(val) || val < 0) { showToast('Ingresa una meta válida', true); return; }
+  const freq = document.getElementById('frecuencia-pago').value;
+  config.metaAhorro = val;
+  config.frecuenciaPago = freq;
+  if (freq === 'quincenal') {
+    config.quincenaDia1 = parseInt(document.getElementById('quincena-dia1').value, 10) || 1;
+    config.quincenaDia2 = parseInt(document.getElementById('quincena-dia2').value, 10) || 16;
+  } else if (freq === 'semanal') {
+    config.semanaDia = parseInt(document.getElementById('semana-dia').value, 10);
+  }
+  actualizarTextosPeriodo();
+  render();
+  showToast('Meta guardada');
+  apiPost({ action: 'set-config', key: 'metaAhorro', value: val });
+  apiPost({ action: 'set-config', key: 'frecuenciaPago', value: freq });
+  apiPost({ action: 'set-config', key: 'quincenaDia1', value: config.quincenaDia1 || 1 });
+  apiPost({ action: 'set-config', key: 'quincenaDia2', value: config.quincenaDia2 || 16 });
+  apiPost({ action: 'set-config', key: 'semanaDia', value: config.semanaDia !== undefined ? config.semanaDia : 5 });
+});
+
+document.getElementById('btn-guardar-saldo-ajustes').addEventListener('click', function() {
+  const val = parseFloat(document.getElementById('saldo-ahorrado-input').value);
+  if (isNaN(val) || val < 0) { showToast('Monto inválido', true); return; }
+  config.saldoAhorrado = val;
+  render();
+  showToast('Saldo ahorrado actualizado');
+  apiPost({ action: 'set-config', key: 'saldoAhorrado', value: val });
+});
+
+document.getElementById('btn-editar-meta').addEventListener('click', function() { irA('ajustes'); });
+
+function cargarFormAjustes() {
+  document.getElementById('perfil-nombre').value = config.perfilNombre || '';
+  document.getElementById('perfil-correo').value = config.perfilCorreo || '';
+  document.getElementById('meta-ahorro-input').value = config.metaAhorro || '';
+  const freq = config.frecuenciaPago || 'quincenal';
+  document.getElementById('frecuencia-pago').value = freq;
+  actualizarCamposFrecuencia(freq);
+  document.getElementById('quincena-dia1').value = config.quincenaDia1 || 1;
+  document.getElementById('quincena-dia2').value = config.quincenaDia2 || 16;
+  document.getElementById('semana-dia').value = config.semanaDia !== undefined ? config.semanaDia : 5;
+  document.getElementById('saldo-ahorrado-input').value = Number(config.saldoAhorrado) || 0;
+}
+
+function nombreFrecuenciaCorta() {
+  const freq = config.frecuenciaPago || 'quincenal';
+  if (freq === 'semanal') return 'Semanal';
+  if (freq === 'mensual') return 'Mensual';
+  return 'Quincenal';
+}
+function actualizarTextosPeriodo() {
+  const label = nombreFrecuenciaCorta();
+  const btn1 = document.querySelector('#toggle-periodo button[data-periodo="quincena"]');
+  const btn2 = document.querySelector('#toggle-periodo-presu button[data-periodo="quincena"]');
+  if (btn1) btn1.textContent = label;
+  if (btn2) btn2.textContent = label;
+}
+
+// --- Filtros de gráficas en Análisis (icono en Análisis + sección en Ajustes) ---
+function filtrosActuales() {
+  const f = config.analisisFiltros || {};
+  const out = {};
+  FILTROS_DEF.forEach(function(d) { out[d.key] = f[d.key] !== false; });
+  return out;
+}
+function aplicarFiltros() {
+  const f = filtrosActuales();
+  FILTROS_DEF.forEach(function(d) {
+    const el = document.getElementById(d.seccion);
+    if (el) el.style.display = f[d.key] ? 'block' : 'none';
+  });
+}
+function renderFiltrosUI() {
+  const f = filtrosActuales();
+  const html = FILTROS_DEF.map(function(d) {
+    return '<div class="filter-row"><span>' + d.label + '</span><label class="switch"><input type="checkbox" data-filtro="' + d.key + '"' + (f[d.key] ? ' checked' : '') + '><span class="slider"></span></label></div>';
+  }).join('');
+  document.getElementById('filtros-lista').innerHTML = html;
+  document.getElementById('ajustes-filtros').innerHTML = html.replace(/data-filtro/g, 'data-filtro-ajustes');
+  document.querySelectorAll('[data-filtro]').forEach(function(chk) {
+    chk.addEventListener('change', function() { onCambioFiltro(chk.dataset.filtro, chk.checked); });
+  });
+  document.querySelectorAll('[data-filtro-ajustes]').forEach(function(chk) {
+    chk.addEventListener('change', function() { onCambioFiltro(chk.dataset.filtroAjustes, chk.checked); });
+  });
+}
+function onCambioFiltro(key, checked) {
+  if (!config.analisisFiltros) config.analisisFiltros = {};
+  config.analisisFiltros[key] = checked;
+  aplicarFiltros();
+  renderFiltrosUI();
+  apiPost({ action: 'set-config', key: 'analisisFiltros', value: config.analisisFiltros });
+}
+document.getElementById('btn-filtros').addEventListener('click', function() {
+  document.getElementById('overlay-filtros').classList.add('show');
+});
+document.getElementById('filtros-close').addEventListener('click', function() {
+  document.getElementById('overlay-filtros').classList.remove('show');
+});
+document.getElementById('overlay-filtros').addEventListener('click', function(e) {
+  if (e.target.id === 'overlay-filtros') this.classList.remove('show');
+});
 
 // --- Toggle quincena / mensual: reutilizado en Análisis y en Presupuesto ---
 function crearTogglePeriodo(toggleEl, indicatorEl, onChange) {
@@ -857,7 +1212,7 @@ function crearTogglePeriodo(toggleEl, indicatorEl, onChange) {
 const togglePeriodo = crearTogglePeriodo(
   document.getElementById('toggle-periodo'),
   document.getElementById('period-indicator'),
-  function(p) { modoAnalisis = p; renderAnalisis(); }
+  function(p) { modoAnalisis = p; renderAnalisis(); renderGastoPorCategoria(); }
 );
 togglePeriodo.set('quincena');
 
@@ -882,9 +1237,12 @@ function cargarDatos() {
     if (resMov && resMov.ok) {
       gastos = resMov.data || [];
       config = (resCfg && resCfg.ok && resCfg.data) || {};
-      actualizarBotonPerfil();
+      cargarFormAjustes();
+      actualizarTextosPeriodo();
+      renderFiltrosUI();
+      aplicarFiltros();
       render();
-      revisarCierreDeMes();
+      revisarCierre();
     } else {
       mostrarErrorCarga();
     }
@@ -1036,16 +1394,44 @@ function fmtCompact(n) {
 
 function diasEnMes(y, m) { return new Date(y, m + 1, 0).getDate(); }
 
+// --- Periodo "corto" (quincena/semana/mes) configurable según la frecuencia
+// de pago que el usuario definió en Ajustes. 'quincena' como valor de modo
+// siempre representa ese periodo corto configurable; 'mensual' es fijo al
+// mes de calendario. ---
 function periodoDe(fechaStr, modo) {
   const d = new Date(fechaStr + 'T00:00:00');
   if (isNaN(d)) return null;
   const y = d.getFullYear(), m = d.getMonth(), day = d.getDate();
+
   if (modo === 'mensual') {
     return { key: y + '-' + m, label: mesesCortos[m] + ' ' + String(y).slice(2), start: new Date(y, m, 1).getTime() };
   }
-  const q = day <= 15 ? 0 : 1;
-  const label = (q === 0 ? '1-15' : ('16-' + diasEnMes(y, m))) + ' ' + mesesCortos[m];
-  return { key: y + '-' + m + '-' + q, label: label, start: new Date(y, m, q === 0 ? 1 : 16).getTime() };
+
+  const freq = config.frecuenciaPago || 'quincenal';
+
+  if (freq === 'semanal') {
+    const diaInicio = config.semanaDia !== undefined ? Number(config.semanaDia) : 5;
+    const diff = (d.getDay() - diaInicio + 7) % 7;
+    const inicio = new Date(y, m, day - diff);
+    const fin = new Date(inicio.getTime()); fin.setDate(fin.getDate() + 6);
+    const key = inicio.getFullYear() + '-' + inicio.getMonth() + '-' + inicio.getDate();
+    const label = inicio.getDate() + ' ' + mesesCortos[inicio.getMonth()] + '-' + fin.getDate() + ' ' + mesesCortos[fin.getMonth()];
+    return { key: key, label: label, start: inicio.getTime() };
+  }
+
+  if (freq === 'mensual') {
+    return { key: y + '-' + m, label: mesesCortos[m] + ' ' + String(y).slice(2), start: new Date(y, m, 1).getTime() };
+  }
+
+  // quincenal (personalizable)
+  let dia1 = Number(config.quincenaDia1) || 1;
+  let dia2 = Number(config.quincenaDia2) || 16;
+  if (dia2 <= dia1) dia2 = dia1 + 1;
+  const q = (day >= dia1 && day < dia2) ? 0 : 1;
+  const inicioDia = q === 0 ? dia1 : dia2;
+  const finDia = q === 0 ? dia2 - 1 : diasEnMes(y, m);
+  const label = inicioDia + '-' + finDia + ' ' + mesesCortos[m];
+  return { key: y + '-' + m + '-' + q, label: label, start: new Date(y, m, inicioDia).getTime() };
 }
 
 function agruparPorPeriodo(modo) {
@@ -1085,6 +1471,18 @@ function renderPreview() {
     '</div>';
 }
 
+function topRoundedPath(x, yTop, w, yBase, r) {
+  const h = yBase - yTop;
+  if (h <= 0) return '';
+  if (h < r) r = h;
+  return 'M' + x + ',' + (yTop + r) +
+    ' Q' + x + ',' + yTop + ' ' + (x + r) + ',' + yTop +
+    ' L' + (x + w - r) + ',' + yTop +
+    ' Q' + (x + w) + ',' + yTop + ' ' + (x + w) + ',' + (yTop + r) +
+    ' L' + (x + w) + ',' + yBase +
+    ' L' + x + ',' + yBase + ' Z';
+}
+
 // --- Análisis: gráfica quincenal/mensual + estadísticas ---
 function renderAnalisis() {
   const wrap = document.getElementById('chart-wrap');
@@ -1110,18 +1508,6 @@ function renderAnalisis() {
   const groupW = W / periodos.length;
   const barW = Math.min(28, groupW / 2 - 5);
   const gap = 2;
-
-  function topRoundedPath(x, yTop, w, yBase, r) {
-    const h = yBase - yTop;
-    if (h <= 0) return '';
-    if (h < r) r = h;
-    return 'M' + x + ',' + (yTop + r) +
-      ' Q' + x + ',' + yTop + ' ' + (x + r) + ',' + yTop +
-      ' L' + (x + w - r) + ',' + yTop +
-      ' Q' + (x + w) + ',' + yTop + ' ' + (x + w) + ',' + (yTop + r) +
-      ' L' + (x + w) + ',' + yBase +
-      ' L' + x + ',' + yBase + ' Z';
-  }
 
   let svg = '<svg viewBox="0 0 ' + W + ' ' + (H + 22) + '" width="100%" height="' + (H + 22) + '" preserveAspectRatio="xMidYMid meet">';
   [0, 0.5, 1].forEach(function(f) {
@@ -1157,7 +1543,6 @@ function renderAnalisis() {
   });
 
   const totalIngresoAll = gastos.filter(function(g) { return g.tipo === 'ingreso'; }).reduce(function(s, g) { return s + Number(g.monto); }, 0);
-  const totalGastoAll = gastos.filter(function(g) { return g.tipo === 'gasto'; }).reduce(function(s, g) { return s + Number(g.monto); }, 0);
   const totalAhorroAll = gastos.filter(function(g) { return g.tipo === 'ahorro'; }).reduce(function(s, g) { return s + Number(g.monto); }, 0);
   const promIngreso = periodos.reduce(function(s, p) { return s + p.ingreso; }, 0) / periodos.length;
   const promGasto = periodos.reduce(function(s, p) { return s + p.gasto; }, 0) / periodos.length;
@@ -1169,12 +1554,111 @@ function renderAnalisis() {
     '<div class="stat-tile"><div class="stat-lbl">Tasa de ahorro</div><div class="stat-val">' + tasaAhorro.toFixed(0) + '%</div></div>';
 
   const peorPeriodo = periodos.reduce(function(a, b) { return b.gasto > a.gasto ? b : a; }, periodos[0]);
-  const periodoTxt = modoAnalisis === 'mensual' ? 'mes' : 'quincena';
+  const periodoTxt = modoAnalisis === 'mensual' ? 'mes' : nombreFrecuenciaCorta().toLowerCase();
   if (peorPeriodo.gasto > 0) {
     insight.innerHTML = 'Tu ' + periodoTxt + ' con más gasto fue <b>' + peorPeriodo.label + '</b>, con ' + fmt(peorPeriodo.gasto) + ' en salidas.';
   } else {
     insight.innerHTML = 'Aún no registras gastos en este periodo.';
   }
+}
+
+// --- Gasto por categoría (Análisis) ---
+function renderGastoPorCategoria() {
+  const wrap = document.getElementById('cat-chart-wrap');
+  if (!wrap) return;
+  const periodo = periodoDe(hoyISO(), modoAnalisis);
+  const porCat = {};
+  CATEGORIAS.forEach(function(c) { porCat[c] = 0; });
+  let total = 0;
+  gastos.forEach(function(g) {
+    if (g.tipo !== 'gasto') return;
+    const p = periodoDe(g.fecha, modoAnalisis);
+    if (!p || !periodo || p.key !== periodo.key) return;
+    if (porCat.hasOwnProperty(g.categoria)) { porCat[g.categoria] += Number(g.monto) || 0; total += Number(g.monto) || 0; }
+  });
+  if (total === 0) {
+    wrap.innerHTML = '<div class="chart-empty">Sin gastos categorizados en este periodo</div>';
+    return;
+  }
+  const filas = CATEGORIAS.map(function(c) { return { cat: c, monto: porCat[c] }; })
+    .filter(function(f) { return f.monto > 0; })
+    .sort(function(a, b) { return b.monto - a.monto; });
+  wrap.innerHTML = filas.map(function(f) {
+    const pct = Math.round((f.monto / total) * 100);
+    return '<div class="budget-row" style="cursor:default">' +
+      '<div class="budget-row-top">' +
+        '<span class="budget-cat">' + etiquetasCat[f.cat] + '</span>' +
+        '<span class="budget-amt"><b>' + fmtCompact(f.monto) + '</b> · ' + pct + '%</span>' +
+      '</div>' +
+      '<div class="budget-bar"><div class="budget-bar-fill" style="width:' + pct + '%;background:var(--accent)"></div></div>' +
+    '</div>';
+  }).join('');
+}
+
+// --- Promedio de gasto (Análisis) ---
+function renderPromedios() {
+  const wrap = document.getElementById('promedios-wrap');
+  if (!wrap) return;
+  const periodosCortos = agruparPorPeriodo('quincena');
+  const promCorto = periodosCortos.length ? periodosCortos.reduce(function(s, p) { return s + p.gasto; }, 0) / periodosCortos.length : 0;
+  const now = new Date();
+  const t = totalesDelMes(now.getFullYear() + '-' + now.getMonth());
+  const promDiario = now.getDate() > 0 ? t.gasto / now.getDate() : 0;
+  wrap.innerHTML =
+    '<div class="stat-tile"><div class="stat-lbl">Gasto prom. ' + nombreFrecuenciaCorta().toLowerCase() + '</div><div class="stat-val">' + fmtCompact(promCorto) + '</div></div>' +
+    '<div class="stat-tile"><div class="stat-lbl">Gasto prom. diario</div><div class="stat-val">' + fmtCompact(promDiario) + '</div></div>';
+}
+
+// --- Ahorro a través del tiempo (Análisis) ---
+function renderAhorroTiempo() {
+  const wrap = document.getElementById('ahorro-chart-wrap');
+  if (!wrap) return;
+  const porMes = {};
+  gastos.forEach(function(g) {
+    if (g.tipo !== 'ahorro') return;
+    const p = periodoDe(g.fecha, 'mensual');
+    if (!p) return;
+    porMes[p.key] = (porMes[p.key] || 0) + (Number(g.monto) || 0);
+  });
+  const meses = Object.keys(porMes).map(function(k) {
+    const parts = k.split('-');
+    const y = Number(parts[0]), m = Number(parts[1]);
+    return { y: y, m: m, monto: porMes[k], start: new Date(y, m, 1).getTime() };
+  }).sort(function(a, b) { return a.start - b.start; });
+
+  if (meses.length === 0) {
+    wrap.innerHTML = '<div class="chart-empty">Aún no hay ahorro registrado</div>';
+    return;
+  }
+
+  let acumulado = Number(config.saldoAhorrado) || 0;
+  let puntos = meses.map(function(mo) {
+    acumulado += mo.monto;
+    return { label: mesesCortos[mo.m] + ' ' + String(mo.y).slice(2), valor: acumulado };
+  });
+  puntos = puntos.slice(-6);
+
+  const W = 320, H = 140, padT = 14;
+  const maxVal = Math.max(1, ...puntos.map(function(p) { return p.valor; }));
+  const stepX = puntos.length > 1 ? W / (puntos.length - 1) : 0;
+
+  let path = '';
+  puntos.forEach(function(p, i) {
+    const x = puntos.length === 1 ? W / 2 : i * stepX;
+    const y = padT + (H - padT) * (1 - p.valor / maxVal);
+    path += (i === 0 ? 'M' : 'L') + x + ',' + y + ' ';
+  });
+
+  let svg = '<svg viewBox="0 0 ' + W + ' ' + (H + 22) + '" width="100%" height="' + (H + 22) + '" preserveAspectRatio="xMidYMid meet">';
+  svg += '<path d="' + path.trim() + '" fill="none" stroke="var(--accent-2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>';
+  puntos.forEach(function(p, i) {
+    const x = puntos.length === 1 ? W / 2 : i * stepX;
+    const y = padT + (H - padT) * (1 - p.valor / maxVal);
+    svg += '<circle cx="' + x + '" cy="' + y + '" r="4" fill="var(--accent-2)" stroke="var(--bg-2)" stroke-width="2"/>';
+    svg += '<text x="' + x + '" y="' + (H + 16) + '" text-anchor="middle" font-size="9" fill="var(--muted)" font-family="Manrope, sans-serif">' + p.label + '</text>';
+  });
+  svg += '</svg>';
+  wrap.innerHTML = svg;
 }
 
 function render() {
@@ -1220,8 +1704,10 @@ function render() {
 
   const totalIngreso = gastos.filter(g => g.tipo === 'ingreso').reduce((s, g) => s + Number(g.monto), 0);
   const totalGasto = gastos.filter(g => g.tipo === 'gasto').reduce((s, g) => s + Number(g.monto), 0);
-  const totalAhorro = gastos.filter(g => g.tipo === 'ahorro').reduce((s, g) => s + Number(g.monto), 0);
-  const disponible = totalIngreso - totalGasto - totalAhorro;
+  const totalAhorroMov = gastos.filter(g => g.tipo === 'ahorro').reduce((s, g) => s + Number(g.monto), 0);
+  const saldoManual = Number(config.saldoAhorrado) || 0;
+  const totalAhorro = totalAhorroMov + saldoManual;
+  const disponible = totalIngreso - totalGasto - totalAhorroMov;
 
   document.getElementById('sum-ingreso').textContent = fmt(totalIngreso);
   document.getElementById('sum-gasto').textContent = fmt(totalGasto);
@@ -1230,6 +1716,9 @@ function render() {
 
   renderPreview();
   renderAnalisis();
+  renderGastoPorCategoria();
+  renderPromedios();
+  renderAhorroTiempo();
   renderPresupuesto();
 }
 
@@ -1274,7 +1763,6 @@ function calcularPresupuesto(modo) {
   });
   const disponibleGasto = Math.max(0, ingresoPeriodo - metaAhorroPeriodo);
 
-  // historial de gasto por categoría, de todo el tiempo, fuera del periodo actual
   const historial = {};
   let totalHist = 0;
   gastos.forEach(function(g) {
@@ -1325,7 +1813,8 @@ function calcularPresupuesto(modo) {
 
   return {
     modo: modo, periodoLabel: periodo.label, overrideKey: overrideKey,
-    metaAhorroPeriodo: metaAhorroPeriodo, disponibleGasto: disponibleGasto, filas: filas
+    metaAhorroPeriodo: metaAhorroPeriodo, disponibleGasto: disponibleGasto,
+    ingresoPeriodo: ingresoPeriodo, filas: filas
   };
 }
 
@@ -1343,10 +1832,24 @@ function renderPresupuesto() {
 
   const p = calcularPresupuesto(modoPresupuesto);
   document.getElementById('meta-ahorro-txt').textContent = fmtCompact(Number(config.metaAhorro) || 0);
-  document.getElementById('presupuesto-resumen').textContent =
-    'Tienes ' + fmt(p.disponibleGasto) + ' para gastar en ' + (modoPresupuesto === 'quincena' ? 'esta quincena' : p.periodoLabel) + '.';
 
+  const resumenEl = document.getElementById('presupuesto-resumen');
   const list = document.getElementById('presupuesto-list');
+  const alertas = document.getElementById('presupuesto-alertas');
+
+  if (p.disponibleGasto <= 0) {
+    resumenEl.innerHTML = 'Todavía no completas lo suficiente para ahorrar esta meta, sigue registrando tus ingresos. Ingresos: ' + fmt(p.ingresoPeriodo) +
+      ' <button type="button" class="info-btn" id="btn-info-nadap">?</button>';
+    list.innerHTML = '';
+    alertas.innerHTML = '';
+    document.getElementById('btn-info-nadap').addEventListener('click', function() {
+      mostrarInfo('¿Qué significa esto?', 'Tu meta de ahorro para este periodo es mayor a lo que has ingresado. Cuando registres más ingresos, tu presupuesto por categoría va a aparecer solo.');
+    });
+    return;
+  }
+
+  resumenEl.textContent = 'Tienes ' + fmt(p.disponibleGasto) + ' para gastar en ' + (modoPresupuesto === 'quincena' ? 'esta ' + nombreFrecuenciaCorta().toLowerCase() : p.periodoLabel) + '.';
+
   list.innerHTML = p.filas.map(function(f) {
     const pct = f.limite > 0 ? Math.min(100, (f.gastado / f.limite) * 100) : (f.gastado > 0 ? 100 : 0);
     const over = f.gastado > f.limite;
@@ -1362,21 +1865,59 @@ function renderPresupuesto() {
   list.querySelectorAll('.budget-row').forEach(function(row) {
     row.addEventListener('click', function() { abrirEditarCategoria(row.dataset.cat); });
   });
+
+  const sobregiros = p.filas.filter(function(f) { return f.gastado > f.limite; });
+  alertas.innerHTML = sobregiros.map(function(f) {
+    const exceso = f.gastado - f.limite;
+    return '<div class="budget-alert"><b>Te pasaste por ' + fmt(exceso) + '</b> en ' + etiquetasCat[f.cat] + '.' +
+      '<button type="button" class="btn-ghost" data-cubrir-cat="' + f.cat + '" data-cubrir-exceso="' + exceso + '">Cubrir desde otra categoría</button></div>';
+  }).join('');
+  alertas.querySelectorAll('[data-cubrir-cat]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      abrirCubrir(btn.dataset.cubrirCat, parseFloat(btn.dataset.cubrirExceso));
+    });
+  });
 }
 
-document.getElementById('btn-guardar-meta').addEventListener('click', function() {
-  const val = parseFloat(document.getElementById('meta-ahorro-input').value);
-  if (isNaN(val) || val < 0) { showToast('Ingresa una meta válida', true); return; }
-  config.metaAhorro = val;
-  renderPresupuesto();
-  showToast('Meta guardada');
-  apiPost({ action: 'set-config', key: 'metaAhorro', value: val });
+document.getElementById('cubrir-close').addEventListener('click', function() {
+  document.getElementById('overlay-cubrir').classList.remove('show');
 });
-document.getElementById('btn-editar-meta').addEventListener('click', function() {
-  document.getElementById('presupuesto-card').style.display = 'none';
-  document.getElementById('presupuesto-setup-card').style.display = 'block';
-  document.getElementById('meta-ahorro-input').value = config.metaAhorro || '';
+document.getElementById('overlay-cubrir').addEventListener('click', function(e) {
+  if (e.target.id === 'overlay-cubrir') this.classList.remove('show');
 });
+function abrirCubrir(catExceso, excesoMonto) {
+  const p = calcularPresupuesto(modoPresupuesto);
+  const opciones = p.filas.filter(function(f) { return f.cat !== catExceso; });
+  document.getElementById('cubrir-info').textContent =
+    'Vas a mover ' + fmt(excesoMonto) + ' de otra categoría hacia ' + etiquetasCat[catExceso] + '. Toca de cuál.';
+  const cont = document.getElementById('cubrir-lista');
+  cont.innerHTML = opciones.map(function(f) {
+    return '<div class="budget-row" data-cat="' + f.cat + '">' +
+      '<div class="budget-row-top">' +
+        '<span class="budget-cat">' + etiquetasCat[f.cat] + '</span>' +
+        '<span class="budget-amt">' + fmtCompact(f.limite) + '</span>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  cont.querySelectorAll('.budget-row').forEach(function(row) {
+    row.addEventListener('click', function() {
+      const otra = row.dataset.cat;
+      const p2 = calcularPresupuesto(modoPresupuesto);
+      const filaExceso = p2.filas.find(function(f) { return f.cat === catExceso; });
+      const filaOtra = p2.filas.find(function(f) { return f.cat === otra; });
+      const nuevoOtra = Math.max(0, filaOtra.limite - excesoMonto);
+      if (!config.categoriaOverrides) config.categoriaOverrides = {};
+      if (!config.categoriaOverrides[p2.overrideKey]) config.categoriaOverrides[p2.overrideKey] = {};
+      config.categoriaOverrides[p2.overrideKey][catExceso] = Math.round(filaExceso.gastado);
+      config.categoriaOverrides[p2.overrideKey][otra] = Math.round(nuevoOtra);
+      guardarOverrides();
+      renderPresupuesto();
+      document.getElementById('overlay-cubrir').classList.remove('show');
+      showToast('Presupuesto ajustado');
+    });
+  });
+  document.getElementById('overlay-cubrir').classList.add('show');
+}
 
 function guardarOverrides() {
   apiPost({ action: 'set-config', key: 'categoriaOverrides', value: config.categoriaOverrides || {} });
@@ -1431,28 +1972,39 @@ document.getElementById('cat-guardar').addEventListener('click', function() {
   showToast('Categoría actualizada');
 });
 
-// --- Cierre de mes: pregunta si mover el disponible del mes pasado a ahorro ---
-function revisarCierreDeMes() {
-  const now = new Date();
-  const mesActualKey = now.getFullYear() + '-' + now.getMonth();
-  if (config.lastRolloverPrompt === mesActualKey) return;
+// --- Cierre de periodo: pregunta si mover el disponible del periodo que
+// acaba de terminar (según la frecuencia de pago configurada) a ahorro ---
+function revisarCierre() {
+  const periodoActual = periodoDe(hoyISO(), 'quincena');
+  if (!periodoActual) return;
+  const claveVisto = 'cierre:' + periodoActual.key;
+  if (config.lastRolloverPrompt === claveVisto) return;
 
-  const mesAnterior = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const mesAnteriorKey = mesAnterior.getFullYear() + '-' + mesAnterior.getMonth();
-  const t = totalesDelMes(mesAnteriorKey);
-  const disponibleAnterior = t.ingreso - t.gasto - t.ahorro;
+  const diaAnterior = new Date(periodoActual.start - 24 * 60 * 60 * 1000);
+  const fechaAnteriorISO = diaAnterior.getFullYear() + '-' + String(diaAnterior.getMonth() + 1).padStart(2, '0') + '-' + String(diaAnterior.getDate()).padStart(2, '0');
+  const periodoAnterior = periodoDe(fechaAnteriorISO, 'quincena');
 
-  if ((t.ingreso === 0 && t.gasto === 0) || disponibleAnterior <= 0) {
-    marcarCierreVisto(mesActualKey);
+  let ingreso = 0, gasto = 0, ahorro = 0;
+  gastos.forEach(function(g) {
+    const p = periodoDe(g.fecha, 'quincena');
+    if (!p || p.key !== periodoAnterior.key) return;
+    if (g.tipo === 'ingreso') ingreso += Number(g.monto) || 0;
+    if (g.tipo === 'gasto') gasto += Number(g.monto) || 0;
+    if (g.tipo === 'ahorro') ahorro += Number(g.monto) || 0;
+  });
+  const disponibleAnterior = ingreso - gasto - ahorro;
+
+  if ((ingreso === 0 && gasto === 0) || disponibleAnterior <= 0) {
+    marcarCierreVisto(claveVisto);
     return;
   }
 
   document.getElementById('cierre-texto').textContent =
-    '¿Quieres mover tus ' + fmt(disponibleAnterior) + ' disponibles de ' + mesesLargos[mesAnterior.getMonth()] + ' a tu Total ahorrado?';
+    '¿Quieres mover tus ' + fmt(disponibleAnterior) + ' disponibles de ' + periodoAnterior.label + ' a tu Total ahorrado?';
   document.getElementById('overlay-cierre').classList.add('show');
 
   document.getElementById('cierre-si').onclick = function() {
-    const mov = { id: String(Date.now()), monto: disponibleAnterior, fecha: hoyISO(), nota: 'Cierre de ' + mesesLargos[mesAnterior.getMonth()], tipo: 'ahorro', categoria: '' };
+    const mov = { id: String(Date.now()), monto: disponibleAnterior, fecha: hoyISO(), nota: 'Cierre de ' + periodoAnterior.label, tipo: 'ahorro', categoria: '' };
     apiPost({ action: 'add', mov: mov }).then(function(res) {
       if (res && res.ok) {
         gastos.unshift(mov);
@@ -1460,17 +2012,17 @@ function revisarCierreDeMes() {
         showToast('Se guardó ' + fmt(disponibleAnterior));
       }
     });
-    marcarCierreVisto(mesActualKey);
+    marcarCierreVisto(claveVisto);
     document.getElementById('overlay-cierre').classList.remove('show');
   };
   document.getElementById('cierre-no').onclick = function() {
-    marcarCierreVisto(mesActualKey);
+    marcarCierreVisto(claveVisto);
     document.getElementById('overlay-cierre').classList.remove('show');
   };
 }
-function marcarCierreVisto(mesKey) {
-  config.lastRolloverPrompt = mesKey;
-  apiPost({ action: 'set-config', key: 'lastRolloverPrompt', value: mesKey });
+function marcarCierreVisto(clave) {
+  config.lastRolloverPrompt = clave;
+  apiPost({ action: 'set-config', key: 'lastRolloverPrompt', value: clave });
 }
 
 document.getElementById('btn-ver-mas').addEventListener('click', function() {
