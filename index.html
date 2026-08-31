@@ -822,6 +822,9 @@ select option { background: var(--card-solid); color: var(--ink); }
     <label class="field-label" for="meta-ahorro-input" style="margin-top:10px">Meta de ahorro mensual</label>
     <input type="number" id="meta-ahorro-input" placeholder="0.00" step="0.01">
 
+    <label class="field-label" for="ingreso-mensual-input" style="margin-top:14px">Ingreso mensual estimado <button type="button" class="info-btn" id="btn-info-ingreso-mensual">?</button></label>
+    <input type="number" id="ingreso-mensual-input" placeholder="0.00" step="0.01">
+
     <label class="field-label" for="frecuencia-pago" style="margin-top:14px">¿Cómo es tu fecha de pago?</label>
     <select id="frecuencia-pago">
       <option value="quincenal">Quincenal</option>
@@ -1021,6 +1024,9 @@ select option { background: var(--card-solid); color: var(--ink); }
     </div>
     <label class="field-label" for="meta-monto-edit" style="margin-top:4px">Meta de ahorro mensual</label>
     <input type="number" id="meta-monto-edit" placeholder="0.00" step="0.01">
+
+    <label class="field-label" for="meta-ingreso-mensual-edit" style="margin-top:14px">Ingreso mensual estimado <button type="button" class="info-btn" id="btn-info-ingreso-mensual-2">?</button></label>
+    <input type="number" id="meta-ingreso-mensual-edit" placeholder="0.00" step="0.01">
 
     <label class="field-label" for="meta-frecuencia-edit" style="margin-top:14px">¿Cómo es tu fecha de pago?</label>
     <select id="meta-frecuencia-edit">
@@ -1436,9 +1442,10 @@ function actualizarCamposFrecuencia(freq, idQuincenal, idSemanal) {
   document.getElementById(idSemanal).classList.toggle('campo-oculto', freq !== 'semanal');
 }
 
-function aplicarYGuardarMeta(val, freq, dia1, dia2, semanaDia) {
+function aplicarYGuardarMeta(val, freq, dia1, dia2, semanaDia, ingresoMensual) {
   config.metaAhorro = val;
   config.frecuenciaPago = freq;
+  config.ingresoMensualEstimado = ingresoMensual;
   if (freq === 'quincenal') {
     config.quincenaDia1 = dia1;
     config.quincenaDia2 = dia2;
@@ -1449,19 +1456,30 @@ function aplicarYGuardarMeta(val, freq, dia1, dia2, semanaDia) {
   render();
   showToast('Meta guardada');
   guardarConSincronizacion({ action: 'set-config', key: 'metaAhorro', value: val });
+  guardarConSincronizacion({ action: 'set-config', key: 'ingresoMensualEstimado', value: ingresoMensual });
   guardarConSincronizacion({ action: 'set-config', key: 'frecuenciaPago', value: freq });
   guardarConSincronizacion({ action: 'set-config', key: 'quincenaDia1', value: config.quincenaDia1 || 1 });
   guardarConSincronizacion({ action: 'set-config', key: 'quincenaDia2', value: config.quincenaDia2 || 16 });
   guardarConSincronizacion({ action: 'set-config', key: 'semanaDia', value: config.semanaDia !== undefined ? config.semanaDia : 5 });
 }
 
+const TEXTO_INFO_INGRESO_MENSUAL = 'Es tu ingreso mensual aproximado (todas tus quincenas o pagos juntos). Kashly lo usa para repartir tu presupuesto entre tus periodos de pago. Después de un mes completo de historial, Kashly deja de usar este número y calcula el promedio real de tus ingresos automáticamente.';
+document.getElementById('btn-info-ingreso-mensual').addEventListener('click', function() {
+  mostrarInfo('Ingreso mensual estimado', TEXTO_INFO_INGRESO_MENSUAL);
+});
+document.getElementById('btn-info-ingreso-mensual-2').addEventListener('click', function(e) {
+  e.stopPropagation();
+  mostrarInfo('Ingreso mensual estimado', TEXTO_INFO_INGRESO_MENSUAL);
+});
+
 document.getElementById('btn-guardar-meta-ajustes').addEventListener('click', function() {
   const val = parseFloat(document.getElementById('meta-ahorro-input').value);
   if (isNaN(val) || val < 0) { showToast('Ingresa una meta válida', true); return; }
+  const ingresoMensual = parseFloat(document.getElementById('ingreso-mensual-input').value) || 0;
   aplicarYGuardarMeta(val, document.getElementById('frecuencia-pago').value,
     parseInt(document.getElementById('quincena-dia1').value, 10) || 1,
     parseInt(document.getElementById('quincena-dia2').value, 10) || 16,
-    parseInt(document.getElementById('semana-dia').value, 10));
+    parseInt(document.getElementById('semana-dia').value, 10), ingresoMensual);
 });
 
 document.getElementById('btn-guardar-saldo-ajustes').addEventListener('click', function() {
@@ -1476,6 +1494,7 @@ document.getElementById('btn-guardar-saldo-ajustes').addEventListener('click', f
 // --- Editar meta desde el Presupuesto: sheet propio, no manda a Ajustes ---
 document.getElementById('btn-editar-meta').addEventListener('click', function() {
   document.getElementById('meta-monto-edit').value = config.metaAhorro || '';
+  document.getElementById('meta-ingreso-mensual-edit').value = config.ingresoMensualEstimado || '';
   const freq = config.frecuenciaPago || 'quincenal';
   document.getElementById('meta-frecuencia-edit').value = freq;
   actualizarCamposFrecuencia(freq, 'meta-campo-quincenal-edit', 'meta-campo-semanal-edit');
@@ -1493,10 +1512,11 @@ document.getElementById('overlay-meta').addEventListener('click', function(e) {
 document.getElementById('btn-guardar-meta-overlay').addEventListener('click', function() {
   const val = parseFloat(document.getElementById('meta-monto-edit').value);
   if (isNaN(val) || val < 0) { showToast('Ingresa una meta válida', true); return; }
+  const ingresoMensual = parseFloat(document.getElementById('meta-ingreso-mensual-edit').value) || 0;
   aplicarYGuardarMeta(val, document.getElementById('meta-frecuencia-edit').value,
     parseInt(document.getElementById('meta-quincena-dia1-edit').value, 10) || 1,
     parseInt(document.getElementById('meta-quincena-dia2-edit').value, 10) || 16,
-    parseInt(document.getElementById('meta-semana-dia-edit').value, 10));
+    parseInt(document.getElementById('meta-semana-dia-edit').value, 10), ingresoMensual);
   cargarFormAjustes();
   document.getElementById('overlay-meta').classList.remove('show');
 });
@@ -1505,6 +1525,7 @@ function cargarFormAjustes() {
   document.getElementById('perfil-nombre').value = config.perfilNombre || '';
   document.getElementById('perfil-correo').value = config.perfilCorreo || '';
   document.getElementById('meta-ahorro-input').value = config.metaAhorro || '';
+  document.getElementById('ingreso-mensual-input').value = config.ingresoMensualEstimado || '';
   const freq = config.frecuenciaPago || 'quincenal';
   document.getElementById('frecuencia-pago').value = freq;
   actualizarCamposFrecuencia(freq, 'campo-frecuencia-quincenal', 'campo-frecuencia-semanal');
@@ -2326,17 +2347,44 @@ function totalesDelMes(mesKey) {
 // Si editas una categoría a mano, el resto se reacomoda solo entre las que
 // siguen en automático, para que la suma de las 7 siempre dé exacto el
 // presupuesto disponible. ---
+// --- Ingreso mensual base para el presupuesto: mientras no haya al menos un
+// mes completo de historial, se usa el ingreso mensual que el usuario
+// definió en Meta de ahorro. Después de eso, se "aprende" solo: se usa el
+// promedio real de los meses ya cerrados, sin necesidad de tocar nada. ---
+function ingresoMensualAprendido() {
+  const porMes = {};
+  gastos.forEach(function(g) {
+    if (g.tipo !== 'ingreso') return;
+    const p = periodoDe(g.fecha, 'mensual');
+    if (!p) return;
+    porMes[p.key] = (porMes[p.key] || 0) + (Number(g.monto) || 0);
+  });
+  const mesActualKey = periodoDe(hoyISO(), 'mensual').key;
+  const mesesCerrados = Object.keys(porMes).filter(function(k) { return k !== mesActualKey; });
+  if (mesesCerrados.length === 0) return null;
+  const total = mesesCerrados.reduce(function(s, k) { return s + porMes[k]; }, 0);
+  return total / mesesCerrados.length;
+}
+function periodosPorMes() {
+  const freq = config.frecuenciaPago || 'quincenal';
+  if (freq === 'semanal') return 52 / 12;
+  if (freq === 'mensual') return 1;
+  return 2;
+}
+function ingresoBaseMensual() {
+  const aprendido = ingresoMensualAprendido();
+  if (aprendido !== null) return { monto: aprendido, aprendido: true };
+  return { monto: Number(config.ingresoMensualEstimado) || 0, aprendido: false };
+}
+
 function calcularPresupuesto(modo) {
   const periodo = periodoDe(hoyISO(), modo);
   const metaAhorroMensual = Number(config.metaAhorro) || 0;
   const metaAhorroPeriodo = modo === 'quincena' ? metaAhorroMensual / 2 : metaAhorroMensual;
 
-  let ingresoPeriodo = 0;
-  gastos.forEach(function(g) {
-    if (g.tipo !== 'ingreso') return;
-    const p = periodoDe(g.fecha, modo);
-    if (p && p.key === periodo.key) ingresoPeriodo += Number(g.monto) || 0;
-  });
+  const base = ingresoBaseMensual();
+  const numPeriodos = modo === 'mensual' ? 1 : periodosPorMes();
+  const ingresoPeriodo = base.monto / numPeriodos;
   const disponibleGasto = Math.max(0, ingresoPeriodo - metaAhorroPeriodo);
 
   const historial = {};
@@ -2413,7 +2461,8 @@ function calcularPresupuesto(modo) {
   return {
     modo: modo, periodoLabel: periodo.label, overrideKey: overrideKey,
     metaAhorroPeriodo: metaAhorroPeriodo, disponibleGasto: disponibleGasto,
-    ingresoPeriodo: ingresoPeriodo, filas: filas
+    ingresoPeriodo: ingresoPeriodo, ingresoMensualBase: base.monto, aprendido: base.aprendido,
+    filas: filas
   };
 }
 
@@ -2441,11 +2490,17 @@ function renderPresupuesto() {
   const warningEl = document.getElementById('presupuesto-warning');
 
   document.getElementById('btn-info-presupuesto').onclick = function() {
-    mostrarInfo('Tu presupuesto', 'Ingresaste ' + fmt(p.ingresoPeriodo) + ' y tu meta de ahorro para ' + p.periodoLabel + ' es ' + fmt(p.metaAhorroPeriodo) + '.');
+    const fuente = p.aprendido
+      ? 'el promedio de tus meses anteriores'
+      : 'el ingreso mensual que definiste en Meta de ahorro';
+    mostrarInfo('Tu presupuesto', 'Se calcula con base en ' + fuente + ' (' + fmt(p.ingresoMensualBase) + ' al mes), repartido entre tus periodos de pago: ' + fmt(p.ingresoPeriodo) + ' para ' + p.periodoLabel + '. A eso se le resta tu meta de ahorro de ese periodo, ' + fmt(p.metaAhorroPeriodo) + '.');
   };
 
   if (p.disponibleGasto <= 0) {
-    list.innerHTML = '<div class="sheet-text">Todavía no completas lo suficiente para ahorrar esta meta, sigue registrando tus ingresos. Ingresos: ' + fmt(p.ingresoPeriodo) + '</div>';
+    const motivo = p.ingresoMensualBase <= 0
+      ? 'Define tu ingreso mensual estimado en "Meta: › Editar" para ver tu presupuesto por categoría.'
+      : 'Tu meta de ahorro es mayor a tu ingreso mensual, así que no queda nada para repartir en categorías.';
+    list.innerHTML = '<div class="sheet-text">' + motivo + '</div>';
     totalRow.style.display = 'none';
     warningEl.style.display = 'none';
     return;
