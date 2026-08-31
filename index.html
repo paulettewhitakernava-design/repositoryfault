@@ -346,7 +346,7 @@ select option { background: var(--card-solid); color: var(--ink); }
 .item-delete-bg {
   position: absolute;
   inset: 0;
-  background: var(--danger);
+  background: rgba(255,138,138,0.16);
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -356,7 +356,7 @@ select option { background: var(--card-solid); color: var(--ink); }
   height: 100%;
   border: none;
   background: none;
-  color: #2a0d0d;
+  color: var(--danger);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -506,6 +506,47 @@ select option { background: var(--card-solid); color: var(--ink); }
 .nav-btn.active { color: var(--ink); }
 .nav-btn.active svg { stroke: var(--accent); }
 
+.ajustes-btn-inicio {
+  width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); flex-shrink: 0;
+  background: rgba(255,255,255,0.06); color: var(--ink);
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.ajustes-btn-inicio svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+
+.cat-input-row { display: flex; gap: 8px; margin-top: 10px; }
+.cat-input-row input { flex: 1; }
+.cat-input-row button {
+  flex-shrink: 0; width: 42px; height: 42px; border-radius: 50%; border: none;
+  background: linear-gradient(135deg, var(--accent), #ff5c9e); color: #1c0f08;
+  font-size: 20px; font-weight: 700; cursor: pointer; align-self: flex-end;
+}
+.ajustes-cat-chip { display: inline-flex; align-items: center; gap: 6px; }
+.ajustes-cat-chip .cat-x {
+  width: 15px; height: 15px; border-radius: 50%; border: none; background: rgba(255,255,255,0.14);
+  color: var(--muted); font-size: 10px; line-height: 1; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; padding: 0;
+}
+
+.reorder-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 0; border-bottom: 1px solid var(--line); gap: 10px;
+}
+.reorder-row:last-child { border-bottom: none; }
+.reorder-row span { font-size: 14px; flex: 1; }
+.reorder-arrows { display: flex; gap: 4px; }
+.reorder-arrows button {
+  width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--line);
+  background: rgba(255,255,255,0.05); color: var(--ink); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.reorder-arrows button:disabled { opacity: 0.25; cursor: default; }
+.reorder-arrows button svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2.2; }
+
+.total-row { padding-top: 14px; margin-top: 4px; border-top: 1px solid var(--line); }
+.total-row .budget-row-top { font-size: 14px; }
+.total-row .budget-cat { font-weight: 700; }
+.limite-warning { font-size: 12px; color: var(--danger); margin-top: 8px; line-height: 1.4; }
+
 .nav-btn.fab { justify-content: flex-start; }
 .fab-circle {
   width: 54px; height: 54px; border-radius: 50%;
@@ -538,8 +579,20 @@ select option { background: var(--card-solid); color: var(--ink); }
 <!-- ===== INICIO ===== -->
 <div class="screen active" id="screen-inicio">
   <div class="header">
-    <div class="eyebrow" id="greeting">Control diario</div>
-    <h1>Kashly</h1>
+    <div class="header-row">
+      <div>
+        <div class="eyebrow" id="greeting">Control diario</div>
+        <h1>Kashly</h1>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button type="button" class="ajustes-btn-inicio" id="btn-filtros-inicio" aria-label="Filtrar secciones">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M8 12h8"/><path d="M11 18h2"/></svg>
+        </button>
+        <button type="button" class="ajustes-btn-inicio" id="btn-ajustes-inicio" aria-label="Ajustes">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 0 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 0 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1Z"/></svg>
+        </button>
+      </div>
+    </div>
   </div>
 
   <div class="card">
@@ -557,47 +610,82 @@ select option { background: var(--card-solid); color: var(--ink); }
     </div>
   </div>
 
-  <div class="card preview-card" id="preview-card">
-    <div class="preview-head">
-      <div class="card-lbl" style="margin-bottom:0">Este mes</div>
-      <span class="link">Ver análisis ›</span>
+  <div id="inicio-secciones">
+
+  <div class="seccion-inicio" id="seccion-estemes" data-key="estemes">
+    <div class="card preview-card" id="preview-card">
+      <div class="preview-head">
+        <div class="card-lbl" style="margin-bottom:0">Este mes</div>
+        <span class="link">Ver análisis ›</span>
+      </div>
+      <div class="preview-bars" id="preview-bars"></div>
     </div>
-    <div class="preview-bars" id="preview-bars"></div>
   </div>
 
-  <div class="card" id="presupuesto-setup-card" style="display:none">
-    <div class="card-lbl">Presupuesto por categoría</div>
-    <div style="font-size:12.5px;color:var(--muted);margin:6px 0 14px;line-height:1.5">Configura tu meta de ahorro y tu frecuencia de pago en Ajustes para que Kashly reparta tu presupuesto automáticamente.</div>
-    <button type="button" class="btn-add" id="btn-ir-ajustes-presu">Ir a Ajustes</button>
+  <div class="seccion-inicio" id="seccion-presupuesto" data-key="presupuesto">
+    <div class="card" id="presupuesto-setup-card" style="display:none">
+      <div class="card-lbl">Presupuesto por categoría</div>
+      <div style="font-size:12.5px;color:var(--muted);margin:6px 0 14px;line-height:1.5">Configura tu meta de ahorro y tu frecuencia de pago para que Kashly reparta tu presupuesto automáticamente.</div>
+      <button type="button" class="btn-add" id="btn-ir-ajustes-presu">Configurar meta</button>
+    </div>
+
+    <div class="card" id="presupuesto-card" style="display:none">
+      <div class="chart-head">
+        <div class="card-lbl" style="margin-bottom:0">Presupuesto <button type="button" class="info-btn" id="btn-info-presupuesto">?</button></div>
+        <span class="link" id="btn-editar-meta" style="cursor:pointer">Meta: <span id="meta-ahorro-txt">$0</span> ›</span>
+      </div>
+      <div class="period-toggle" role="tablist" aria-label="Periodo del presupuesto" id="toggle-periodo-presu">
+        <div class="period-indicator" id="period-indicator-presu"></div>
+        <button type="button" role="tab" data-periodo="quincena" aria-selected="false">Quincenal</button>
+        <button type="button" role="tab" data-periodo="mensual" aria-selected="false">Mensual</button>
+      </div>
+      <div id="presupuesto-list" style="margin-top:6px"></div>
+      <div class="budget-row total-row" id="presupuesto-total-row">
+        <div class="budget-row-top">
+          <span class="budget-cat">Total</span>
+          <span class="budget-amt" id="presupuesto-total-txt"></span>
+        </div>
+        <div class="budget-bar"><div class="budget-bar-fill" id="presupuesto-total-fill" style="width:0%"></div></div>
+      </div>
+      <div class="limite-warning" id="presupuesto-warning" style="display:none"></div>
+    </div>
   </div>
 
-  <div class="card" id="presupuesto-card" style="display:none">
-    <div class="chart-head">
-      <div class="card-lbl" style="margin-bottom:0">Presupuesto</div>
-      <span class="link" id="btn-editar-meta" style="cursor:pointer">Meta: <span id="meta-ahorro-txt">$0</span> ›</span>
+  <div class="seccion-inicio" id="seccion-movimientos" data-key="movimientos">
+    <div class="section-row">
+      <div class="section-label">Movimientos</div>
+      <div class="section-count" id="section-count"></div>
     </div>
-    <div class="period-toggle" role="tablist" aria-label="Periodo del presupuesto" id="toggle-periodo-presu">
-      <div class="period-indicator" id="period-indicator-presu"></div>
-      <button type="button" role="tab" data-periodo="quincena" aria-selected="false">Quincenal</button>
-      <button type="button" role="tab" data-periodo="mensual" aria-selected="true">Mensual</button>
+    <div id="lista">
+      <div class="skeleton"></div>
+      <div class="skeleton" style="opacity:.7"></div>
+      <div class="skeleton" style="opacity:.45"></div>
     </div>
-    <div class="card-lbl" id="gasto-permitido-lbl" style="margin-top:18px">Gasto permitido</div>
-    <div class="card-num" id="gasto-permitido-num" style="font-size:30px;margin-bottom:2px">$0</div>
-    <div class="sheet-text" id="presupuesto-resumen" style="margin-top:2px"></div>
-    <div id="presupuesto-list"></div>
-    <div id="presupuesto-alertas"></div>
+    <button type="button" class="btn-ghost" id="btn-ver-mas" style="display:none"></button>
   </div>
 
-  <div class="section-row">
-    <div class="section-label">Movimientos</div>
-    <div class="section-count" id="section-count"></div>
+  <div class="seccion-inicio" id="seccion-categoria" data-key="categoria">
+    <div class="card">
+      <div class="card-lbl">Gasto por categoría</div>
+      <div class="chart-wrap" id="inicio-cat-wrap" style="margin-top:10px"></div>
+    </div>
   </div>
-  <div id="lista">
-    <div class="skeleton"></div>
-    <div class="skeleton" style="opacity:.7"></div>
-    <div class="skeleton" style="opacity:.45"></div>
+
+  <div class="seccion-inicio" id="seccion-promedios" data-key="promedios">
+    <div class="card">
+      <div class="card-lbl">Promedio de gasto</div>
+      <div class="stat-row-2" id="inicio-promedios-wrap" style="margin-top:10px"></div>
+    </div>
   </div>
-  <button type="button" class="btn-ghost" id="btn-ver-mas" style="display:none"></button>
+
+  <div class="seccion-inicio" id="seccion-ahorro" data-key="ahorro">
+    <div class="card">
+      <div class="card-lbl">Ahorro a través del tiempo</div>
+      <div class="chart-wrap" id="inicio-ahorro-wrap" style="margin-top:10px"></div>
+    </div>
+  </div>
+
+  </div>
 </div>
 
 <!-- ===== ANALISIS ===== -->
@@ -756,6 +844,13 @@ select option { background: var(--card-solid); color: var(--ink); }
   <div class="card">
     <div class="card-lbl">Categorías</div>
     <div class="ajustes-cat-list" id="ajustes-categorias"></div>
+    <div class="cat-input-row">
+      <div style="flex:1">
+        <label class="field-label" for="cat-nueva-input" style="margin-top:10px">Nueva categoría</label>
+        <input type="text" id="cat-nueva-input" placeholder="ej. Mascotas">
+      </div>
+      <button type="button" id="btn-agregar-categoria" aria-label="Agregar categoría">+</button>
+    </div>
   </div>
 
   <div class="card">
@@ -830,18 +925,6 @@ select option { background: var(--card-solid); color: var(--ink); }
   </div>
 </div>
 
-<div class="overlay" id="overlay-cubrir">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-head">
-      <h2>Cubrir exceso</h2>
-      <button type="button" class="sheet-close" id="cubrir-close" aria-label="Cerrar">✕</button>
-    </div>
-    <div class="sheet-text" id="cubrir-info"></div>
-    <div id="cubrir-lista"></div>
-  </div>
-</div>
-
 <div class="overlay" id="overlay-cierre">
   <div class="sheet">
     <div class="sheet-handle"></div>
@@ -892,24 +975,79 @@ select option { background: var(--card-solid); color: var(--ink); }
   </div>
 </div>
 
+<div class="overlay" id="overlay-filtros-inicio">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <h2>Mostrar y ordenar</h2>
+      <button type="button" class="sheet-close" id="filtros-inicio-close" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="sheet-text">Elige qué secciones ver en Inicio y en qué orden.</div>
+    <div id="filtros-inicio-lista" style="margin-top:6px"></div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay-meta">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <h2>Meta de ahorro</h2>
+      <button type="button" class="sheet-close" id="meta-close" aria-label="Cerrar">✕</button>
+    </div>
+    <label class="field-label" for="meta-monto-edit" style="margin-top:4px">Meta de ahorro mensual</label>
+    <input type="number" id="meta-monto-edit" placeholder="0.00" step="0.01">
+
+    <label class="field-label" for="meta-frecuencia-edit" style="margin-top:14px">¿Cómo es tu fecha de pago?</label>
+    <select id="meta-frecuencia-edit">
+      <option value="quincenal">Quincenal</option>
+      <option value="semanal">Semanal</option>
+      <option value="mensual">Mensual</option>
+    </select>
+
+    <div id="meta-campo-quincenal-edit" style="margin-top:14px">
+      <div class="row2">
+        <div>
+          <label class="field-label" for="meta-quincena-dia1-edit">1ra quincena empieza el día</label>
+          <input type="number" id="meta-quincena-dia1-edit" min="1" max="31" placeholder="1">
+        </div>
+        <div>
+          <label class="field-label" for="meta-quincena-dia2-edit">2da quincena empieza el día</label>
+          <input type="number" id="meta-quincena-dia2-edit" min="1" max="31" placeholder="16">
+        </div>
+      </div>
+    </div>
+
+    <div id="meta-campo-semanal-edit" class="campo-oculto" style="margin-top:14px">
+      <label class="field-label" for="meta-semana-dia-edit">Tu semana de pago empieza el</label>
+      <select id="meta-semana-dia-edit">
+        <option value="1">Lunes</option>
+        <option value="2">Martes</option>
+        <option value="3">Miércoles</option>
+        <option value="4">Jueves</option>
+        <option value="5">Viernes</option>
+        <option value="6">Sábado</option>
+        <option value="0">Domingo</option>
+      </select>
+    </div>
+
+    <button type="button" class="btn-add" id="btn-guardar-meta-overlay" style="margin-top:16px">Guardar</button>
+  </div>
+</div>
+
 <nav class="bottom-nav">
   <div class="nav-inner">
     <button class="nav-btn active" data-screen="inicio">
       <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
       <span>Inicio</span>
     </button>
-    <button class="nav-btn" data-screen="analisis">
-      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/></svg>
-      <span>Análisis</span>
-    </button>
     <button class="nav-btn fab" data-screen="agregar" aria-label="Agregar">
       <span class="fab-circle">
         <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
       </span>
     </button>
-    <button class="nav-btn" data-screen="ajustes">
-      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 0 1-4 0v-.09A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 0 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 0 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1Z"/></svg>
-      <span>Ajustes</span>
+    <button class="nav-btn" data-screen="analisis">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M12 20V4"/><path d="M20 20v-7"/></svg>
+      <span>Análisis</span>
     </button>
   </div>
 </nav>
@@ -934,7 +1072,7 @@ let editandoId = null;
 let datosCargados = false;
 let mostrarTodos = false;
 let modoAnalisis = 'quincena';
-let modoPresupuesto = 'mensual';
+let modoPresupuesto = 'quincena';
 
 const LIMITE_LISTA = 10;
 const tipos = ['gasto', 'ingreso', 'ahorro'];
@@ -946,30 +1084,100 @@ const mesesCortos = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct'
 const mesesLargos = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const diasSemana = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
 
-const CATEGORIAS = ['alimentacion', 'suscripciones', 'transporte', 'salud', 'educacion', 'cuidado_personal', 'entretenimiento'];
-const etiquetasCat = {
-  alimentacion: 'Alimentación', suscripciones: 'Suscripciones', transporte: 'Transporte',
-  salud: 'Salud', educacion: 'Educación', cuidado_personal: 'Cuidado personal', entretenimiento: 'Entretenimiento'
-};
+const CATEGORIAS_DEFAULT = [
+  { id: 'alimentacion', label: 'Alimentación' }, { id: 'suscripciones', label: 'Suscripciones' },
+  { id: 'transporte', label: 'Transporte' }, { id: 'salud', label: 'Salud' },
+  { id: 'educacion', label: 'Educación' }, { id: 'cuidado_personal', label: 'Cuidado personal' },
+  { id: 'entretenimiento', label: 'Entretenimiento' }
+];
+let CATEGORIAS = CATEGORIAS_DEFAULT.map(function(c) { return c.id; });
+let etiquetasCat = {};
+CATEGORIAS_DEFAULT.forEach(function(c) { etiquetasCat[c.id] = c.label; });
+
 const FILTROS_DEF = [
   { key: 'categoria', label: 'Gasto por categoría', seccion: 'chart-section-categoria' },
   { key: 'promedios', label: 'Promedio de gasto', seccion: 'chart-section-promedios' },
   { key: 'ahorro', label: 'Ahorro a través del tiempo', seccion: 'chart-section-ahorro' }
 ];
+const SECCIONES_INICIO = [
+  { key: 'estemes', label: 'Este mes' },
+  { key: 'presupuesto', label: 'Presupuesto' },
+  { key: 'movimientos', label: 'Movimientos' },
+  { key: 'categoria', label: 'Gasto por categoría' },
+  { key: 'promedios', label: 'Promedio de gasto' },
+  { key: 'ahorro', label: 'Ahorro a través del tiempo' }
+];
 let config = {};
 let categoriaEnEdicion = null;
 
-CATEGORIAS.forEach(function(c) {
-  const opt1 = document.createElement('option');
-  opt1.value = c; opt1.textContent = etiquetasCat[c];
-  document.getElementById('categoria').appendChild(opt1);
-  const opt2 = document.createElement('option');
-  opt2.value = c; opt2.textContent = etiquetasCat[c];
-  document.getElementById('edit-categoria').appendChild(opt2);
+// --- Categorías: por defecto o las que el usuario haya personalizado ---
+function slugify(s) {
+  return String(s).trim().toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || ('cat_' + Date.now());
+}
+function cargarCategorias() {
+  const guardadas = config.categorias;
+  if (Array.isArray(guardadas) && guardadas.length > 0) {
+    CATEGORIAS = guardadas.map(function(c) { return c.id; });
+    etiquetasCat = {};
+    guardadas.forEach(function(c) { etiquetasCat[c.id] = c.label; });
+  }
+}
+function guardarCategorias() {
+  const arr = CATEGORIAS.map(function(id) { return { id: id, label: etiquetasCat[id] }; });
+  config.categorias = arr;
+  apiPost({ action: 'set-config', key: 'categorias', value: arr });
+}
+function poblarSelectsCategoria() {
+  ['categoria', 'edit-categoria'].forEach(function(id) {
+    const sel = document.getElementById(id);
+    const prev = sel.value;
+    sel.innerHTML = '';
+    CATEGORIAS.forEach(function(c) {
+      const opt = document.createElement('option');
+      opt.value = c; opt.textContent = etiquetasCat[c];
+      sel.appendChild(opt);
+    });
+    if (CATEGORIAS.indexOf(prev) !== -1) sel.value = prev;
+  });
+}
+function renderAjustesCategorias() {
+  document.getElementById('ajustes-categorias').innerHTML = CATEGORIAS.map(function(c) {
+    return '<span class="ajustes-cat-chip">' + etiquetasCat[c] + ' <button type="button" class="cat-x" data-catid="' + c + '">✕</button></span>';
+  }).join('');
+  document.querySelectorAll('.cat-x').forEach(function(btn) {
+    btn.addEventListener('click', function() { eliminarCategoria(btn.dataset.catid); });
+  });
+}
+function eliminarCategoria(id) {
+  if (CATEGORIAS.length <= 1) { showToast('Debes tener al menos una categoría', true); return; }
+  CATEGORIAS = CATEGORIAS.filter(function(c) { return c !== id; });
+  delete etiquetasCat[id];
+  guardarCategorias();
+  poblarSelectsCategoria();
+  renderAjustesCategorias();
+  render();
+  showToast('Categoría eliminada');
+}
+document.getElementById('btn-agregar-categoria').addEventListener('click', function() {
+  const input = document.getElementById('cat-nueva-input');
+  const label = input.value.trim();
+  if (!label) return;
+  const id = slugify(label);
+  if (CATEGORIAS.indexOf(id) !== -1) { showToast('Esa categoría ya existe', true); return; }
+  CATEGORIAS.push(id);
+  etiquetasCat[id] = label;
+  input.value = '';
+  guardarCategorias();
+  poblarSelectsCategoria();
+  renderAjustesCategorias();
+  render();
+  showToast('Categoría agregada');
 });
-document.getElementById('ajustes-categorias').innerHTML = CATEGORIAS.map(function(c) {
-  return '<span class="ajustes-cat-chip">' + etiquetasCat[c] + '</span>';
-}).join('');
+
+poblarSelectsCategoria();
+renderAjustesCategorias();
 
 document.getElementById('fecha').valueAsDate = new Date();
 
@@ -995,21 +1203,27 @@ document.getElementById('greeting').textContent =
   (hora < 12 ? 'Buenos días' : hora < 19 ? 'Buenas tardes' : 'Buenas noches');
 
 // --- Navegación entre pantallas (tipo app, con animación) ---
-document.querySelectorAll('.nav-btn').forEach(function(btn) {
-  btn.addEventListener('click', function() {
-    const destino = btn.dataset.screen;
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b === btn));
-    document.querySelectorAll('.screen').forEach(function(s) {
-      s.classList.toggle('active', s.id === 'screen-' + destino);
-    });
-    window.scrollTo(0, 0);
+function mostrarPantalla(pantalla) {
+  document.querySelectorAll('.nav-btn').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.screen === pantalla);
   });
-});
-function irA(pantalla) {
-  document.querySelector('.nav-btn[data-screen="' + pantalla + '"]').click();
+  document.querySelectorAll('.screen').forEach(function(s) {
+    s.classList.toggle('active', s.id === 'screen-' + pantalla);
+  });
+  window.scrollTo(0, 0);
+  // recalcula la posición de los toggles: si la pantalla estaba oculta,
+  // el ancho de sus botones era 0 y el indicador quedaba mal colocado.
+  togglePeriodo.set(togglePeriodo.get());
+  togglePresu.set(togglePresu.get());
+  toggleAdd.set(toggleAdd.get());
 }
+document.querySelectorAll('.nav-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() { mostrarPantalla(btn.dataset.screen); });
+});
+function irA(pantalla) { mostrarPantalla(pantalla); }
 document.getElementById('preview-card').addEventListener('click', function() { irA('analisis'); });
 document.getElementById('btn-ir-ajustes-presu').addEventListener('click', function() { irA('ajustes'); });
+document.getElementById('btn-ajustes-inicio').addEventListener('click', function() { irA('ajustes'); });
 
 // --- Info genérico (sheets con "?") ---
 function mostrarInfo(titulo, texto) {
@@ -1103,26 +1317,27 @@ document.getElementById('saldo-guardar').addEventListener('click', function() {
   document.getElementById('overlay-saldo').classList.remove('show');
 });
 
-// --- Frecuencia de pago: mostrar/ocultar campos según selección ---
+// --- Frecuencia de pago: mostrar/ocultar campos según selección. Se usa
+// tanto en Ajustes como en el sheet propio de "Editar meta" del Presupuesto. ---
 document.getElementById('frecuencia-pago').addEventListener('change', function() {
-  actualizarCamposFrecuencia(this.value);
+  actualizarCamposFrecuencia(this.value, 'campo-frecuencia-quincenal', 'campo-frecuencia-semanal');
 });
-function actualizarCamposFrecuencia(freq) {
-  document.getElementById('campo-frecuencia-quincenal').classList.toggle('campo-oculto', freq !== 'quincenal');
-  document.getElementById('campo-frecuencia-semanal').classList.toggle('campo-oculto', freq !== 'semanal');
+document.getElementById('meta-frecuencia-edit').addEventListener('change', function() {
+  actualizarCamposFrecuencia(this.value, 'meta-campo-quincenal-edit', 'meta-campo-semanal-edit');
+});
+function actualizarCamposFrecuencia(freq, idQuincenal, idSemanal) {
+  document.getElementById(idQuincenal).classList.toggle('campo-oculto', freq !== 'quincenal');
+  document.getElementById(idSemanal).classList.toggle('campo-oculto', freq !== 'semanal');
 }
 
-document.getElementById('btn-guardar-meta-ajustes').addEventListener('click', function() {
-  const val = parseFloat(document.getElementById('meta-ahorro-input').value);
-  if (isNaN(val) || val < 0) { showToast('Ingresa una meta válida', true); return; }
-  const freq = document.getElementById('frecuencia-pago').value;
+function aplicarYGuardarMeta(val, freq, dia1, dia2, semanaDia) {
   config.metaAhorro = val;
   config.frecuenciaPago = freq;
   if (freq === 'quincenal') {
-    config.quincenaDia1 = parseInt(document.getElementById('quincena-dia1').value, 10) || 1;
-    config.quincenaDia2 = parseInt(document.getElementById('quincena-dia2').value, 10) || 16;
+    config.quincenaDia1 = dia1;
+    config.quincenaDia2 = dia2;
   } else if (freq === 'semanal') {
-    config.semanaDia = parseInt(document.getElementById('semana-dia').value, 10);
+    config.semanaDia = semanaDia;
   }
   actualizarTextosPeriodo();
   render();
@@ -1132,6 +1347,15 @@ document.getElementById('btn-guardar-meta-ajustes').addEventListener('click', fu
   apiPost({ action: 'set-config', key: 'quincenaDia1', value: config.quincenaDia1 || 1 });
   apiPost({ action: 'set-config', key: 'quincenaDia2', value: config.quincenaDia2 || 16 });
   apiPost({ action: 'set-config', key: 'semanaDia', value: config.semanaDia !== undefined ? config.semanaDia : 5 });
+}
+
+document.getElementById('btn-guardar-meta-ajustes').addEventListener('click', function() {
+  const val = parseFloat(document.getElementById('meta-ahorro-input').value);
+  if (isNaN(val) || val < 0) { showToast('Ingresa una meta válida', true); return; }
+  aplicarYGuardarMeta(val, document.getElementById('frecuencia-pago').value,
+    parseInt(document.getElementById('quincena-dia1').value, 10) || 1,
+    parseInt(document.getElementById('quincena-dia2').value, 10) || 16,
+    parseInt(document.getElementById('semana-dia').value, 10));
 });
 
 document.getElementById('btn-guardar-saldo-ajustes').addEventListener('click', function() {
@@ -1143,7 +1367,33 @@ document.getElementById('btn-guardar-saldo-ajustes').addEventListener('click', f
   apiPost({ action: 'set-config', key: 'saldoAhorrado', value: val });
 });
 
-document.getElementById('btn-editar-meta').addEventListener('click', function() { irA('ajustes'); });
+// --- Editar meta desde el Presupuesto: sheet propio, no manda a Ajustes ---
+document.getElementById('btn-editar-meta').addEventListener('click', function() {
+  document.getElementById('meta-monto-edit').value = config.metaAhorro || '';
+  const freq = config.frecuenciaPago || 'quincenal';
+  document.getElementById('meta-frecuencia-edit').value = freq;
+  actualizarCamposFrecuencia(freq, 'meta-campo-quincenal-edit', 'meta-campo-semanal-edit');
+  document.getElementById('meta-quincena-dia1-edit').value = config.quincenaDia1 || 1;
+  document.getElementById('meta-quincena-dia2-edit').value = config.quincenaDia2 || 16;
+  document.getElementById('meta-semana-dia-edit').value = config.semanaDia !== undefined ? config.semanaDia : 5;
+  document.getElementById('overlay-meta').classList.add('show');
+});
+document.getElementById('meta-close').addEventListener('click', function() {
+  document.getElementById('overlay-meta').classList.remove('show');
+});
+document.getElementById('overlay-meta').addEventListener('click', function(e) {
+  if (e.target.id === 'overlay-meta') this.classList.remove('show');
+});
+document.getElementById('btn-guardar-meta-overlay').addEventListener('click', function() {
+  const val = parseFloat(document.getElementById('meta-monto-edit').value);
+  if (isNaN(val) || val < 0) { showToast('Ingresa una meta válida', true); return; }
+  aplicarYGuardarMeta(val, document.getElementById('meta-frecuencia-edit').value,
+    parseInt(document.getElementById('meta-quincena-dia1-edit').value, 10) || 1,
+    parseInt(document.getElementById('meta-quincena-dia2-edit').value, 10) || 16,
+    parseInt(document.getElementById('meta-semana-dia-edit').value, 10));
+  cargarFormAjustes();
+  document.getElementById('overlay-meta').classList.remove('show');
+});
 
 function cargarFormAjustes() {
   document.getElementById('perfil-nombre').value = config.perfilNombre || '';
@@ -1151,7 +1401,7 @@ function cargarFormAjustes() {
   document.getElementById('meta-ahorro-input').value = config.metaAhorro || '';
   const freq = config.frecuenciaPago || 'quincenal';
   document.getElementById('frecuencia-pago').value = freq;
-  actualizarCamposFrecuencia(freq);
+  actualizarCamposFrecuencia(freq, 'campo-frecuencia-quincenal', 'campo-frecuencia-semanal');
   document.getElementById('quincena-dia1').value = config.quincenaDia1 || 1;
   document.getElementById('quincena-dia2').value = config.quincenaDia2 || 16;
   document.getElementById('semana-dia').value = config.semanaDia !== undefined ? config.semanaDia : 5;
@@ -1217,6 +1467,88 @@ document.getElementById('overlay-filtros').addEventListener('click', function(e)
   if (e.target.id === 'overlay-filtros') this.classList.remove('show');
 });
 
+// --- Mostrar/ocultar y reordenar las secciones de Inicio ---
+function ordenInicioActual() {
+  const keys = SECCIONES_INICIO.map(function(s) { return s.key; });
+  const guardado = config.inicioOrden;
+  if (Array.isArray(guardado) && guardado.length) {
+    const valido = guardado.filter(function(k) { return keys.indexOf(k) !== -1; });
+    keys.forEach(function(k) { if (valido.indexOf(k) === -1) valido.push(k); });
+    return valido;
+  }
+  return keys.slice();
+}
+function filtrosInicioActuales() {
+  const f = config.inicioFiltros || {};
+  const out = {};
+  SECCIONES_INICIO.forEach(function(s) { out[s.key] = f[s.key] !== false; });
+  return out;
+}
+function aplicarOrdenYFiltrosInicio() {
+  const orden = ordenInicioActual();
+  const vis = filtrosInicioActuales();
+  const cont = document.getElementById('inicio-secciones');
+  orden.forEach(function(key) {
+    const el = document.getElementById('seccion-' + key);
+    if (!el) return;
+    el.style.display = vis[key] ? '' : 'none';
+    cont.appendChild(el);
+  });
+}
+function guardarInicioConfig() {
+  apiPost({ action: 'set-config', key: 'inicioOrden', value: config.inicioOrden || ordenInicioActual() });
+  apiPost({ action: 'set-config', key: 'inicioFiltros', value: config.inicioFiltros || {} });
+}
+function renderFiltrosInicioUI() {
+  const orden = ordenInicioActual();
+  const vis = filtrosInicioActuales();
+  const cont = document.getElementById('filtros-inicio-lista');
+  cont.innerHTML = orden.map(function(key, i) {
+    const s = SECCIONES_INICIO.filter(function(x) { return x.key === key; })[0];
+    return '<div class="reorder-row">' +
+      '<label class="switch"><input type="checkbox" data-inicio-filtro="' + key + '"' + (vis[key] ? ' checked' : '') + '><span class="slider"></span></label>' +
+      '<span>' + s.label + '</span>' +
+      '<div class="reorder-arrows">' +
+        '<button type="button" data-mover="' + key + '" data-dir="up"' + (i === 0 ? ' disabled' : '') + ' aria-label="Subir"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg></button>' +
+        '<button type="button" data-mover="' + key + '" data-dir="down"' + (i === orden.length - 1 ? ' disabled' : '') + ' aria-label="Bajar"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  cont.querySelectorAll('[data-inicio-filtro]').forEach(function(chk) {
+    chk.addEventListener('change', function() {
+      if (!config.inicioFiltros) config.inicioFiltros = {};
+      config.inicioFiltros[chk.dataset.inicioFiltro] = chk.checked;
+      guardarInicioConfig();
+      aplicarOrdenYFiltrosInicio();
+    });
+  });
+  cont.querySelectorAll('[data-mover]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const key = btn.dataset.mover;
+      const dir = btn.dataset.dir;
+      const orden = ordenInicioActual();
+      const idx = orden.indexOf(key);
+      const swapWith = dir === 'up' ? idx - 1 : idx + 1;
+      if (swapWith < 0 || swapWith >= orden.length) return;
+      const tmp = orden[idx]; orden[idx] = orden[swapWith]; orden[swapWith] = tmp;
+      config.inicioOrden = orden;
+      guardarInicioConfig();
+      aplicarOrdenYFiltrosInicio();
+      renderFiltrosInicioUI();
+    });
+  });
+}
+document.getElementById('btn-filtros-inicio').addEventListener('click', function() {
+  renderFiltrosInicioUI();
+  document.getElementById('overlay-filtros-inicio').classList.add('show');
+});
+document.getElementById('filtros-inicio-close').addEventListener('click', function() {
+  document.getElementById('overlay-filtros-inicio').classList.remove('show');
+});
+document.getElementById('overlay-filtros-inicio').addEventListener('click', function(e) {
+  if (e.target.id === 'overlay-filtros-inicio') this.classList.remove('show');
+});
+
 // --- Toggle quincena / mensual: reutilizado en Análisis y en Presupuesto ---
 function crearTogglePeriodo(toggleEl, indicatorEl, onChange) {
   let actual = 'quincena';
@@ -1250,7 +1582,7 @@ const togglePresu = crearTogglePeriodo(
   document.getElementById('period-indicator-presu'),
   function(p) { modoPresupuesto = p; renderPresupuesto(); }
 );
-togglePresu.set('mensual');
+togglePresu.set('quincena');
 
 window.addEventListener('resize', function() {
   toggleAdd.set(toggleAdd.get());
@@ -1266,10 +1598,14 @@ function cargarDatos() {
     if (resMov && resMov.ok) {
       gastos = resMov.data || [];
       config = (resCfg && resCfg.ok && resCfg.data) || {};
+      cargarCategorias();
+      poblarSelectsCategoria();
+      renderAjustesCategorias();
       cargarFormAjustes();
       actualizarTextosPeriodo();
       renderFiltrosUI();
       aplicarFiltros();
+      aplicarOrdenYFiltrosInicio();
       render();
       revisarCierre();
     } else {
@@ -1662,10 +1998,10 @@ function renderAnalisis() {
   }
 }
 
-// --- Gasto por categoría (Análisis) ---
+// --- Gasto por categoría: se muestra igual en Análisis y como resumen en Inicio ---
 function renderGastoPorCategoria() {
-  const wrap = document.getElementById('cat-chart-wrap');
-  if (!wrap) return;
+  const destinos = ['cat-chart-wrap', 'inicio-cat-wrap'].map(function(id) { return document.getElementById(id); }).filter(Boolean);
+  if (!destinos.length) return;
   const periodo = periodoDe(hoyISO(), modoAnalisis);
   const porCat = {};
   CATEGORIAS.forEach(function(c) { porCat[c] = 0; });
@@ -1676,43 +2012,46 @@ function renderGastoPorCategoria() {
     if (!p || !periodo || p.key !== periodo.key) return;
     if (porCat.hasOwnProperty(g.categoria)) { porCat[g.categoria] += Number(g.monto) || 0; total += Number(g.monto) || 0; }
   });
+  let html;
   if (total === 0) {
-    wrap.innerHTML = '<div class="chart-empty">Sin gastos categorizados en este periodo</div>';
-    return;
+    html = '<div class="chart-empty">Sin gastos categorizados en este periodo</div>';
+  } else {
+    const filas = CATEGORIAS.map(function(c) { return { cat: c, monto: porCat[c] }; })
+      .filter(function(f) { return f.monto > 0; })
+      .sort(function(a, b) { return b.monto - a.monto; });
+    html = filas.map(function(f) {
+      const pct = Math.round((f.monto / total) * 100);
+      return '<div class="budget-row" style="cursor:default">' +
+        '<div class="budget-row-top">' +
+          '<span class="budget-cat">' + etiquetasCat[f.cat] + '</span>' +
+          '<span class="budget-amt"><b>' + fmtCompact(f.monto) + '</b> · ' + pct + '%</span>' +
+        '</div>' +
+        '<div class="budget-bar"><div class="budget-bar-fill" style="width:' + pct + '%;background:var(--accent)"></div></div>' +
+      '</div>';
+    }).join('');
   }
-  const filas = CATEGORIAS.map(function(c) { return { cat: c, monto: porCat[c] }; })
-    .filter(function(f) { return f.monto > 0; })
-    .sort(function(a, b) { return b.monto - a.monto; });
-  wrap.innerHTML = filas.map(function(f) {
-    const pct = Math.round((f.monto / total) * 100);
-    return '<div class="budget-row" style="cursor:default">' +
-      '<div class="budget-row-top">' +
-        '<span class="budget-cat">' + etiquetasCat[f.cat] + '</span>' +
-        '<span class="budget-amt"><b>' + fmtCompact(f.monto) + '</b> · ' + pct + '%</span>' +
-      '</div>' +
-      '<div class="budget-bar"><div class="budget-bar-fill" style="width:' + pct + '%;background:var(--accent)"></div></div>' +
-    '</div>';
-  }).join('');
+  destinos.forEach(function(wrap) { wrap.innerHTML = html; });
 }
 
-// --- Promedio de gasto (Análisis) ---
+// --- Promedio de gasto: se muestra igual en Análisis y como resumen en Inicio ---
 function renderPromedios() {
-  const wrap = document.getElementById('promedios-wrap');
-  if (!wrap) return;
+  const destinos = ['promedios-wrap', 'inicio-promedios-wrap'].map(function(id) { return document.getElementById(id); }).filter(Boolean);
+  if (!destinos.length) return;
   const periodosCortos = agruparPorPeriodo('quincena');
   const promCorto = periodosCortos.length ? periodosCortos.reduce(function(s, p) { return s + p.gasto; }, 0) / periodosCortos.length : 0;
   const now = new Date();
   const t = totalesDelMes(now.getFullYear() + '-' + now.getMonth());
   const promDiario = now.getDate() > 0 ? t.gasto / now.getDate() : 0;
-  wrap.innerHTML =
+  const html =
     '<div class="stat-tile"><div class="stat-lbl">Gasto prom. ' + nombreFrecuenciaCorta().toLowerCase() + '</div><div class="stat-val">' + fmtCompact(promCorto) + '</div></div>' +
     '<div class="stat-tile"><div class="stat-lbl">Gasto prom. diario</div><div class="stat-val">' + fmtCompact(promDiario) + '</div></div>';
+  destinos.forEach(function(wrap) { wrap.innerHTML = html; });
 }
 
-// --- Ahorro a través del tiempo (Análisis) ---
+// --- Ahorro a través del tiempo: se muestra igual en Análisis y como resumen en Inicio ---
 function renderAhorroTiempo() {
-  const wrap = document.getElementById('ahorro-chart-wrap');
-  if (!wrap) return;
+  const destinos = ['ahorro-chart-wrap', 'inicio-ahorro-wrap'].map(function(id) { return document.getElementById(id); }).filter(Boolean);
+  if (!destinos.length) return;
   const porMes = {};
   gastos.forEach(function(g) {
     if (g.tipo !== 'ahorro') return;
@@ -1726,39 +2065,40 @@ function renderAhorroTiempo() {
     return { y: y, m: m, monto: porMes[k], start: new Date(y, m, 1).getTime() };
   }).sort(function(a, b) { return a.start - b.start; });
 
+  let html;
   if (meses.length === 0) {
-    wrap.innerHTML = '<div class="chart-empty">Aún no hay ahorro registrado</div>';
-    return;
+    html = '<div class="chart-empty">Aún no hay ahorro registrado</div>';
+  } else {
+    let acumulado = Number(config.saldoAhorrado) || 0;
+    let puntos = meses.map(function(mo) {
+      acumulado += mo.monto;
+      return { label: mesesCortos[mo.m] + ' ' + String(mo.y).slice(2), valor: acumulado };
+    });
+    puntos = puntos.slice(-6);
+
+    const W = 320, H = 140, padT = 14;
+    const maxVal = Math.max(1, ...puntos.map(function(p) { return p.valor; }));
+    const stepX = puntos.length > 1 ? W / (puntos.length - 1) : 0;
+
+    let path = '';
+    puntos.forEach(function(p, i) {
+      const x = puntos.length === 1 ? W / 2 : i * stepX;
+      const y = padT + (H - padT) * (1 - p.valor / maxVal);
+      path += (i === 0 ? 'M' : 'L') + x + ',' + y + ' ';
+    });
+
+    let svg = '<svg viewBox="0 0 ' + W + ' ' + (H + 22) + '" width="100%" height="' + (H + 22) + '" preserveAspectRatio="xMidYMid meet">';
+    svg += '<path d="' + path.trim() + '" fill="none" stroke="var(--accent-2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>';
+    puntos.forEach(function(p, i) {
+      const x = puntos.length === 1 ? W / 2 : i * stepX;
+      const y = padT + (H - padT) * (1 - p.valor / maxVal);
+      svg += '<circle cx="' + x + '" cy="' + y + '" r="4" fill="var(--accent-2)" stroke="var(--bg-2)" stroke-width="2"/>';
+      svg += '<text x="' + x + '" y="' + (H + 16) + '" text-anchor="middle" font-size="9" fill="var(--muted)" font-family="Manrope, sans-serif">' + p.label + '</text>';
+    });
+    svg += '</svg>';
+    html = svg;
   }
-
-  let acumulado = Number(config.saldoAhorrado) || 0;
-  let puntos = meses.map(function(mo) {
-    acumulado += mo.monto;
-    return { label: mesesCortos[mo.m] + ' ' + String(mo.y).slice(2), valor: acumulado };
-  });
-  puntos = puntos.slice(-6);
-
-  const W = 320, H = 140, padT = 14;
-  const maxVal = Math.max(1, ...puntos.map(function(p) { return p.valor; }));
-  const stepX = puntos.length > 1 ? W / (puntos.length - 1) : 0;
-
-  let path = '';
-  puntos.forEach(function(p, i) {
-    const x = puntos.length === 1 ? W / 2 : i * stepX;
-    const y = padT + (H - padT) * (1 - p.valor / maxVal);
-    path += (i === 0 ? 'M' : 'L') + x + ',' + y + ' ';
-  });
-
-  let svg = '<svg viewBox="0 0 ' + W + ' ' + (H + 22) + '" width="100%" height="' + (H + 22) + '" preserveAspectRatio="xMidYMid meet">';
-  svg += '<path d="' + path.trim() + '" fill="none" stroke="var(--accent-2)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>';
-  puntos.forEach(function(p, i) {
-    const x = puntos.length === 1 ? W / 2 : i * stepX;
-    const y = padT + (H - padT) * (1 - p.valor / maxVal);
-    svg += '<circle cx="' + x + '" cy="' + y + '" r="4" fill="var(--accent-2)" stroke="var(--bg-2)" stroke-width="2"/>';
-    svg += '<text x="' + x + '" y="' + (H + 16) + '" text-anchor="middle" font-size="9" fill="var(--muted)" font-family="Manrope, sans-serif">' + p.label + '</text>';
-  });
-  svg += '</svg>';
-  wrap.innerHTML = svg;
+  destinos.forEach(function(wrap) { wrap.innerHTML = html; });
 }
 
 function render() {
@@ -1918,16 +2258,39 @@ function calcularPresupuesto(modo) {
   const restante = Math.max(0, disponibleGasto - sumaManual);
   const pesoAutoTotal = automaticas.reduce(function(s, c) { return s + pesoBase[c]; }, 0);
 
-  const filas = CATEGORIAS.map(function(c) {
-    let limite;
+  const limites = {};
+  CATEGORIAS.forEach(function(c) {
     if (overrides.hasOwnProperty(c)) {
-      limite = Number(overrides[c]);
+      limites[c] = Number(overrides[c]);
     } else if (pesoAutoTotal > 0) {
-      limite = Math.round(restante * (pesoBase[c] / pesoAutoTotal));
+      limites[c] = Math.round(restante * (pesoBase[c] / pesoAutoTotal));
     } else {
-      limite = 0;
+      limites[c] = 0;
     }
-    return { cat: c, limite: limite, gastado: gastadoPorCat[c], manual: overrides.hasOwnProperty(c) };
+  });
+
+  // Si una categoría se pasa de su límite, se le da lo que realmente gastó y
+  // el excedente se resta de las categorías automáticas que todavía tienen
+  // espacio libre, para que la suma de todos los límites nunca cambie.
+  for (let iter = 0; iter < CATEGORIAS.length; iter++) {
+    const sobregiradas = CATEGORIAS.filter(function(c) { return gastadoPorCat[c] > limites[c]; });
+    if (sobregiradas.length === 0) break;
+    let excedente = 0;
+    sobregiradas.forEach(function(c) { excedente += gastadoPorCat[c] - limites[c]; limites[c] = gastadoPorCat[c]; });
+    const candidatas = automaticas.filter(function(c) {
+      return sobregiradas.indexOf(c) === -1 && limites[c] > gastadoPorCat[c];
+    });
+    const espacioTotal = candidatas.reduce(function(s, c) { return s + (limites[c] - gastadoPorCat[c]); }, 0);
+    if (espacioTotal <= 0 || candidatas.length === 0) break;
+    candidatas.forEach(function(c) {
+      const espacio = limites[c] - gastadoPorCat[c];
+      const quitar = excedente * (espacio / espacioTotal);
+      limites[c] = Math.max(gastadoPorCat[c], Math.round(limites[c] - quitar));
+    });
+  }
+
+  const filas = CATEGORIAS.map(function(c) {
+    return { cat: c, limite: limites[c], gastado: gastadoPorCat[c], manual: overrides.hasOwnProperty(c) };
   });
 
   return {
@@ -1947,33 +2310,30 @@ function renderPresupuesto() {
     return;
   }
   setupCard.style.display = 'none';
+  const eraOculta = card.style.display === 'none';
   card.style.display = 'block';
+  if (eraOculta) togglePresu.set(togglePresu.get());
 
   const p = calcularPresupuesto(modoPresupuesto);
   document.getElementById('meta-ahorro-txt').textContent = fmtCompact(Number(config.metaAhorro) || 0);
 
-  const resumenEl = document.getElementById('presupuesto-resumen');
   const list = document.getElementById('presupuesto-list');
-  const alertas = document.getElementById('presupuesto-alertas');
-  const gastoPermitidoLbl = document.getElementById('gasto-permitido-lbl');
-  const gastoPermitidoNum = document.getElementById('gasto-permitido-num');
-  const etiquetaPeriodo = modoPresupuesto === 'quincena' ? nombreFrecuenciaCorta().toLowerCase() : 'mensual';
-  gastoPermitidoLbl.textContent = 'Gasto permitido (' + etiquetaPeriodo + ')';
+  const totalRow = document.getElementById('presupuesto-total-row');
+  const totalTxt = document.getElementById('presupuesto-total-txt');
+  const totalFill = document.getElementById('presupuesto-total-fill');
+  const warningEl = document.getElementById('presupuesto-warning');
+
+  document.getElementById('btn-info-presupuesto').onclick = function() {
+    mostrarInfo('Tu presupuesto', 'Ingresaste ' + fmt(p.ingresoPeriodo) + ' y tu meta de ahorro para ' + p.periodoLabel + ' es ' + fmt(p.metaAhorroPeriodo) + '.');
+  };
 
   if (p.disponibleGasto <= 0) {
-    gastoPermitidoNum.textContent = fmt(0);
-    resumenEl.innerHTML = 'Todavía no completas lo suficiente para ahorrar esta meta, sigue registrando tus ingresos. Ingresos: ' + fmt(p.ingresoPeriodo) +
-      ' <button type="button" class="info-btn" id="btn-info-nadap">?</button>';
-    list.innerHTML = '';
-    alertas.innerHTML = '';
-    document.getElementById('btn-info-nadap').addEventListener('click', function() {
-      mostrarInfo('¿Qué significa esto?', 'Tu meta de ahorro para este periodo es mayor a lo que has ingresado. Cuando registres más ingresos, tu presupuesto por categoría va a aparecer solo.');
-    });
+    list.innerHTML = '<div class="sheet-text">Todavía no completas lo suficiente para ahorrar esta meta, sigue registrando tus ingresos. Ingresos: ' + fmt(p.ingresoPeriodo) + '</div>';
+    totalRow.style.display = 'none';
+    warningEl.style.display = 'none';
     return;
   }
-
-  gastoPermitidoNum.textContent = fmt(p.disponibleGasto);
-  resumenEl.textContent = 'Ingresaste ' + fmt(p.ingresoPeriodo) + ' y tu meta de ahorro para ' + p.periodoLabel + ' es ' + fmt(p.metaAhorroPeriodo) + '.';
+  totalRow.style.display = 'block';
 
   list.innerHTML = p.filas.map(function(f) {
     const pct = f.limite > 0 ? Math.min(100, (f.gastado / f.limite) * 100) : (f.gastado > 0 ? 100 : 0);
@@ -1991,57 +2351,22 @@ function renderPresupuesto() {
     row.addEventListener('click', function() { abrirEditarCategoria(row.dataset.cat); });
   });
 
-  const sobregiros = p.filas.filter(function(f) { return f.gastado > f.limite; });
-  alertas.innerHTML = sobregiros.map(function(f) {
-    const exceso = f.gastado - f.limite;
-    return '<div class="budget-alert"><b>Te pasaste por ' + fmt(exceso) + '</b> en ' + etiquetasCat[f.cat] + '.' +
-      '<button type="button" class="btn-ghost" data-cubrir-cat="' + f.cat + '" data-cubrir-exceso="' + exceso + '">Cubrir desde otra categoría</button></div>';
-  }).join('');
-  alertas.querySelectorAll('[data-cubrir-cat]').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      abrirCubrir(btn.dataset.cubrirCat, parseFloat(btn.dataset.cubrirExceso));
-    });
-  });
-}
+  const totalGastado = p.filas.reduce(function(s, f) { return s + f.gastado; }, 0);
+  const totalLimite = p.filas.reduce(function(s, f) { return s + f.limite; }, 0);
+  const pctTotal = totalLimite > 0 ? Math.min(100, (totalGastado / totalLimite) * 100) : 0;
+  totalTxt.innerHTML = '<b>' + fmtCompact(totalGastado) + '</b> de ' + fmtCompact(totalLimite);
+  totalFill.style.width = pctTotal + '%';
+  totalFill.classList.toggle('over', totalGastado > totalLimite);
 
-document.getElementById('cubrir-close').addEventListener('click', function() {
-  document.getElementById('overlay-cubrir').classList.remove('show');
-});
-document.getElementById('overlay-cubrir').addEventListener('click', function(e) {
-  if (e.target.id === 'overlay-cubrir') this.classList.remove('show');
-});
-function abrirCubrir(catExceso, excesoMonto) {
-  const p = calcularPresupuesto(modoPresupuesto);
-  const opciones = p.filas.filter(function(f) { return f.cat !== catExceso; });
-  document.getElementById('cubrir-info').textContent =
-    'Vas a mover ' + fmt(excesoMonto) + ' de otra categoría hacia ' + etiquetasCat[catExceso] + '. Toca de cuál.';
-  const cont = document.getElementById('cubrir-lista');
-  cont.innerHTML = opciones.map(function(f) {
-    return '<div class="budget-row" data-cat="' + f.cat + '">' +
-      '<div class="budget-row-top">' +
-        '<span class="budget-cat">' + etiquetasCat[f.cat] + '</span>' +
-        '<span class="budget-amt">' + fmtCompact(f.limite) + '</span>' +
-      '</div>' +
-    '</div>';
-  }).join('');
-  cont.querySelectorAll('.budget-row').forEach(function(row) {
-    row.addEventListener('click', function() {
-      const otra = row.dataset.cat;
-      const p2 = calcularPresupuesto(modoPresupuesto);
-      const filaExceso = p2.filas.find(function(f) { return f.cat === catExceso; });
-      const filaOtra = p2.filas.find(function(f) { return f.cat === otra; });
-      const nuevoOtra = Math.max(0, filaOtra.limite - excesoMonto);
-      if (!config.categoriaOverrides) config.categoriaOverrides = {};
-      if (!config.categoriaOverrides[p2.overrideKey]) config.categoriaOverrides[p2.overrideKey] = {};
-      config.categoriaOverrides[p2.overrideKey][catExceso] = Math.round(filaExceso.gastado);
-      config.categoriaOverrides[p2.overrideKey][otra] = Math.round(nuevoOtra);
-      guardarOverrides();
-      renderPresupuesto();
-      document.getElementById('overlay-cubrir').classList.remove('show');
-      showToast('Presupuesto ajustado');
-    });
-  });
-  document.getElementById('overlay-cubrir').classList.add('show');
+  if (totalLimite > 0 && totalGastado > totalLimite) {
+    warningEl.style.display = 'block';
+    warningEl.textContent = 'Ya alcanzaste tu límite de gasto para este periodo.';
+  } else if (totalLimite > 0 && totalGastado >= totalLimite * 0.9) {
+    warningEl.style.display = 'block';
+    warningEl.textContent = 'Estás cerca de alcanzar tu límite de gasto para este periodo.';
+  } else {
+    warningEl.style.display = 'none';
+  }
 }
 
 function guardarOverrides() {
