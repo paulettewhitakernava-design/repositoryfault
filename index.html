@@ -62,7 +62,7 @@ button, input, .item, .nav-btn { touch-action: manipulation; }
 @keyframes fadeOut { to { opacity: 0; transform: translateX(24px) scale(0.97); } }
 @keyframes pop { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 @keyframes shimmer { 0% { background-position: -200px 0; } 100% { background-position: 200px 0; } }
-@keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+@keyframes sheetPop { from { opacity: 0; transform: scale(0.94) translateY(6px); } to { opacity: 1; transform: scale(1) translateY(0); } }
 @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes blurIn { from { opacity: 0; filter: blur(9px); transform: translateY(6px); } to { opacity: 1; filter: blur(0); transform: translateY(0); } }
 @keyframes screenIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -451,25 +451,25 @@ select option { background: var(--card-solid); color: var(--ink); }
   box-shadow: 0 8px 20px -8px rgba(0,0,0,0.5);
 }
 
-/* ---- Bottom sheets ---- */
+/* ---- Ventanas emergentes (centradas) ---- */
 .overlay {
   position: fixed; inset: 0; background: var(--overlay);
-  z-index: 40; display: none; align-items: flex-end; justify-content: center;
+  z-index: 40; display: none; align-items: center; justify-content: center;
   animation: overlayIn 0.2s ease;
+  padding: 20px;
 }
 .overlay.show { display: flex; }
 .sheet {
-  width: 100%; max-width: 480px;
-  max-height: 85vh;
+  width: 100%; max-width: 420px;
+  max-height: 82vh;
   overflow-y: auto;
   background: var(--card-solid);
   border: 1px solid var(--line);
-  border-bottom: none;
-  border-radius: 26px 26px 0 0;
-  padding: 14px 22px calc(26px + var(--safe-b));
-  animation: sheetUp 0.28s cubic-bezier(.32,.72,0,1);
+  border-radius: 24px;
+  padding: 22px;
+  animation: sheetPop 0.22s cubic-bezier(.32,.72,0,1);
 }
-.sheet-handle { width: 36px; height: 4px; border-radius: 999px; background: var(--line); margin: 0 auto 18px; }
+.sheet-handle { display: none; }
 .sheet-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
 .sheet-head h2 { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 500; margin: 0; }
 .sheet-close {
@@ -478,7 +478,7 @@ select option { background: var(--card-solid); color: var(--ink); }
 }
 .sheet form { margin-bottom: 0; gap: 16px; }
 .sheet-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
-.sheet-text { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 4px; }
+.sheet-text { font-size: 13.5px; color: var(--muted); line-height: 1.65; margin-bottom: 4px; white-space: pre-line; }
 
 /* ---- Presupuesto por categoría ---- */
 .budget-row { padding: 12px 0; cursor: pointer; }
@@ -554,17 +554,20 @@ select option { background: var(--card-solid); color: var(--ink); }
 .reorder-row {
   display: flex; align-items: center; justify-content: space-between;
   padding: 12px 0; border-bottom: 1px solid var(--line); gap: 10px;
+  touch-action: pan-y;
+  position: relative;
+  background: var(--card-solid);
 }
 .reorder-row:last-child { border-bottom: none; }
 .reorder-row span { font-size: 14px; flex: 1; }
-.reorder-arrows { display: flex; gap: 4px; }
-.reorder-arrows button {
-  width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--line);
-  background: rgba(255,255,255,0.05); color: var(--ink); cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
+.reorder-row.drag-activo {
+  z-index: 5;
+  border-radius: 12px;
+  box-shadow: 0 14px 28px -10px rgba(0,0,0,0.6);
+  transition: none;
 }
-.reorder-arrows button:disabled { opacity: 0.25; cursor: default; }
-.reorder-arrows button svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2.2; }
+.drag-handle { color: var(--muted); display: flex; align-items: center; justify-content: center; padding: 6px; flex-shrink: 0; cursor: grab; }
+.drag-handle svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; }
 
 .total-row { padding-top: 14px; margin-top: 4px; border-top: 1px solid var(--line); }
 .total-row .budget-row-top { font-size: 14px; }
@@ -974,7 +977,7 @@ select option { background: var(--card-solid); color: var(--ink); }
       <h2>Saldo ahorrado <button type="button" class="info-btn" id="btn-info-saldo-2">?</button></h2>
       <button type="button" class="sheet-close" id="saldo-close" aria-label="Cerrar">✕</button>
     </div>
-    <div class="sheet-text">Dinero que ya tenías ahorrado antes de usar Kashly. No afecta tus ingresos, gastos ni disponible.</div>
+    <div class="sheet-text">Dinero que ya tenías ahorrado antes de usar Kashly. No influye en tus ingresos, gastos ni presupuesto disponible.</div>
     <label class="field-label" for="saldo-monto">Monto</label>
     <input type="number" id="saldo-monto" step="0.01" inputmode="decimal">
     <button type="button" class="btn-add" id="saldo-guardar" style="margin-top:16px">Guardar</button>
@@ -1350,11 +1353,11 @@ document.getElementById('overlay-info').addEventListener('click', function(e) {
   if (e.target.id === 'overlay-info') this.classList.remove('show');
 });
 document.getElementById('btn-info-saldo').addEventListener('click', function() {
-  mostrarInfo('Saldo ahorrado', 'Dinero que ya tenías ahorrado antes de usar Kashly. No afecta tus ingresos, gastos ni disponible — se suma directo a tu Total ahorrado.');
+  mostrarInfo('Saldo ahorrado', 'Dinero que ya tenías ahorrado antes de usar Kashly. No influye en tus ingresos, gastos ni presupuesto disponible.\n\nSolo se suma directo a tu Total ahorrado.');
 });
 document.getElementById('btn-info-saldo-2').addEventListener('click', function(e) {
   e.stopPropagation();
-  mostrarInfo('Saldo ahorrado', 'Dinero que ya tenías ahorrado antes de usar Kashly. No afecta tus ingresos, gastos ni disponible — se suma directo a tu Total ahorrado.');
+  mostrarInfo('Saldo ahorrado', 'Dinero que ya tenías ahorrado antes de usar Kashly. No influye en tus ingresos, gastos ni presupuesto disponible.\n\nSolo se suma directo a tu Total ahorrado.');
 });
 
 // --- Tabs: delegated listener, reutilizado por el form de agregar y la hoja de edición ---
@@ -1463,7 +1466,10 @@ function aplicarYGuardarMeta(val, freq, dia1, dia2, semanaDia, ingresoMensual) {
   guardarConSincronizacion({ action: 'set-config', key: 'semanaDia', value: config.semanaDia !== undefined ? config.semanaDia : 5 });
 }
 
-const TEXTO_INFO_INGRESO_MENSUAL = 'Es tu ingreso mensual aproximado (todas tus quincenas o pagos juntos). Kashly lo usa para repartir tu presupuesto entre tus periodos de pago. Después de un mes completo de historial, Kashly deja de usar este número y calcula el promedio real de tus ingresos automáticamente.';
+const TEXTO_INFO_INGRESO_MENSUAL =
+  '¿Qué es?\nTu ingreso mensual aproximado (suma de todas tus quincenas o pagos).\n\n' +
+  '¿Para qué sirve?\nKashly lo usa para repartir tu presupuesto entre tus periodos de pago.\n\n' +
+  '¿Cuándo cambia?\nDespués de un mes completo de historial, Kashly calcula automáticamente el promedio real de tus ingresos y ya no usa este número.';
 document.getElementById('btn-info-ingreso-mensual').addEventListener('click', function() {
   mostrarInfo('Ingreso mensual estimado', TEXTO_INFO_INGRESO_MENSUAL);
 });
@@ -1630,15 +1636,12 @@ function renderFiltrosInicioUI() {
   const orden = ordenInicioActual();
   const vis = filtrosInicioActuales();
   const cont = document.getElementById('filtros-inicio-lista');
-  cont.innerHTML = orden.map(function(key, i) {
+  cont.innerHTML = orden.map(function(key) {
     const s = SECCIONES_INICIO.filter(function(x) { return x.key === key; })[0];
-    return '<div class="reorder-row">' +
+    return '<div class="reorder-row" data-key="' + key + '">' +
       '<label class="switch"><input type="checkbox" data-inicio-filtro="' + key + '"' + (vis[key] ? ' checked' : '') + '><span class="slider"></span></label>' +
       '<span>' + s.label + '</span>' +
-      '<div class="reorder-arrows">' +
-        '<button type="button" data-mover="' + key + '" data-dir="up"' + (i === 0 ? ' disabled' : '') + ' aria-label="Subir"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg></button>' +
-        '<button type="button" data-mover="' + key + '" data-dir="down"' + (i === orden.length - 1 ? ' disabled' : '') + ' aria-label="Bajar"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></button>' +
-      '</div>' +
+      '<span class="drag-handle" aria-hidden="true"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="9" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="9" cy="18" r="1.2" fill="currentColor" stroke="none"/><circle cx="15" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg></span>' +
     '</div>';
   }).join('');
   cont.querySelectorAll('[data-inicio-filtro]').forEach(function(chk) {
@@ -1649,20 +1652,90 @@ function renderFiltrosInicioUI() {
       aplicarOrdenYFiltrosInicio();
     });
   });
-  cont.querySelectorAll('[data-mover]').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      const key = btn.dataset.mover;
-      const dir = btn.dataset.dir;
-      const orden = ordenInicioActual();
-      const idx = orden.indexOf(key);
-      const swapWith = dir === 'up' ? idx - 1 : idx + 1;
-      if (swapWith < 0 || swapWith >= orden.length) return;
-      const tmp = orden[idx]; orden[idx] = orden[swapWith]; orden[swapWith] = tmp;
-      config.inicioOrden = orden;
-      guardarInicioConfig();
-      aplicarOrdenYFiltrosInicio();
-      renderFiltrosInicioUI();
+  habilitarDragReorder(cont, '.reorder-row', function(nuevoOrden) {
+    config.inicioOrden = nuevoOrden;
+    guardarInicioConfig();
+    aplicarOrdenYFiltrosInicio();
+  });
+}
+
+// --- Reordenar manteniendo presionado y deslizando, como en iPhone/Spotify.
+// Se activa tras ~380ms de presión sin soltar (para no confundirse con un
+// simple toque o con el scroll de la hoja); mientras se arrastra, las demás
+// filas se van corriendo para hacer espacio. ---
+function habilitarDragReorder(cont, selectorFila, onReorder) {
+  let holdTimer = null;
+  let dragging = false;
+  let dragEl = null;
+  let startY = 0;
+  let startTop = 0;
+
+  function limpiar() {
+    if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
+    if (dragEl) { dragEl.style.transform = ''; dragEl.classList.remove('drag-activo'); }
+    dragging = false;
+    dragEl = null;
+  }
+
+  cont.querySelectorAll(selectorFila).forEach(function(row) {
+    row.addEventListener('touchstart', function(e) {
+      if (e.target.closest('.switch')) return;
+      startY = e.touches[0].clientY;
+      holdTimer = setTimeout(function() {
+        dragging = true;
+        dragEl = row;
+        startTop = row.getBoundingClientRect().top;
+        row.classList.add('drag-activo');
+        if (navigator.vibrate) navigator.vibrate(8);
+      }, 380);
+    }, { passive: true });
+
+    row.addEventListener('touchmove', function(e) {
+      if (!dragging) {
+        if (holdTimer && Math.abs(e.touches[0].clientY - startY) > 8) {
+          clearTimeout(holdTimer);
+          holdTimer = null;
+        }
+        return;
+      }
+      if (e.cancelable) e.preventDefault();
+      const dy = e.touches[0].clientY - startY;
+      dragEl.style.transform = 'translateY(' + dy + 'px)';
+
+      const filas = Array.from(cont.querySelectorAll(selectorFila));
+      const idxActual = filas.indexOf(dragEl);
+      const centroArrastrado = startTop + dy + dragEl.offsetHeight / 2;
+
+      let idxDestino = idxActual;
+      filas.forEach(function(f, i) {
+        if (f === dragEl) return;
+        const rect = f.getBoundingClientRect();
+        const centro = rect.top + rect.height / 2;
+        if (i < idxActual && centroArrastrado < centro) idxDestino = Math.min(idxDestino, i);
+        if (i > idxActual && centroArrastrado > centro) idxDestino = Math.max(idxDestino, i);
+      });
+
+      if (idxDestino !== idxActual) {
+        const referencia = filas[idxDestino];
+        if (idxDestino < idxActual) cont.insertBefore(dragEl, referencia);
+        else cont.insertBefore(dragEl, referencia.nextSibling);
+        // Recalibra la base para que la fila no "salte": a partir de aquí
+        // el desplazamiento se mide desde la posición actual del dedo.
+        dragEl.style.transform = '';
+        startTop = dragEl.getBoundingClientRect().top;
+        startY = e.touches[0].clientY;
+        dragEl.style.transform = 'translateY(0px)';
+      }
+    }, { passive: false });
+
+    row.addEventListener('touchend', function() {
+      if (holdTimer) { clearTimeout(holdTimer); holdTimer = null; }
+      if (!dragging) return;
+      const nuevoOrden = Array.from(cont.querySelectorAll(selectorFila)).map(function(el) { return el.dataset.key; });
+      limpiar();
+      onReorder(nuevoOrden);
     });
+    row.addEventListener('touchcancel', limpiar);
   });
 }
 document.getElementById('btn-filtros-inicio').addEventListener('click', function() {
@@ -2491,9 +2564,10 @@ function renderPresupuesto() {
 
   document.getElementById('btn-info-presupuesto').onclick = function() {
     const fuente = p.aprendido
-      ? 'el promedio de tus meses anteriores'
-      : 'el ingreso mensual que definiste en Meta de ahorro';
-    mostrarInfo('Tu presupuesto', 'Se calcula con base en ' + fuente + ' (' + fmt(p.ingresoMensualBase) + ' al mes), repartido entre tus periodos de pago: ' + fmt(p.ingresoPeriodo) + ' para ' + p.periodoLabel + '. A eso se le resta tu meta de ahorro de ese periodo, ' + fmt(p.metaAhorroPeriodo) + '.');
+      ? 'tu ingreso mensual (calculado con el promedio de tus meses anteriores)'
+      : 'tu ingreso mensual estimado';
+    const texto = 'Se calcula con base en ' + fuente + ' de ' + fmt(p.ingresoMensualBase) + ', dividido entre tus periodos de pago. Para este periodo corresponden ' + fmt(p.ingresoPeriodo) + '.\n\nA esa cantidad se le resta tu meta de ahorro de este periodo (' + fmt(p.metaAhorroPeriodo) + '), por lo que tu presupuesto disponible es de ' + fmt(p.disponibleGasto) + '.';
+    mostrarInfo('Presupuesto del periodo (' + p.periodoLabel + ')', texto);
   };
 
   if (p.disponibleGasto <= 0) {
