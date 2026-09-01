@@ -2598,7 +2598,11 @@ function renderPresupuesto() {
   });
 
   const totalGastado = p.filas.reduce(function(s, f) { return s + f.gastado; }, 0);
-  const totalLimite = p.filas.reduce(function(s, f) { return s + f.limite; }, 0);
+  // Ojo: el total usa el presupuesto disponible real (mismo número que el
+  // texto del ícono "?"), NO la suma de los límites por categoría — esa suma
+  // puede quedar por encima cuando varias categorías se sobregiran a la vez
+  // y no hay espacio suficiente en las demás para compensar del todo.
+  const totalLimite = p.disponibleGasto;
   const pctTotal = totalLimite > 0 ? Math.min(100, (totalGastado / totalLimite) * 100) : 0;
   totalTxt.innerHTML = '<b>' + fmtCompact(totalGastado) + '</b> de ' + fmtCompact(totalLimite);
   totalFill.style.width = pctTotal + '%';
