@@ -3056,16 +3056,22 @@ function mostrandoRadiante() {
   return dias >= 0 && dias < 2;
 }
 
-function imagenGatoActual() {
+// Imagen de Estado: siempre refleja el ánimo del momento (Inicio), nunca el logro equipado.
+function imagenEstadoGato() {
+  if (mostrandoRadiante()) return 'gato-radiante.png';
+  const estado = estadoAnimoBase();
+  const variantes = VARIANTES_ANIMO[estado];
+  return variantes[diaDelAnio() % variantes.length];
+}
+
+// Imagen de Avatar: el logro equipado si tienes uno desbloqueado, si no tu diseño de Nivel (Kashly Financiero).
+function imagenAvatarGato() {
   const skin = config.gatoSkinEquipado;
   if (skin && skin !== 'nivel') {
     const especial = ESPECIALES_GATO.find(function(e) { return e.id === skin; });
     if (especial && (config.gatoLogrosDesbloqueados || []).indexOf(skin) !== -1) return especial.archivo;
   }
-  if (mostrandoRadiante()) return 'gato-radiante.png';
-  const estado = estadoAnimoBase();
-  const variantes = VARIANTES_ANIMO[estado];
-  return variantes[diaDelAnio() % variantes.length];
+  return 'gato-nivel-' + nivelActualGato() + '.png';
 }
 
 function renderGato() {
@@ -3075,7 +3081,7 @@ function renderGato() {
   const nivel = nivelActualGato();
   const nivelInfo = NIVELES_GATO.find(function(nv) { return nv.n === nivel; });
   const animo = mostrandoRadiante() ? 'radiante' : estadoAnimoBase();
-  const imagen = imagenGatoActual();
+  const imagen = imagenEstadoGato();
 
   document.getElementById('gato-img-actual').src = imagen;
   document.getElementById('gato-nivel-nombre').textContent = 'Nivel ' + nivel + ' · ' + nivelInfo.nombre;
@@ -3163,13 +3169,14 @@ function renderPanelEspecialesGato() {
       guardarConSincronizacion({ action: 'set-config', key: 'gatoSkinEquipado', value: config.gatoSkinEquipado });
       renderPanelEspecialesGato();
       renderGato();
-      document.getElementById('gato-sheet-img').src = imagenGatoActual();
+      renderPantallaGato();
+      document.getElementById('gato-sheet-img').src = imagenAvatarGato();
     });
   });
 }
 
 function abrirSheetGato() {
-  document.getElementById('gato-sheet-img').src = imagenGatoActual();
+  document.getElementById('gato-sheet-img').src = imagenAvatarGato();
   const nivel = nivelActualGato();
   const nivelInfo = NIVELES_GATO.find(function(nv) { return nv.n === nivel; });
   document.getElementById('gato-sheet-nivel').textContent = 'Nivel ' + nivel + ' · ' + nivelInfo.nombre;
@@ -3192,9 +3199,18 @@ function renderPantallaGato() {
   const nivelInfo = NIVELES_GATO.find(function(nv) { return nv.n === nivel; });
   const animo = mostrandoRadiante() ? 'radiante' : estadoAnimoBase();
 
-  document.getElementById('gato-avatar-img').src = 'gato-nivel-' + nivel + '.png';
-  document.getElementById('gato-avatar-nivel').textContent = 'Nivel ' + nivel + ' · ' + nivelInfo.nombre;
-  document.getElementById('gato-avatar-animo').textContent = NOMBRES_ANIMO[animo];
+  const skin = config.gatoSkinEquipado;
+  const especialEquipado = (skin && skin !== 'nivel')
+    ? ESPECIALES_GATO.find(function(e) { return e.id === skin && (config.gatoLogrosDesbloqueados || []).indexOf(skin) !== -1; })
+    : null;
+
+  document.getElementById('gato-avatar-img').src = imagenAvatarGato();
+  document.getElementById('gato-avatar-nivel').textContent = especialEquipado
+    ? especialEquipado.nombre + ' · Logro equipado'
+    : 'Nivel ' + nivel + ' · ' + nivelInfo.nombre;
+  document.getElementById('gato-avatar-animo').textContent = especialEquipado
+    ? 'Nivel ' + nivel + ' · ' + nivelInfo.nombre
+    : NOMBRES_ANIMO[animo];
 
   const siguiente = nivel < 10 ? nivel + 1 : null;
   const progresoEl = document.getElementById('gato-avatar-progreso');
@@ -3215,6 +3231,14 @@ document.getElementById('btn-gato-volver').addEventListener('click', function() 
 });
 document.getElementById('btn-gato-abrir-sheet').addEventListener('click', abrirSheetGato);
 document.getElementById('btn-gato-animo-info').addEventListener('click', function() {
+  const skin = config.gatoSkinEquipado;
+  const especialEquipado = (skin && skin !== 'nivel')
+    ? ESPECIALES_GATO.find(function(e) { return e.id === skin && (config.gatoLogrosDesbloqueados || []).indexOf(skin) !== -1; })
+    : null;
+  if (especialEquipado) {
+    mostrarInfo(especialEquipado.nombre, 'Logro financiero equipado.\n\nCómo lo desbloqueaste: ' + especialEquipado.requisito + '.', especialEquipado.archivo);
+    return;
+  }
   const animo = mostrandoRadiante() ? 'radiante' : estadoAnimoBase();
   mostrarInfo(NOMBRES_ANIMO[animo], TEXTOS_ANIMO_INFO[animo]);
 });
