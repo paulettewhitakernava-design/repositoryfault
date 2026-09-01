@@ -2844,11 +2844,13 @@ document.getElementById('cat-guardar').addEventListener('click', function() {
 function totalAhorradoActual() {
   return totalAhorradoAppSolo() + (Number(config.saldoAhorrado) || 0);
 }
-// Solo el ahorro que la propia app fue calculando y guardando (cierres de
-// periodo, etc). Se usa para niveles y logros — el saldo que ingresaste a
-// mano de antes de usar Kashly no cuenta para tu progreso dentro de la app.
+// Solo el ahorro que la propia app fue calculando y moviendo sola (el
+// disponible que aceptaste mandar a tu Total ahorrado al cerrar una
+// quincena/mes). Se usa para niveles y logros — ni el saldo que ingresaste
+// de antes de usar Kashly, ni un ahorro que tú registras a mano, cuentan
+// para tu progreso dentro de la app.
 function totalAhorradoAppSolo() {
-  return gastos.filter(function(g) { return g.tipo === 'ahorro'; }).reduce(function(s, g) { return s + Number(g.monto); }, 0);
+  return gastos.filter(function(g) { return g.tipo === 'ahorro' && typeof g.nota === 'string' && g.nota.indexOf('Cierre de ') === 0; }).reduce(function(s, g) { return s + Number(g.monto); }, 0);
 }
 
 function diasUsandoApp() {
@@ -2978,7 +2980,32 @@ const ESPECIALES_GATO = [
   { id: 'despreocupado', nombre: 'Despreocupado', archivo: 'gato-especial-despreocupado.png', requisito: '6 meses seguidos sin exceder presupuesto', cumple: function() { return rachaDentroDePresupuesto('mensual') >= 6; } },
   { id: 'mago', nombre: 'Mago del dinero', archivo: 'gato-especial-mago.png', requisito: 'Meta de ahorro alcanzada 12 meses seguidos', cumple: function() { return rachaMetaAhorro('mensual') >= 12; } }
 ];
+// Corrección única: antes, el ahorro registrado a mano (tipo "ahorro")
+// también contaba para los logros de monto ahorrado. Ya se corrigió para
+// que solo cuenten los cierres de periodo que la app mueve sola, así que
+// aquí se revisa una sola vez y se retira cualquier logro que se haya
+// otorgado por error con la lógica anterior.
+function revalidarLogrosGatoUnaVez() {
+  if (config.gatoLogrosRevalidadosV2) return;
+  const desbloqueados = config.gatoLogrosDesbloqueados || [];
+  const correctos = desbloqueados.filter(function(id) {
+    const e = ESPECIALES_GATO.find(function(x) { return x.id === id; });
+    return e && e.cumple();
+  });
+  if (correctos.length !== desbloqueados.length) {
+    config.gatoLogrosDesbloqueados = correctos;
+    guardarConSincronizacion({ action: 'set-config', key: 'gatoLogrosDesbloqueados', value: correctos });
+    if (config.gatoSkinEquipado && correctos.indexOf(config.gatoSkinEquipado) === -1) {
+      config.gatoSkinEquipado = 'nivel';
+      guardarConSincronizacion({ action: 'set-config', key: 'gatoSkinEquipado', value: 'nivel' });
+    }
+  }
+  config.gatoLogrosRevalidadosV2 = true;
+  guardarConSincronizacion({ action: 'set-config', key: 'gatoLogrosRevalidadosV2', value: true });
+}
+
 function revisarLogrosGato() {
+  revalidarLogrosGatoUnaVez();
   const desbloqueados = config.gatoLogrosDesbloqueados || [];
   let cambiaron = false;
   const nuevos = [];
