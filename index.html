@@ -459,6 +459,7 @@ select option { background: var(--card-solid); color: var(--ink); }
   padding: 20px;
 }
 .overlay.show { display: flex; }
+#overlay-info { z-index: 41; } /* puede abrirse encima de otro sheet ya abierto (ej. desde Niveles y logros) */
 .sheet {
   width: 100%; max-width: 420px;
   max-height: 82vh;
@@ -590,7 +591,13 @@ select option { background: var(--card-solid); color: var(--ink); }
   50% { transform: translateY(-3px) scale(1.015); }
 }
 .gato-hero-card { display: flex; align-items: center; gap: 16px; position: relative; }
-.gato-stage-wrap { width: 92px; height: 92px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.gato-stage-wrap { width: 118px; height: 118px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+
+.gato-avatar-card { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 32px 22px; }
+.gato-avatar-wrap { width: 172px; height: 172px; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 14px; }
+.gato-avatar-wrap .gato-img { width: 100%; height: 100%; object-fit: contain; }
+.gato-avatar-nivel { font-family: 'Space Grotesk', sans-serif; font-size: 19px; font-weight: 600; margin-bottom: 8px; }
+.gato-avatar-animo-row { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); font-weight: 600; }
 .gato-img { width: 100%; height: 100%; object-fit: contain; animation: gatoRespira 4.6s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .gato-img { animation: none; } }
 .gato-info { flex: 1; min-width: 0; }
@@ -618,20 +625,23 @@ select option { background: var(--card-solid); color: var(--ink); }
 
 .gato-nivel-row {
   display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line);
+  cursor: pointer;
 }
 .gato-nivel-row:last-child { border-bottom: none; }
 .gato-nivel-row img { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; opacity: 0.35; }
 .gato-nivel-row.actual img { opacity: 1; }
-.gato-nivel-row .n { font-size: 13px; font-weight: 600; }
+.gato-nivel-row .n { flex: 1; font-size: 13px; font-weight: 600; }
 .gato-nivel-row .n small { display: block; font-size: 10.5px; color: var(--muted); font-weight: 500; margin-top: 1px; }
 .gato-nivel-row.actual .n { color: var(--accent); }
+.gato-nivel-row .chev { color: var(--muted); font-size: 14px; flex-shrink: 0; }
 
 .gato-especial-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
 .gato-especial-card {
   border: 1px solid var(--line); border-radius: 16px; padding: 12px 10px; text-align: center;
   background: rgba(255,255,255,0.03); cursor: pointer; position: relative;
 }
-.gato-especial-card.bloqueado { opacity: 0.4; cursor: default; }
+.gato-especial-card.bloqueado { opacity: 0.55; }
+.gato-especial-card.bloqueado img { filter: grayscale(1); opacity: 0.6; }
 .gato-especial-card.equipado { border-color: var(--accent); background: rgba(255,138,92,0.08); }
 .gato-especial-card img { width: 56px; height: 56px; object-fit: contain; margin-bottom: 6px; }
 .gato-especial-card .nombre { font-size: 11.5px; font-weight: 700; margin-bottom: 2px; }
@@ -640,6 +650,7 @@ select option { background: var(--card-solid); color: var(--ink); }
   position: absolute; top: 8px; right: 8px; width: 16px; height: 16px; border-radius: 50%;
   background: var(--accent); color: #2a1608; font-size: 10px; display: flex; align-items: center; justify-content: center;
 }
+.gato-especial-check.gato-especial-candado { background: rgba(0,0,0,0.5); font-size: 9px; }
 
 /* ---- Splash ---- */
 .splash {
@@ -964,6 +975,40 @@ select option { background: var(--card-solid); color: var(--ink); }
   </div>
 </div>
 
+<!-- ===== KASHLY FINANCIERO (mascota) ===== -->
+<div class="screen" id="screen-gato">
+  <div class="header">
+    <div class="header-row">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button type="button" class="ajustes-btn-inicio" id="btn-gato-volver" aria-label="Volver">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div>
+          <div class="eyebrow">Tu progreso</div>
+          <h1>Kashly financiero</h1>
+        </div>
+      </div>
+      <button type="button" class="ajustes-btn-inicio" id="btn-gato-abrir-sheet" aria-label="Ver niveles y logros">
+        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M8 12h8"/><path d="M11 18h2"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="card gato-avatar-card">
+    <div class="gato-avatar-wrap"><img class="gato-img" id="gato-avatar-img" src="" alt="Tu nivel"></div>
+    <div class="gato-avatar-nivel" id="gato-avatar-nivel">Nivel 1 · Inicial</div>
+    <div class="gato-avatar-animo-row">
+      <span id="gato-avatar-animo">Tranquilo</span>
+      <button type="button" class="info-btn" id="btn-gato-animo-info">?</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-lbl">Para el siguiente nivel</div>
+    <div class="sheet-text" id="gato-avatar-progreso" style="margin-top:8px"></div>
+  </div>
+</div>
+
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1061,6 +1106,7 @@ select option { background: var(--card-solid); color: var(--ink); }
       <h2 id="info-titulo">Info</h2>
       <button type="button" class="sheet-close" id="info-close" aria-label="Cerrar">✕</button>
     </div>
+    <div class="gato-stage-wrap" id="info-img-wrap" style="display:none;margin:0 auto 14px;width:84px;height:84px"><img class="gato-img" id="info-img" src="" alt="" style="animation:none"></div>
     <div class="sheet-text" id="info-texto"></div>
   </div>
 </div>
@@ -1092,7 +1138,7 @@ select option { background: var(--card-solid); color: var(--ink); }
   <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-head">
-      <h2>Tu gato</h2>
+      <h2>Niveles y logros</h2>
       <button type="button" class="sheet-close" id="gato-close" aria-label="Cerrar">✕</button>
     </div>
     <div class="gato-sheet-head-row">
@@ -1104,7 +1150,7 @@ select option { background: var(--card-solid); color: var(--ink); }
     </div>
     <div class="gato-tab-row">
       <button type="button" class="gato-tab-btn activo" data-tab="niveles">Niveles</button>
-      <button type="button" class="gato-tab-btn" data-tab="especiales">Gatos especiales</button>
+      <button type="button" class="gato-tab-btn" data-tab="especiales">Logros financieros</button>
     </div>
     <div class="gato-panel activo" id="gato-panel-niveles"></div>
     <div class="gato-panel" id="gato-panel-especiales">
@@ -1399,6 +1445,7 @@ document.getElementById('fecha').valueAsDate = new Date();
     startY = e.touches[0].clientY;
   }, { passive: true });
   document.addEventListener('touchmove', function(e) {
+    if (e.target.closest('.sheet')) return; // deja que la hoja haga su propio scroll
     if (e.target.closest('.bottom-nav, .overlay')) { e.preventDefault(); return; }
     const y = e.touches[0].clientY;
     const arrastraAbajo = y > startY;
@@ -1437,9 +1484,16 @@ document.getElementById('btn-ir-ajustes-presu').addEventListener('click', functi
 document.getElementById('btn-ajustes-inicio').addEventListener('click', function() { irA('ajustes'); });
 
 // --- Info genérico (sheets con "?") ---
-function mostrarInfo(titulo, texto) {
+function mostrarInfo(titulo, texto, imagenSrc) {
   document.getElementById('info-titulo').textContent = titulo;
   document.getElementById('info-texto').textContent = texto;
+  const wrap = document.getElementById('info-img-wrap');
+  if (imagenSrc) {
+    document.getElementById('info-img').src = imagenSrc;
+    wrap.style.display = 'flex';
+  } else {
+    wrap.style.display = 'none';
+  }
   document.getElementById('overlay-info').classList.add('show');
 }
 document.getElementById('info-close').addEventListener('click', function() {
@@ -2788,9 +2842,13 @@ document.getElementById('cat-guardar').addEventListener('click', function() {
 // ==================================================================
 
 function totalAhorradoActual() {
-  const totalAhorroMov = gastos.filter(function(g) { return g.tipo === 'ahorro'; }).reduce(function(s, g) { return s + Number(g.monto); }, 0);
-  const saldoManual = Number(config.saldoAhorrado) || 0;
-  return totalAhorroMov + saldoManual;
+  return totalAhorradoAppSolo() + (Number(config.saldoAhorrado) || 0);
+}
+// Solo el ahorro que la propia app fue calculando y guardando (cierres de
+// periodo, etc). Se usa para niveles y logros — el saldo que ingresaste a
+// mano de antes de usar Kashly no cuenta para tu progreso dentro de la app.
+function totalAhorradoAppSolo() {
+  return gastos.filter(function(g) { return g.tipo === 'ahorro'; }).reduce(function(s, g) { return s + Number(g.monto); }, 0);
 }
 
 function diasUsandoApp() {
@@ -2875,38 +2933,45 @@ const NIVELES_GATO = [
   { n: 2, nombre: 'Aprendiz', requisito: 'Alcanza tu primera meta de ahorro.', cumple: function() { return tieneAhorroAlgunaVez(); } },
   { n: 3, nombre: 'Previsor', requisito: 'Mantente dentro del presupuesto una quincena.', cumple: function() { return rachaDentroDePresupuesto('quincena') >= 1; } },
   { n: 4, nombre: 'Estratega', requisito: 'Alcanza tu meta de ahorro mensual un mes.', cumple: function() { return rachaMetaAhorro('mensual') >= 1; } },
-  { n: 5, nombre: 'Financiero', requisito: 'Ten $3,000 o más en Total ahorrado.', cumple: function() { return totalAhorradoActual() >= 3000; } },
+  { n: 5, nombre: 'Financiero', requisito: 'Ten $3,000 o más en Total ahorrado.', cumple: function() { return totalAhorradoAppSolo() >= 3000; } },
   { n: 6, nombre: 'Maestro', requisito: 'Mantente dentro del presupuesto 3 meses seguidos.', cumple: function() { return rachaDentroDePresupuesto('mensual') >= 3; } },
   { n: 7, nombre: 'Sabio', requisito: 'Alcanza tu meta de ahorro 3 meses seguidos.', cumple: function() { return rachaMetaAhorro('mensual') >= 3; } },
-  { n: 8, nombre: 'Ascendido', requisito: 'Ten $20,000 o más en Total ahorrado.', cumple: function() { return totalAhorradoActual() >= 20000; } },
-  { n: 9, nombre: 'Dominio', requisito: 'Ten $50,000 o más en Total ahorrado.', cumple: function() { return totalAhorradoActual() >= 50000; } },
-  { n: 10, nombre: 'Libre', requisito: 'Ten $100,000 o más en Total ahorrado.', cumple: function() { return totalAhorradoActual() >= 100000; } }
+  { n: 8, nombre: 'Ascendido', requisito: 'Ten $20,000 o más en Total ahorrado.', cumple: function() { return totalAhorradoAppSolo() >= 20000; } },
+  { n: 9, nombre: 'Dominio', requisito: 'Ten $50,000 o más en Total ahorrado.', cumple: function() { return totalAhorradoAppSolo() >= 50000; } },
+  { n: 10, nombre: 'Libre', requisito: 'Ten $100,000 o más en Total ahorrado.', cumple: function() { return totalAhorradoAppSolo() >= 100000; } }
 ];
+// Los niveles se suben en orden: no puedes estar en el nivel 5 sin haber
+// cumplido primero el 2, 3 y 4, aunque técnicamente ya cumplas el requisito
+// del 5 (ej. tener cierto ahorro de golpe). Se para en el primero que falte.
 function nivelActualGato() {
-  let max = 1;
-  NIVELES_GATO.forEach(function(nv) { if (nv.cumple()) max = Math.max(max, nv.n); });
-  return max;
+  let nivel = 1;
+  for (let i = 0; i < NIVELES_GATO.length; i++) {
+    const nv = NIVELES_GATO[i];
+    if (nv.n === 1) continue;
+    if (nv.cumple()) { nivel = nv.n; } else { break; }
+  }
+  return nivel;
 }
 function progresoHaciaNivel(n) {
   switch (n) {
     case 2: return tieneAhorroAlgunaVez() ? { pct: 100, texto: 'Completado' } : { pct: 0, texto: 'Registra tu primer ahorro' };
     case 3: { const r = rachaDentroDePresupuesto('quincena'); return { pct: r >= 1 ? 100 : 0, texto: r >= 1 ? 'Completado' : 'Termina esta quincena dentro de tu presupuesto' }; }
     case 4: { const r = rachaMetaAhorro('mensual'); return { pct: r >= 1 ? 100 : 0, texto: r >= 1 ? 'Completado' : 'Alcanza tu meta de ahorro este mes' }; }
-    case 5: { const t = totalAhorradoActual(); return { pct: Math.min(100, (t / 3000) * 100), texto: 'Te faltan ' + fmt(Math.max(0, 3000 - t)) }; }
+    case 5: { const t = totalAhorradoAppSolo(); return { pct: Math.min(100, (t / 3000) * 100), texto: 'Te faltan ' + fmt(Math.max(0, 3000 - t)) }; }
     case 6: { const r = rachaDentroDePresupuesto('mensual'); return { pct: Math.min(100, (r / 3) * 100), texto: 'Llevas ' + r + ' de 3 meses dentro de presupuesto' }; }
     case 7: { const r = rachaMetaAhorro('mensual'); return { pct: Math.min(100, (r / 3) * 100), texto: 'Llevas ' + r + ' de 3 meses cumpliendo tu meta' }; }
-    case 8: { const t = totalAhorradoActual(); return { pct: Math.min(100, (t / 20000) * 100), texto: 'Te faltan ' + fmt(Math.max(0, 20000 - t)) }; }
-    case 9: { const t = totalAhorradoActual(); return { pct: Math.min(100, (t / 50000) * 100), texto: 'Te faltan ' + fmt(Math.max(0, 50000 - t)) }; }
-    case 10: { const t = totalAhorradoActual(); return { pct: Math.min(100, (t / 100000) * 100), texto: 'Te faltan ' + fmt(Math.max(0, 100000 - t)) }; }
+    case 8: { const t = totalAhorradoAppSolo(); return { pct: Math.min(100, (t / 20000) * 100), texto: 'Te faltan ' + fmt(Math.max(0, 20000 - t)) }; }
+    case 9: { const t = totalAhorradoAppSolo(); return { pct: Math.min(100, (t / 50000) * 100), texto: 'Te faltan ' + fmt(Math.max(0, 50000 - t)) }; }
+    case 10: { const t = totalAhorradoAppSolo(); return { pct: Math.min(100, (t / 100000) * 100), texto: 'Te faltan ' + fmt(Math.max(0, 100000 - t)) }; }
     default: return { pct: 100, texto: '¡Nivel máximo!' };
   }
 }
 
 // --- Gatos especiales (skins opcionales, se desbloquean para siempre) ---
 const ESPECIALES_GATO = [
-  { id: 'sincargas', nombre: 'Sin cargas', archivo: 'gato-especial-sincargas.png', requisito: 'Ahorra $10,000 o más', cumple: function() { return totalAhorradoActual() >= 10000; } },
-  { id: 'cuspide', nombre: 'Cúspide', archivo: 'gato-especial-cuspide.png', requisito: 'Ahorra $30,000 o más', cumple: function() { return totalAhorradoActual() >= 30000; } },
-  { id: 'libre', nombre: 'Libre', archivo: 'gato-especial-libre.png', requisito: 'Total ahorrado de $40,000 o más', cumple: function() { return totalAhorradoActual() >= 40000; } },
+  { id: 'sincargas', nombre: 'Sin cargas', archivo: 'gato-especial-sincargas.png', requisito: 'Ahorra $10,000 o más', cumple: function() { return totalAhorradoAppSolo() >= 10000; } },
+  { id: 'cuspide', nombre: 'Cúspide', archivo: 'gato-especial-cuspide.png', requisito: 'Ahorra $30,000 o más', cumple: function() { return totalAhorradoAppSolo() >= 30000; } },
+  { id: 'libre', nombre: 'Libre', archivo: 'gato-especial-libre.png', requisito: 'Total ahorrado de $40,000 o más', cumple: function() { return totalAhorradoAppSolo() >= 40000; } },
   { id: 'dominio', nombre: 'Dominio', archivo: 'gato-especial-dominio.png', requisito: 'Nivel 9 y 1 año usando Kashly', cumple: function() { return nivelActualGato() >= 9 && diasUsandoApp() >= 365; } },
   { id: 'ascendido', nombre: 'Ascendido', archivo: 'gato-especial-ascendido.png', requisito: 'Llegar a nivel 10', cumple: function() { return nivelActualGato() >= 10; } },
   { id: 'relajado', nombre: 'Relajado', archivo: 'gato-especial-relajado.png', requisito: '2 meses seguidos sin exceder presupuesto', cumple: function() { return rachaDentroDePresupuesto('mensual') >= 2; } },
@@ -3030,15 +3095,49 @@ function renderGato() {
   }
 }
 
+// Texto explicativo al tocar un nivel: si todavía falta un nivel anterior,
+// avisa que hay que llegar a ese primero (los niveles son por pasos).
+function mensajeDetalleNivel(n) {
+  const frecuencia = nombreFrecuenciaCorta().toLowerCase();
+  const anterior = NIVELES_GATO.find(function(nv) { return nv.n === n - 1; });
+  if (anterior && anterior.n > 1 && !anterior.cumple()) {
+    return 'Primero necesitas alcanzar el Nivel ' + anterior.n + ' · ' + anterior.nombre + '.';
+  }
+  const nv = NIVELES_GATO.find(function(x) { return x.n === n; });
+  if (nv.cumple() && n > 1) return '¡Completado! ' + nv.requisito;
+  switch (n) {
+    case 1: return 'Todos empiezan aquí. En cuanto registres tu primer ahorro, avanzas al Nivel 2.';
+    case 2: return 'Aún no has alcanzado tu primera meta de ahorro. ¡Todo empieza con un primer paso! Configura una meta de ahorro, aunque sea pequeña ($100, $500), y cuando la alcances, desbloquearás el Nivel 2.';
+    case 3: return 'No te has mantenido dentro del presupuesto de tu ' + frecuencia + ' todavía. Termina una ' + frecuencia + ' completa sin exceder tu presupuesto para desbloquear el Nivel 3.';
+    case 4: return 'Aún no alcanzas tu meta de ahorro en un mes completo. 0 de 1 metas alcanzadas.';
+    case 5: { const t = totalAhorradoAppSolo(); return 'Llevas ' + fmt(t) + ' de $3,000 en ahorro calculado por la app.'; }
+    case 6: { const r = rachaDentroDePresupuesto('mensual'); return 'Llevas ' + r + ' de 3 meses seguidos dentro de presupuesto.'; }
+    case 7: { const r = rachaMetaAhorro('mensual'); return 'Llevas ' + r + ' de 3 meses seguidos cumpliendo tu meta de ahorro.'; }
+    case 8: { const t = totalAhorradoAppSolo(); return 'Llevas ' + fmt(t) + ' de $20,000 en ahorro calculado por la app.'; }
+    case 9: { const t = totalAhorradoAppSolo(); return 'Llevas ' + fmt(t) + ' de $50,000 en ahorro calculado por la app.'; }
+    case 10: { const t = totalAhorradoAppSolo(); return 'Llevas ' + fmt(t) + ' de $100,000 en ahorro calculado por la app.'; }
+    default: return '';
+  }
+}
+
 function renderPanelNivelesGato() {
   const nivelActual = nivelActualGato();
   document.getElementById('gato-panel-niveles').innerHTML = NIVELES_GATO.map(function(nv) {
-    return '<div class="gato-nivel-row' + (nv.n === nivelActual ? ' actual' : '') + '">' +
+    return '<div class="gato-nivel-row' + (nv.n === nivelActual ? ' actual' : '') + '" data-nivel="' + nv.n + '">' +
       '<img src="gato-nivel-' + nv.n + '.png" alt="">' +
       '<div class="n">Nivel ' + nv.n + ' · ' + nv.nombre + '<small>' + nv.requisito + '</small></div>' +
+      '<span class="chev">›</span>' +
     '</div>';
   }).join('');
+  document.querySelectorAll('#gato-panel-niveles .gato-nivel-row').forEach(function(row) {
+    row.addEventListener('click', function() {
+      const n = parseInt(row.dataset.nivel, 10);
+      const nv = NIVELES_GATO.find(function(x) { return x.n === n; });
+      mostrarInfo('Nivel ' + n + ' · ' + nv.nombre, mensajeDetalleNivel(n), 'gato-nivel-' + n + '.png');
+    });
+  });
 }
+
 function renderPanelEspecialesGato() {
   const desbloqueados = config.gatoLogrosDesbloqueados || [];
   const equipado = config.gatoSkinEquipado || 'nivel';
@@ -3046,17 +3145,21 @@ function renderPanelEspecialesGato() {
     const tiene = desbloqueados.indexOf(e.id) !== -1;
     const estaEquipado = tiene && equipado === e.id;
     return '<div class="gato-especial-card' + (tiene ? '' : ' bloqueado') + (estaEquipado ? ' equipado' : '') + '" data-skin="' + e.id + '" data-desbloqueado="' + tiene + '">' +
-      (estaEquipado ? '<span class="gato-especial-check">✓</span>' : '') +
+      (estaEquipado ? '<span class="gato-especial-check">✓</span>' : (tiene ? '' : '<span class="gato-especial-check gato-especial-candado">🔒</span>')) +
       '<img src="' + e.archivo + '" alt="">' +
       '<div class="nombre">' + e.nombre + '</div>' +
-      '<div class="req">' + (tiene ? (estaEquipado ? 'En uso' : 'Toca para usar') : e.requisito) + '</div>' +
+      '<div class="req">' + (tiene ? (estaEquipado ? 'En uso' : 'Toca para usar') : 'Bloqueado') + '</div>' +
     '</div>';
   }).join('');
   document.querySelectorAll('.gato-especial-card').forEach(function(card) {
     card.addEventListener('click', function() {
-      if (card.dataset.desbloqueado !== 'true') return;
-      const skin = card.dataset.skin;
-      config.gatoSkinEquipado = (config.gatoSkinEquipado === skin) ? 'nivel' : skin;
+      const id = card.dataset.skin;
+      const e = ESPECIALES_GATO.find(function(x) { return x.id === id; });
+      if (card.dataset.desbloqueado !== 'true') {
+        mostrarInfo(e.nombre, 'Todavía no lo desbloqueas.\n\nCómo desbloquearlo: ' + e.requisito + '.', e.archivo);
+        return;
+      }
+      config.gatoSkinEquipado = (config.gatoSkinEquipado === id) ? 'nivel' : id;
       guardarConSincronizacion({ action: 'set-config', key: 'gatoSkinEquipado', value: config.gatoSkinEquipado });
       renderPanelEspecialesGato();
       renderGato();
@@ -3065,7 +3168,7 @@ function renderPanelEspecialesGato() {
   });
 }
 
-document.getElementById('btn-gato-perfil').addEventListener('click', function() {
+function abrirSheetGato() {
   document.getElementById('gato-sheet-img').src = imagenGatoActual();
   const nivel = nivelActualGato();
   const nivelInfo = NIVELES_GATO.find(function(nv) { return nv.n === nivel; });
@@ -3074,6 +3177,46 @@ document.getElementById('btn-gato-perfil').addEventListener('click', function() 
   renderPanelNivelesGato();
   renderPanelEspecialesGato();
   document.getElementById('overlay-gato').classList.add('show');
+}
+
+const TEXTOS_ANIMO_INFO = {
+  tranquilo: 'Vas bien: llevas usado menos de la mitad de tu presupuesto de esta quincena.',
+  alerta: 'Ya usaste entre el 50% y el 89% de tu presupuesto de esta quincena — vigila tu gasto.',
+  preocupado: 'Ya usaste entre el 90% y el 99% de tu presupuesto de esta quincena — estás a punto de excederte.',
+  colapsado: 'Ya te pasaste de tu presupuesto de esta quincena (100% o más).',
+  radiante: 'Terminaste tu periodo anterior dentro de presupuesto o alcanzando tu meta de ahorro. Este estado dura 1-2 días y luego vuelve a la normalidad.'
+};
+
+function renderPantallaGato() {
+  const nivel = nivelActualGato();
+  const nivelInfo = NIVELES_GATO.find(function(nv) { return nv.n === nivel; });
+  const animo = mostrandoRadiante() ? 'radiante' : estadoAnimoBase();
+
+  document.getElementById('gato-avatar-img').src = 'gato-nivel-' + nivel + '.png';
+  document.getElementById('gato-avatar-nivel').textContent = 'Nivel ' + nivel + ' · ' + nivelInfo.nombre;
+  document.getElementById('gato-avatar-animo').textContent = NOMBRES_ANIMO[animo];
+
+  const siguiente = nivel < 10 ? nivel + 1 : null;
+  const progresoEl = document.getElementById('gato-avatar-progreso');
+  if (siguiente) {
+    const sigInfo = NIVELES_GATO.find(function(nv) { return nv.n === siguiente; });
+    progresoEl.textContent = 'Nivel ' + siguiente + ' · ' + sigInfo.nombre + ': ' + mensajeDetalleNivel(siguiente);
+  } else {
+    progresoEl.textContent = '¡Alcanzaste el nivel máximo!';
+  }
+}
+
+document.getElementById('btn-gato-perfil').addEventListener('click', function() {
+  irA('gato');
+  renderPantallaGato();
+});
+document.getElementById('btn-gato-volver').addEventListener('click', function() {
+  irA('inicio');
+});
+document.getElementById('btn-gato-abrir-sheet').addEventListener('click', abrirSheetGato);
+document.getElementById('btn-gato-animo-info').addEventListener('click', function() {
+  const animo = mostrandoRadiante() ? 'radiante' : estadoAnimoBase();
+  mostrarInfo(NOMBRES_ANIMO[animo], TEXTOS_ANIMO_INFO[animo]);
 });
 document.getElementById('gato-close').addEventListener('click', function() {
   document.getElementById('overlay-gato').classList.remove('show');
