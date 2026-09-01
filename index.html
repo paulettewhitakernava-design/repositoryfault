@@ -690,19 +690,6 @@ select option { background: var(--card-solid); color: var(--ink); }
     </div>
   </div>
 
-  <div class="card gato-hero-card" id="gato-hero-card">
-    <div class="gato-stage-wrap"><img class="gato-img" id="gato-img-actual" src="" alt="Tu gato"></div>
-    <div class="gato-info">
-      <div class="gato-nivel-nombre" id="gato-nivel-nombre">Nivel 1 · Inicial</div>
-      <div class="gato-animo-txt" id="gato-animo-txt"></div>
-      <div class="gato-bar"><div class="gato-bar-fill" id="gato-bar-fill" style="width:0%"></div></div>
-      <div class="gato-progreso-txt" id="gato-progreso-txt"></div>
-    </div>
-    <button type="button" class="icon-btn gato-btn-perfil" id="btn-gato-perfil" aria-label="Ver a tu gato">
-      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-    </button>
-  </div>
-
   <div class="card">
     <div class="card-lbl-row">
       <div class="card-lbl" style="margin-bottom:0">Total ahorrado</div>
@@ -757,6 +744,19 @@ select option { background: var(--card-solid); color: var(--ink); }
       </div>
       <div class="limite-warning" id="presupuesto-warning" style="display:none"></div>
     </div>
+  </div>
+
+  <div class="card gato-hero-card" id="gato-hero-card">
+    <div class="gato-stage-wrap"><img class="gato-img" id="gato-img-actual" src="" alt="Tu gato"></div>
+    <div class="gato-info">
+      <div class="gato-nivel-nombre" id="gato-nivel-nombre">Nivel 1 · Inicial</div>
+      <div class="gato-animo-txt" id="gato-animo-txt"></div>
+      <div class="gato-bar"><div class="gato-bar-fill" id="gato-bar-fill" style="width:0%"></div></div>
+      <div class="gato-progreso-txt" id="gato-progreso-txt"></div>
+    </div>
+    <button type="button" class="icon-btn gato-btn-perfil" id="btn-gato-perfil" aria-label="Ver a tu gato">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
   </div>
 
   <div class="seccion-inicio" id="seccion-movimientos" data-key="movimientos">
@@ -1777,6 +1777,11 @@ function aplicarOrdenYFiltrosInicio() {
     el.style.display = vis[key] ? '' : 'none';
     cont.appendChild(el);
   });
+  // La tarjeta de Kashly siempre va justo debajo de Presupuesto, la
+  // reordenes donde la reordenes desde "Mostrar y ordenar".
+  const presuEl = document.getElementById('seccion-presupuesto');
+  const gatoEl = document.getElementById('gato-hero-card');
+  if (presuEl && gatoEl) presuEl.insertAdjacentElement('afterend', gatoEl);
 }
 function guardarInicioConfig() {
   guardarConSincronizacion({ action: 'set-config', key: 'inicioOrden', value: config.inicioOrden || ordenInicioActual() });
