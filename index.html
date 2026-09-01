@@ -2032,6 +2032,19 @@ function periodoDe(fechaStr, modo) {
   const y = d.getFullYear(), m = d.getMonth(), day = d.getDate();
 
   if (modo === 'mensual') {
+    const freqMensual = config.frecuenciaPago || 'quincenal';
+    // Si pagas quincenal, "un mes" se cuenta desde tu día de pago (ej. 28 ago
+    // a 27 sep), no del 1 al último del mes de calendario — así el mes
+    // siempre corresponde exactamente a tus dos quincenas seguidas.
+    if (freqMensual === 'quincenal') {
+      const dia1 = Number(config.quincenaDia1) || 1;
+      let inicioM = m;
+      if (day < dia1) inicioM = m - 1;
+      const inicio = new Date(y, inicioM, dia1);
+      const fin = new Date(inicio.getFullYear(), inicio.getMonth() + 1, dia1 - 1);
+      const label = inicio.getDate() + ' ' + mesesCortos[inicio.getMonth()] + '-' + fin.getDate() + ' ' + mesesCortos[fin.getMonth()];
+      return { key: inicio.getFullYear() + '-' + inicio.getMonth() + '-ciclo', label: label, start: inicio.getTime() };
+    }
     return { key: y + '-' + m, label: mesesCortos[m] + ' ' + String(y).slice(2), start: new Date(y, m, 1).getTime() };
   }
 
