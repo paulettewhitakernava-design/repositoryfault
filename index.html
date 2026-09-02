@@ -2039,6 +2039,7 @@ window.addEventListener('resize', function() {
 function iniciarConDatos(datosGastos, datosConfig, offline) {
   gastos = datosGastos || [];
   config = datosConfig || {};
+  registrarUsoDiario();
   cargarCategorias();
   poblarSelectsCategoria();
   renderAjustesCategorias();
@@ -3079,15 +3080,126 @@ function progresoHaciaNivel(n) {
 }
 
 // --- Gatos especiales (skins opcionales, se desbloquean para siempre) ---
+function ingresoDePeriodo(periodoKey, modo) {
+  let total = 0;
+  gastos.forEach(function(g) {
+    if (g.tipo !== 'ingreso') return;
+    const p = periodoDe(g.fecha, modo);
+    if (p && p.key === periodoKey) total += Number(g.monto) || 0;
+  });
+  return total;
+}
+
+// Registra (una vez por día de calendario) que el usuario abrió la app, para
+// logros que dependen de uso diario y no de movimientos financieros.
+function registrarUsoDiario() {
+  const hoy = hoyISO();
+  const dias = Array.isArray(config.diasUso) ? config.diasUso.slice() : [];
+  if (dias.indexOf(hoy) !== -1) return;
+  dias.push(hoy);
+  if (dias.length > 90) dias.splice(0, dias.length - 90);
+  config.diasUso = dias;
+  guardarConSincronizacion({ action: 'set-config', key: 'diasUso', value: dias });
+}
+// true si hay un registro de uso para cada uno de los últimos n días (sin contar hoy).
+function diasUsoConsecutivos(n) {
+  const dias = config.diasUso || [];
+  const set = {};
+  dias.forEach(function(d) { set[d] = true; });
+  const hoy = new Date(hoyISO() + 'T00:00:00');
+  for (let i = 1; i <= n; i++) {
+    const d = new Date(hoy); d.setDate(d.getDate() - i);
+    const iso = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    if (!set[iso]) return false;
+  }
+  return true;
+}
+// true si, en cada uno de los últimos n días (sin contar hoy), hay al menos
+// un movimiento de cada tipo listado (ej. ['gasto'] o ['gasto','ingreso']).
+function diasConTiposSeguidos(tipos, n) {
+  const porDia = {};
+  gastos.forEach(function(g) {
+    if (tipos.indexOf(g.tipo) === -1) return;
+    if (!porDia[g.fecha]) porDia[g.fecha] = {};
+    porDia[g.fecha][g.tipo] = true;
+  });
+  const hoy = new Date(hoyISO() + 'T00:00:00');
+  for (let i = 1; i <= n; i++) {
+    const d = new Date(hoy); d.setDate(d.getDate() - i);
+    const iso = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    const dia = porDia[iso];
+    if (!dia || !tipos.every(function(t) { return dia[t]; })) return false;
+  }
+  return true;
+}
+// true si algún mes (ciclo propio) tuvo 2 o más periodos de pago excedidos.
+function huboMesConDosExcesos() {
+  const periodosPago = periodosCompletos('quincena');
+  const techo = techoGastoPeriodo('quincena');
+  const porMes = {};
+  periodosPago.forEach(function(p) {
+    const f = new Date(p.start);
+    const iso = f.getFullYear() + '-' + String(f.getMonth() + 1).padStart(2, '0') + '-' + String(f.getDate()).padStart(2, '0');
+    const mesKey = periodoDe(iso, 'mensual').key;
+    if (!porMes[mesKey]) porMes[mesKey] = 0;
+    if (gastoDePeriodo(p.key, 'quincena') > techo) porMes[mesKey]++;
+  });
+  return Object.keys(porMes).some(function(k) { return porMes[k] >= 2; });
+}
+function mesesConSaldoPositivo() {
+  const periodos = periodosCompletos('mensual');
+  let n = 0;
+  periodos.forEach(function(p) {
+    if (ingresoDePeriodo(p.key, 'mensual') > gastoDePeriodo(p.key, 'mensual')) n++;
+  });
+  return n;
+}
+// Racha (terminando en el mes cerrado más reciente) de meses seguidos donde el
+// gasto fue al menos 10% menor al promedio de los 3 meses inmediatos anteriores.
+function rachaReduccionGasto() {
+  const periodos = periodosCompletos('mensual');
+  let racha = 0;
+  for (let i = periodos.length - 1; i >= 3; i--) {
+    const actual = gastoDePeriodo(periodos[i].key, 'mensual');
+    const prom = (gastoDePeriodo(periodos[i - 1].key, 'mensual') + gastoDePeriodo(periodos[i - 2].key, 'mensual') + gastoDePeriodo(periodos[i - 3].key, 'mensual')) / 3;
+    if (prom > 0 && actual <= prom * 0.9) racha++; else break;
+  }
+  return racha;
+}
+
 const ESPECIALES_GATO = [
-  { id: 'sincargas', nombre: 'Sin cargas', archivo: 'gato-especial-sincargas.png', requisito: 'Ahorra $10,000 o más', cumple: function() { return totalAhorradoAppSolo() >= 10000; } },
-  { id: 'cuspide', nombre: 'Cúspide', archivo: 'gato-especial-cuspide.png', requisito: 'Ahorra $30,000 o más', cumple: function() { return totalAhorradoAppSolo() >= 30000; } },
-  { id: 'libre', nombre: 'Libre', archivo: 'gato-especial-libre.png', requisito: 'Total ahorrado de $40,000 o más', cumple: function() { return totalAhorradoAppSolo() >= 40000; } },
-  { id: 'dominio', nombre: 'Dominio', archivo: 'gato-especial-dominio.png', requisito: 'Nivel 9 y 1 año usando Kashly', cumple: function() { return nivelActualGato() >= 9 && diasUsandoApp() >= 365; } },
-  { id: 'ascendido', nombre: 'Ascendido', archivo: 'gato-especial-ascendido.png', requisito: 'Llegar a nivel 10', cumple: function() { return nivelActualGato() >= 10; } },
-  { id: 'relajado', nombre: 'Relajado', archivo: 'gato-especial-relajado.png', requisito: '2 meses seguidos sin exceder presupuesto', cumple: function() { return rachaDentroDePresupuesto('mensual') >= 2; } },
-  { id: 'despreocupado', nombre: 'Despreocupado', archivo: 'gato-especial-despreocupado.png', requisito: '6 meses seguidos sin exceder presupuesto', cumple: function() { return rachaDentroDePresupuesto('mensual') >= 6; } },
-  { id: 'mago', nombre: 'Mago del dinero', archivo: 'gato-especial-mago.png', requisito: 'Meta de ahorro alcanzada 12 meses seguidos', cumple: function() { return rachaMetaAhorro('mensual') >= 12; } }
+  { id: 'sincargas', nombre: 'Sin cargas', archivo: 'gato-especial-sincargas.png',
+    requisito: 'Registra todos tus gastos durante 30 días seguidos sin fallar.',
+    explicacion: 'Durante un mes completo, registraste cada gasto sin olvidar ninguno. Tus finanzas ya no tienen cargas ocultas.',
+    cumple: function() { return diasConTiposSeguidos(['gasto'], 30); } },
+  { id: 'cuspide', nombre: 'Cúspide', archivo: 'gato-especial-cuspide.png',
+    requisito: 'Usa Kashly todos los días durante 2 semanas seguidas.',
+    explicacion: 'Entraste a la app 14 días seguidos. Estás en la cima del hábito financiero.',
+    cumple: function() { return diasUsoConsecutivos(14); } },
+  { id: 'libre', nombre: 'Libre', archivo: 'gato-especial-libre.png',
+    requisito: 'Completa 4 semanas seguidas registrando ingresos y gastos sin saltarte ningún día.',
+    explicacion: 'Un mes completo registrando todo: ingresos y gastos. Tu dinero ya se mueve con libertad y claridad.',
+    cumple: function() { return diasConTiposSeguidos(['gasto', 'ingreso'], 28); } },
+  { id: 'dominio', nombre: 'Dominio', archivo: 'gato-especial-dominio.png',
+    requisito: 'Crea y sigue un presupuesto personalizado durante 3 meses seguidos.',
+    explicacion: 'Durante tres meses, creaste un presupuesto y te mantuviste dentro de él. Eso es dominio de tu dinero.',
+    cumple: function() { return rachaDentroDePresupuesto('mensual') >= 3; } },
+  { id: 'ascendido', nombre: 'Ascendido', archivo: 'gato-especial-ascendido.png',
+    requisito: 'Alcanza tu meta de ahorro mensual 6 meses seguidos.',
+    explicacion: 'Seis meses seguidos cumpliendo tu meta de ahorro. Tu disciplina te ha llevado a otro nivel.',
+    cumple: function() { return rachaMetaAhorro('mensual') >= 6; } },
+  { id: 'relajado', nombre: 'Relajado', archivo: 'gato-especial-relajado.png', negativo: true,
+    requisito: 'Se activa si excedes tu presupuesto quincenal 2 veces en un mismo mes.',
+    explicacion: 'Vaya… este mes te pasaste del presupuesto un par de veces. No pasa nada, hasta los más relajados aprenden. Aquí tienes un recordatorio (y un Kashly que lo sabe).',
+    cumple: function() { return huboMesConDosExcesos(); } },
+  { id: 'despreocupado', nombre: 'Despreocupado', archivo: 'gato-especial-despreocupado.png',
+    requisito: 'Termina 2 meses distintos con saldo positivo (ingresos mayores a gastos).',
+    explicacion: 'Dos meses terminaste con más ingresos que gastos. Tu dinero cierra en positivo y tú más despreocupado.',
+    cumple: function() { return mesesConSaldoPositivo() >= 2; } },
+  { id: 'mago', nombre: 'Mago del dinero', archivo: 'gato-especial-mago.png',
+    requisito: 'Reduce tus gastos totales al menos 10% frente a tu promedio de los 3 meses anteriores, durante 2 meses seguidos.',
+    explicacion: 'Dos meses seguidos gastaste al menos 10% menos que tu promedio anterior. Eso no es suerte, es magia financiera.',
+    cumple: function() { return rachaReduccionGasto() >= 2; } }
 ];
 // Corrección única: antes, el ahorro registrado a mano (tipo "ahorro")
 // también contaba para los logros de monto ahorrado. Ya se corrigió para
@@ -3095,7 +3207,7 @@ const ESPECIALES_GATO = [
 // aquí se revisa una sola vez y se retira cualquier logro que se haya
 // otorgado por error con la lógica anterior.
 function revalidarLogrosGatoUnaVez() {
-  if (config.gatoLogrosRevalidadosV2) return;
+  if (config.gatoLogrosRevalidadosV3) return;
   const desbloqueados = config.gatoLogrosDesbloqueados || [];
   const correctos = desbloqueados.filter(function(id) {
     const e = ESPECIALES_GATO.find(function(x) { return x.id === id; });
@@ -3109,8 +3221,8 @@ function revalidarLogrosGatoUnaVez() {
       guardarConSincronizacion({ action: 'set-config', key: 'gatoSkinEquipado', value: 'nivel' });
     }
   }
-  config.gatoLogrosRevalidadosV2 = true;
-  guardarConSincronizacion({ action: 'set-config', key: 'gatoLogrosRevalidadosV2', value: true });
+  config.gatoLogrosRevalidadosV3 = true;
+  guardarConSincronizacion({ action: 'set-config', key: 'gatoLogrosRevalidadosV3', value: true });
 }
 
 function revisarLogrosGato() {
@@ -3298,7 +3410,7 @@ function renderPanelEspecialesGato() {
       const id = card.dataset.skin;
       const e = ESPECIALES_GATO.find(function(x) { return x.id === id; });
       if (card.dataset.desbloqueado !== 'true') {
-        mostrarInfo(e.nombre, 'Todavía no lo desbloqueas.\n\nCómo desbloquearlo: ' + e.requisito + '.', e.archivo);
+        mostrarInfo(e.nombre, 'Todavía no lo desbloqueas.\n\n' + e.requisito, e.archivo);
         return;
       }
       config.gatoSkinEquipado = (config.gatoSkinEquipado === id) ? 'nivel' : id;
