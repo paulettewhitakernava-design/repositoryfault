@@ -705,6 +705,19 @@ select option { background: var(--card-solid); color: var(--ink); }
     </div>
   </div>
 
+  <div class="card gato-hero-card" id="gato-hero-card">
+    <div class="gato-stage-wrap"><img class="gato-img" id="gato-img-actual" src="" alt="Tu gato"></div>
+    <div class="gato-info">
+      <div class="gato-nivel-nombre" id="gato-nivel-nombre">Nivel 1 · Inicial</div>
+      <div class="gato-animo-txt" id="gato-animo-txt"></div>
+      <div class="gato-bar"><div class="gato-bar-fill" id="gato-bar-fill" style="width:0%"></div></div>
+      <div class="gato-progreso-txt" id="gato-progreso-txt"></div>
+    </div>
+    <button type="button" class="icon-btn gato-btn-perfil" id="btn-gato-perfil" aria-label="Ver a tu gato">
+      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+  </div>
+
   <div id="inicio-secciones">
 
   <div class="seccion-inicio" id="seccion-estemes" data-key="estemes">
@@ -744,19 +757,6 @@ select option { background: var(--card-solid); color: var(--ink); }
       </div>
       <div class="limite-warning" id="presupuesto-warning" style="display:none"></div>
     </div>
-  </div>
-
-  <div class="card gato-hero-card" id="gato-hero-card">
-    <div class="gato-stage-wrap"><img class="gato-img" id="gato-img-actual" src="" alt="Tu gato"></div>
-    <div class="gato-info">
-      <div class="gato-nivel-nombre" id="gato-nivel-nombre">Nivel 1 · Inicial</div>
-      <div class="gato-animo-txt" id="gato-animo-txt"></div>
-      <div class="gato-bar"><div class="gato-bar-fill" id="gato-bar-fill" style="width:0%"></div></div>
-      <div class="gato-progreso-txt" id="gato-progreso-txt"></div>
-    </div>
-    <button type="button" class="icon-btn gato-btn-perfil" id="btn-gato-perfil" aria-label="Ver a tu gato">
-      <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
-    </button>
   </div>
 
   <div class="seccion-inicio" id="seccion-movimientos" data-key="movimientos">
@@ -912,6 +912,8 @@ select option { background: var(--card-solid); color: var(--ink); }
     <label class="field-label" for="frecuencia-pago" style="margin-top:14px">¿Cómo es tu fecha de pago?</label>
     <select id="frecuencia-pago">
       <option value="quincenal">Quincenal</option>
+      <option value="catorcenal">Catorcenal</option>
+      <option value="decenal">Decenal</option>
       <option value="semanal">Semanal</option>
       <option value="mensual">Mensual</option>
     </select>
@@ -919,15 +921,16 @@ select option { background: var(--card-solid); color: var(--ink); }
     <div id="campo-frecuencia-quincenal" style="margin-top:14px">
       <div class="row2">
         <div>
-          <label class="field-label" for="quincena-dia1">1ra quincena empieza el día</label>
+          <label class="field-label" for="quincena-dia1">1er periodo de pago empieza el día</label>
           <input type="number" id="quincena-dia1" min="1" max="31" placeholder="1">
         </div>
         <div>
-          <label class="field-label" for="quincena-dia2">2da quincena empieza el día</label>
+          <label class="field-label" for="quincena-dia2">2do periodo de pago empieza el día</label>
           <input type="number" id="quincena-dia2" min="1" max="31" placeholder="16">
         </div>
       </div>
     </div>
+    <div class="sheet-text campo-oculto" style="margin-top:8px" id="frecuencia-decenal-nota">Decenal reparte el mes en 3 periodos fijos: días 1-10, 11-20 y 21 al último día del mes.</div>
 
     <div id="campo-frecuencia-semanal" class="campo-oculto" style="margin-top:14px">
       <label class="field-label" for="semana-dia">Tu semana de pago empieza el</label>
@@ -1176,6 +1179,8 @@ select option { background: var(--card-solid); color: var(--ink); }
     <label class="field-label" for="meta-frecuencia-edit" style="margin-top:14px">¿Cómo es tu fecha de pago?</label>
     <select id="meta-frecuencia-edit">
       <option value="quincenal">Quincenal</option>
+      <option value="catorcenal">Catorcenal</option>
+      <option value="decenal">Decenal</option>
       <option value="semanal">Semanal</option>
       <option value="mensual">Mensual</option>
     </select>
@@ -1183,15 +1188,16 @@ select option { background: var(--card-solid); color: var(--ink); }
     <div id="meta-campo-quincenal-edit" style="margin-top:14px">
       <div class="row2">
         <div>
-          <label class="field-label" for="meta-quincena-dia1-edit">1ra quincena empieza el día</label>
+          <label class="field-label" for="meta-quincena-dia1-edit">1er periodo de pago empieza el día</label>
           <input type="number" id="meta-quincena-dia1-edit" min="1" max="31" placeholder="1">
         </div>
         <div>
-          <label class="field-label" for="meta-quincena-dia2-edit">2da quincena empieza el día</label>
+          <label class="field-label" for="meta-quincena-dia2-edit">2do periodo de pago empieza el día</label>
           <input type="number" id="meta-quincena-dia2-edit" min="1" max="31" placeholder="16">
         </div>
       </div>
     </div>
+    <div class="sheet-text campo-oculto" style="margin-top:8px" id="meta-frecuencia-decenal-nota">Decenal reparte el mes en 3 periodos fijos: días 1-10, 11-20 y 21 al último día del mes.</div>
 
     <div id="meta-campo-semanal-edit" class="campo-oculto" style="margin-top:14px">
       <label class="field-label" for="meta-semana-dia-edit">Tu semana de pago empieza el</label>
@@ -1591,15 +1597,18 @@ document.getElementById('meta-frecuencia-edit').addEventListener('change', funct
   actualizarCamposFrecuencia(this.value, 'meta-campo-quincenal-edit', 'meta-campo-semanal-edit');
 });
 function actualizarCamposFrecuencia(freq, idQuincenal, idSemanal) {
-  document.getElementById(idQuincenal).classList.toggle('campo-oculto', freq !== 'quincenal');
+  document.getElementById(idQuincenal).classList.toggle('campo-oculto', freq !== 'quincenal' && freq !== 'catorcenal');
   document.getElementById(idSemanal).classList.toggle('campo-oculto', freq !== 'semanal');
+  const notaId = idQuincenal === 'campo-frecuencia-quincenal' ? 'frecuencia-decenal-nota' : 'meta-frecuencia-decenal-nota';
+  const nota = document.getElementById(notaId);
+  if (nota) nota.classList.toggle('campo-oculto', freq !== 'decenal');
 }
 
 function aplicarYGuardarMeta(val, freq, dia1, dia2, semanaDia, ingresoMensual) {
   config.metaAhorro = val;
   config.frecuenciaPago = freq;
   config.ingresoMensualEstimado = ingresoMensual;
-  if (freq === 'quincenal') {
+  if (freq === 'quincenal' || freq === 'catorcenal') {
     config.quincenaDia1 = dia1;
     config.quincenaDia2 = dia2;
   } else if (freq === 'semanal') {
@@ -1695,6 +1704,8 @@ function nombreFrecuenciaCorta() {
   const freq = config.frecuenciaPago || 'quincenal';
   if (freq === 'semanal') return 'Semanal';
   if (freq === 'mensual') return 'Mensual';
+  if (freq === 'catorcenal') return 'Catorcenal';
+  if (freq === 'decenal') return 'Decenal';
   return 'Quincenal';
 }
 function actualizarTextosPeriodo() {
@@ -1777,11 +1788,6 @@ function aplicarOrdenYFiltrosInicio() {
     el.style.display = vis[key] ? '' : 'none';
     cont.appendChild(el);
   });
-  // La tarjeta de Kashly siempre va justo debajo de Presupuesto, la
-  // reordenes donde la reordenes desde "Mostrar y ordenar".
-  const presuEl = document.getElementById('seccion-presupuesto');
-  const gatoEl = document.getElementById('gato-hero-card');
-  if (presuEl && gatoEl) presuEl.insertAdjacentElement('afterend', gatoEl);
 }
 function guardarInicioConfig() {
   guardarConSincronizacion({ action: 'set-config', key: 'inicioOrden', value: config.inicioOrden || ordenInicioActual() });
@@ -2192,7 +2198,7 @@ function periodoDe(fechaStr, modo) {
     // Si pagas quincenal, "un mes" se cuenta desde tu día de pago (ej. 28 ago
     // a 27 sep), no del 1 al último del mes de calendario — así el mes
     // siempre corresponde exactamente a tus dos quincenas seguidas.
-    if (freqMensual === 'quincenal') {
+    if (freqMensual === 'quincenal' || freqMensual === 'catorcenal') {
       const dia1 = Number(config.quincenaDia1) || 1;
       let inicioM = m;
       if (day < dia1) inicioM = m - 1;
@@ -2220,8 +2226,20 @@ function periodoDe(fechaStr, modo) {
     return { key: y + '-' + m, label: mesesCortos[m] + ' ' + String(y).slice(2), start: new Date(y, m, 1).getTime() };
   }
 
-  // quincenal (personalizable). Soporta que la 2da quincena "cruce" el fin de
-  // mes (ej. dia1=28, dia2=11: una quincena va del 28 al 10, la otra del 11 al 27).
+  if (freq === 'decenal') {
+    // 3 periodos fijos por mes: 1-10, 11-20, 21-fin de mes.
+    let tercio, dIni, dFin;
+    if (day <= 10) { tercio = 0; dIni = 1; dFin = 10; }
+    else if (day <= 20) { tercio = 1; dIni = 11; dFin = 20; }
+    else { tercio = 2; dIni = 21; dFin = new Date(y, m + 1, 0).getDate(); }
+    const inicioDecenal = new Date(y, m, dIni);
+    const label = dIni + ' ' + mesesCortos[m] + '-' + dFin + ' ' + mesesCortos[m];
+    return { key: y + '-' + m + '-' + tercio, label: label, start: inicioDecenal.getTime() };
+  }
+
+  // quincenal o catorcenal (personalizable, mismos dos días de anclaje).
+  // Soporta que el 2do periodo "cruce" el fin de mes (ej. dia1=28, dia2=11:
+  // un periodo va del 28 al 10, el otro del 11 al 27).
   let dia1 = Number(config.quincenaDia1) || 1;
   let dia2 = Number(config.quincenaDia2) || 16;
   if (dia1 === dia2) dia2 = dia1 < 28 ? dia1 + 1 : 1;
@@ -2612,6 +2630,7 @@ function periodosPorMes() {
   const freq = config.frecuenciaPago || 'quincenal';
   if (freq === 'semanal') return 52 / 12;
   if (freq === 'mensual') return 1;
+  if (freq === 'decenal') return 3;
   return 2;
 }
 function ingresoBaseMensual() {
