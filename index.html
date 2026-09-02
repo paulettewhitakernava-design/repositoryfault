@@ -552,6 +552,16 @@ select option { background: var(--card-solid); color: var(--ink); }
   cursor: pointer; padding: 0;
 }
 
+.ajustes-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 15px 0; border-bottom: 1px solid var(--line); gap: 10px; cursor: pointer;
+}
+.ajustes-row:last-child { border-bottom: none; }
+.ajustes-row:active { opacity: 0.7; }
+.ajustes-row-title { font-size: 14px; font-weight: 600; }
+.ajustes-row-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.ajustes-row-chev { color: var(--muted); font-size: 15px; flex-shrink: 0; }
+
 .reorder-row {
   display: flex; align-items: center; justify-content: space-between;
   padding: 12px 0; border-bottom: 1px solid var(--line); gap: 10px;
@@ -892,18 +902,52 @@ select option { background: var(--card-solid); color: var(--ink); }
     <h1>Ajustes</h1>
   </div>
 
+  <div class="card" style="padding-top:6px;padding-bottom:6px">
+    <div class="ajustes-row" data-abrir="overlay-ajustes-perfil">
+      <div><div class="ajustes-row-title">Perfil</div><div class="ajustes-row-sub" id="resumen-perfil">Sin nombre</div></div>
+      <span class="ajustes-row-chev">›</span>
+    </div>
+    <div class="ajustes-row" data-abrir="overlay-ajustes-meta">
+      <div><div class="ajustes-row-title">Meta de ahorro</div><div class="ajustes-row-sub" id="resumen-meta">Sin configurar</div></div>
+      <span class="ajustes-row-chev">›</span>
+    </div>
+    <div class="ajustes-row" data-abrir="overlay-ajustes-saldo">
+      <div><div class="ajustes-row-title">Saldo ahorrado</div><div class="ajustes-row-sub" id="resumen-saldo">$0.00</div></div>
+      <span class="ajustes-row-chev">›</span>
+    </div>
+    <div class="ajustes-row" data-abrir="overlay-ajustes-categorias">
+      <div><div class="ajustes-row-title">Categorías</div><div class="ajustes-row-sub" id="resumen-categorias">0 categorías</div></div>
+      <span class="ajustes-row-chev">›</span>
+    </div>
+    <div class="ajustes-row" data-abrir="overlay-ajustes-filtros">
+      <div><div class="ajustes-row-title">Qué mostrar en Análisis</div><div class="ajustes-row-sub" id="resumen-filtros">Todo activo</div></div>
+      <span class="ajustes-row-chev">›</span>
+    </div>
+  </div>
+
   <div class="card">
-    <div class="card-lbl">Perfil</div>
-    <label class="field-label" for="perfil-nombre" style="margin-top:10px">Nombre</label>
+    <div class="card-lbl">Acerca de</div>
+    <div class="acerca-txt">Kashly · v1.0<br>Tu control de gastos, ingresos y presupuesto.</div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay-ajustes-perfil">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h2>Perfil</h2><button type="button" class="sheet-close" data-cerrar="overlay-ajustes-perfil" aria-label="Cerrar">✕</button></div>
+    <label class="field-label" for="perfil-nombre">Nombre</label>
     <input type="text" id="perfil-nombre" placeholder="Tu nombre">
     <label class="field-label" for="perfil-correo" style="margin-top:14px">Correo</label>
     <input type="email" id="perfil-correo" placeholder="tucorreo@ejemplo.com">
     <button type="button" class="btn-add" id="perfil-guardar" style="margin-top:16px">Guardar</button>
   </div>
+</div>
 
-  <div class="card">
-    <div class="card-lbl">Meta de ahorro</div>
-    <label class="field-label" for="meta-ahorro-input" style="margin-top:10px">Meta de ahorro mensual</label>
+<div class="overlay" id="overlay-ajustes-meta">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h2>Meta de ahorro</h2><button type="button" class="sheet-close" data-cerrar="overlay-ajustes-meta" aria-label="Cerrar">✕</button></div>
+    <label class="field-label" for="meta-ahorro-input">Meta de ahorro mensual</label>
     <input type="number" id="meta-ahorro-input" placeholder="0.00" step="0.01">
 
     <label class="field-label" for="ingreso-mensual-input" style="margin-top:14px">Ingreso mensual estimado <button type="button" class="info-btn" id="btn-info-ingreso-mensual">?</button></label>
@@ -947,16 +991,22 @@ select option { background: var(--card-solid); color: var(--ink); }
 
     <button type="button" class="btn-add" id="btn-guardar-meta-ajustes" style="margin-top:16px">Guardar</button>
   </div>
+</div>
 
-  <div class="card">
-    <div class="card-lbl">Saldo ahorrado <button type="button" class="info-btn" id="btn-info-saldo">?</button></div>
-    <label class="field-label" for="saldo-ahorrado-input" style="margin-top:10px">Dinero que ya tenías ahorrado antes de usar Kashly</label>
+<div class="overlay" id="overlay-ajustes-saldo">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h2>Saldo ahorrado <button type="button" class="info-btn" id="btn-info-saldo">?</button></h2><button type="button" class="sheet-close" data-cerrar="overlay-ajustes-saldo" aria-label="Cerrar">✕</button></div>
+    <label class="field-label" for="saldo-ahorrado-input">Dinero que ya tenías ahorrado antes de usar Kashly</label>
     <input type="number" id="saldo-ahorrado-input" placeholder="0.00" step="0.01">
     <button type="button" class="btn-add" id="btn-guardar-saldo-ajustes" style="margin-top:16px">Guardar</button>
   </div>
+</div>
 
-  <div class="card">
-    <div class="card-lbl">Categorías</div>
+<div class="overlay" id="overlay-ajustes-categorias">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h2>Categorías</h2><button type="button" class="sheet-close" data-cerrar="overlay-ajustes-categorias" aria-label="Cerrar">✕</button></div>
     <div class="ajustes-cat-list" id="ajustes-categorias"></div>
     <div class="cat-input-row">
       <div style="flex:1">
@@ -966,15 +1016,13 @@ select option { background: var(--card-solid); color: var(--ink); }
       <button type="button" id="btn-agregar-categoria" aria-label="Agregar categoría">+</button>
     </div>
   </div>
+</div>
 
-  <div class="card">
-    <div class="card-lbl">Qué mostrar en Análisis</div>
+<div class="overlay" id="overlay-ajustes-filtros">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h2>Qué mostrar en Análisis</h2><button type="button" class="sheet-close" data-cerrar="overlay-ajustes-filtros" aria-label="Cerrar">✕</button></div>
     <div id="ajustes-filtros" style="margin-top:6px"></div>
-  </div>
-
-  <div class="card">
-    <div class="card-lbl">Acerca de</div>
-    <div class="acerca-txt">Kashly · v1.0<br>Tu control de gastos, ingresos y presupuesto.</div>
   </div>
 </div>
 
@@ -1698,7 +1746,43 @@ function cargarFormAjustes() {
   document.getElementById('quincena-dia2').value = config.quincenaDia2 || 16;
   document.getElementById('semana-dia').value = config.semanaDia !== undefined ? config.semanaDia : 5;
   document.getElementById('saldo-ahorrado-input').value = Number(config.saldoAhorrado) || 0;
+  renderAjustesResumen();
 }
+
+function renderAjustesResumen() {
+  document.getElementById('resumen-perfil').textContent = config.perfilNombre ? config.perfilNombre : 'Sin nombre';
+
+  const meta = Number(config.metaAhorro) || 0;
+  document.getElementById('resumen-meta').textContent = meta > 0
+    ? fmt(meta) + ' · ' + nombreFrecuenciaCorta()
+    : 'Sin configurar';
+
+  document.getElementById('resumen-saldo').textContent = fmt(Number(config.saldoAhorrado) || 0);
+
+  const nCat = CATEGORIAS.length;
+  document.getElementById('resumen-categorias').textContent = nCat + (nCat === 1 ? ' categoría' : ' categorías');
+
+  const f = filtrosActuales();
+  const nActivas = Object.keys(f).filter(function(k) { return f[k]; }).length;
+  const nTotal = Object.keys(f).length;
+  document.getElementById('resumen-filtros').textContent = nActivas === nTotal ? 'Todo activo' : nActivas + ' de ' + nTotal + ' activas';
+}
+
+document.querySelectorAll('.ajustes-row[data-abrir]').forEach(function(row) {
+  row.addEventListener('click', function() {
+    document.getElementById(row.dataset.abrir).classList.add('show');
+  });
+});
+document.querySelectorAll('[data-cerrar]').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.getElementById(btn.dataset.cerrar).classList.remove('show');
+  });
+});
+['overlay-ajustes-perfil', 'overlay-ajustes-meta', 'overlay-ajustes-saldo', 'overlay-ajustes-categorias', 'overlay-ajustes-filtros'].forEach(function(id) {
+  document.getElementById(id).addEventListener('click', function(e) {
+    if (e.target.id === id) this.classList.remove('show');
+  });
+});
 
 function nombreFrecuenciaCorta() {
   const freq = config.frecuenciaPago || 'quincenal';
@@ -2578,6 +2662,7 @@ function render() {
   renderAhorroTiempo();
   renderPresupuesto();
   renderGato();
+  renderAjustesResumen();
 }
 
 function hoyISO() {
