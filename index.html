@@ -44,6 +44,7 @@ body {
   margin: 0;
   min-height: 100%;
   min-height: 100dvh;
+  overflow-x: hidden;
   overscroll-behavior-y: contain;
   background: radial-gradient(120% 100% at 15% 0%, var(--bg-1) 0%, var(--bg-2) 55%);
   color: var(--ink);
@@ -649,7 +650,7 @@ select option { background: var(--card-solid); color: var(--ink); }
 .gato-info-img-wrap img { width: 100%; height: 100%; object-fit: contain; position: relative; z-index: 1; filter: drop-shadow(0 12px 14px rgba(0,0,0,0.45)); }
 .gato-info-img-wrap .gato-aura { inset: -6px; }
 
-.gato-notif-wrap { position: relative; }
+.gato-notif-wrap { position: relative; overflow: hidden; }
 .gato-nivel-tab {
   position: absolute; top: 110px; right: -3px; z-index: 6;
   display: flex; align-items: center; gap: 8px; background: linear-gradient(135deg, var(--accent), #ff5c9e);
@@ -664,11 +665,11 @@ select option { background: var(--card-solid); color: var(--ink); }
 .gato-vitrina { border-radius: 20px; padding: 24px 18px; text-align: center; position: relative; background: linear-gradient(180deg, #1a1330, #0d0a1c); border: 1px solid rgba(255,209,102,0.18); margin-bottom: 12px; }
 .gato-vitrina::before { content: ''; position: absolute; top: 14px; left: 14px; right: 14px; bottom: 14px; border: 1px solid rgba(255,209,102,0.1); border-radius: 14px; pointer-events: none; }
 .gato-vit-badge {
-  position: absolute; top: 14px; right: 14px; width: 38px; height: 38px; border-radius: 12px;
+  position: absolute; top: 14px; right: 14px; width: 50px; height: 50px; border-radius: 14px;
   background: rgba(255,209,102,0.12); border: 1px solid rgba(255,209,102,0.3); display: flex; align-items: center;
-  justify-content: center; font-size: 16px; cursor: pointer; z-index: 2;
+  justify-content: center; font-size: 22px; cursor: pointer; z-index: 2;
 }
-.gato-vit-badge-count { position: absolute; bottom: -4px; right: -4px; background: var(--gold); color: #2a1608; font-size: 7.5px; font-weight: 800; border-radius: 999px; padding: 1px 4px; font-family: 'Space Grotesk', sans-serif; white-space: nowrap; }
+.gato-vit-badge-count { position: absolute; bottom: -5px; right: -5px; background: var(--gold); color: #2a1608; font-size: 9px; font-weight: 800; border-radius: 999px; padding: 2px 5px; font-family: 'Space Grotesk', sans-serif; white-space: nowrap; }
 .gato-life-stage { width: 130px; height: 130px; margin: 0 auto 14px; position: relative; }
 .gato-life-stage::before { content: ''; position: absolute; inset: -14%; background: radial-gradient(circle, rgba(255,209,102,0.22), transparent 70%); animation: gatoAura 3s ease-in-out infinite; }
 .gato-mote { position: absolute; bottom: 34%; left: 50%; width: 4px; height: 4px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 6px 1px rgba(255,209,102,0.8); animation: gatoMote 3.2s ease-in infinite; }
@@ -900,7 +901,6 @@ select option { background: var(--card-solid); color: var(--ink); }
     </button>
   </div>
   <div class="gato-nivel-tab" id="gato-nivel-tab"><img id="gato-nivel-tab-img" src="" alt=""><span>¡Subiste de nivel! Toca aquí</span></div>
-  </div>
   </div>
 
   <div id="inicio-secciones">
