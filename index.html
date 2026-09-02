@@ -133,6 +133,17 @@ h1 { font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 26px
 .preview-bar-lbl { font-size: 10px; color: var(--muted); }
 .preview-bar-val { font-size: 11px; font-weight: 700; color: var(--ink); }
 
+.analisis-inicio-scroll {
+  display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 0;
+  margin: 0 -22px; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+}
+.analisis-inicio-scroll::-webkit-scrollbar { display: none; }
+.analisis-inicio-page { flex: 0 0 100%; scroll-snap-align: start; min-width: 100%; box-sizing: border-box; padding: 0 22px; }
+.analisis-inicio-page-lbl { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+.analisis-inicio-dots { display: flex; justify-content: center; gap: 6px; margin-top: 14px; }
+.analisis-inicio-dot { width: 6px; height: 6px; border-radius: 999px; background: rgba(255,255,255,0.14); transition: background 0.2s, width 0.2s; }
+.analisis-inicio-dot.activo { background: var(--accent); width: 16px; }
+
 /* ---- Chart (Analisis) ---- */
 .chart-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
 .legend { display: flex; gap: 14px; }
@@ -612,24 +623,28 @@ select option { background: var(--card-solid); color: var(--ink); }
 
 /* Inicio: tarjeta grande y animada */
 .gato-hero-card {
-  border-radius: 24px; padding: 20px; position: relative; overflow: hidden; margin-bottom: 20px;
-  background: linear-gradient(150deg, rgba(255,138,92,0.22), rgba(124,245,196,0.08) 60%, var(--card-solid) 100%);
+  border-radius: 26px; padding: 24px; position: relative; overflow: hidden; margin-bottom: 20px;
+  background: radial-gradient(120% 130% at -10% -25%, rgba(255,138,92,0.30), transparent 55%), var(--card-solid);
   border: 1px solid rgba(255,209,102,0.22); animation: rise 0.5s ease both;
 }
 .gato-hero-clickzone { display: block; width: 100%; background: none; border: none; padding: 0; margin: 0; text-align: left; cursor: pointer; color: inherit; font: inherit; }
-.gato-hero-row { display: flex; align-items: center; gap: 14px; position: relative; z-index: 1; }
-.gato-stage-wrap { width: 92px; height: 92px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+.gato-hero-row { display: flex; align-items: center; gap: 16px; position: relative; z-index: 1; }
+.gato-stage-wrap { width: 108px; height: 108px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
 .gato-aura { position: absolute; inset: -14px; border-radius: 50%; background: radial-gradient(circle, rgba(255,209,102,0.4), transparent 68%); animation: gatoAura 2.8s ease-in-out infinite; }
 .gato-stage-wrap .gato-img { position: relative; z-index: 1; animation: gatoSway 4.2s ease-in-out infinite; filter: drop-shadow(0 10px 8px rgba(0,0,0,0.4)); }
 .gato-info { flex: 1; min-width: 0; }
-.gato-nivel-nombre { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 3px; }
-.gato-animo-row { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
-.gato-animo-txt { font-size: 11.5px; color: var(--accent-2); font-weight: 600; }
+.gato-nivel-nombre { font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+.gato-animo-row { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; }
+.gato-animo-txt { font-size: 12.5px; color: var(--accent-2); font-weight: 600; }
 .gato-info-btn { width: 16px; height: 16px; border-radius: 50%; background: rgba(255,255,255,0.14); color: var(--ink); font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.gato-bar { height: 8px; border-radius: 5px; background: rgba(0,0,0,0.28); overflow: hidden; }
+.gato-bar { height: 9px; border-radius: 5px; background: rgba(0,0,0,0.28); overflow: hidden; }
 .gato-bar-fill { height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--accent), var(--gold)); transition: width 0.4s ease; }
-.gato-progreso-txt { font-size: 10px; color: var(--muted); margin-top: 6px; line-height: 1.4; }
+.gato-progreso-txt { font-size: 10.5px; color: var(--muted); margin-top: 7px; line-height: 1.4; }
 .gato-hero-chev { color: var(--muted); font-size: 15px; align-self: flex-start; flex-shrink: 0; }
+
+.gato-info-img-wrap { width: 140px; height: 140px; margin: 0 auto 16px; position: relative; }
+.gato-info-img-wrap img { width: 100%; height: 100%; object-fit: contain; position: relative; z-index: 1; filter: drop-shadow(0 12px 14px rgba(0,0,0,0.45)); }
+.gato-info-img-wrap .gato-aura { inset: -6px; }
 
 .gato-nivel-tab {
   position: absolute; top: 96px; right: -3px; z-index: 5;
@@ -673,8 +688,22 @@ select option { background: var(--card-solid); color: var(--ink); }
 
 .gato-racha-strip { margin-top: 16px; padding-top: 16px; border-top: 1px dashed rgba(255,255,255,0.1); text-align: left; position: relative; z-index: 1; }
 .gato-racha-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }
+.gato-racha-lbl-row { display: flex; align-items: center; gap: 6px; }
 .gato-racha-lbl { font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .gato-racha-mult { font-family: 'Space Grotesk', sans-serif; font-size: 10px; font-weight: 800; color: var(--gold); background: rgba(255,209,102,0.12); border: 1px solid rgba(255,209,102,0.3); border-radius: 999px; padding: 2px 8px; }
+
+.gato-siguiente-card { position: relative; }
+.gato-siguiente-row { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+.gato-siguiente-badge {
+  width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 800; color: #2a1608;
+  background: linear-gradient(135deg, var(--gold), var(--accent));
+}
+.gato-siguiente-txt { flex: 1; min-width: 0; }
+.gato-siguiente-nombre { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 700; }
+.gato-siguiente-falta { font-size: 12px; color: var(--gold); font-weight: 600; margin-top: 1px; }
+.gato-siguiente-bar { height: 6px; border-radius: 999px; background: rgba(255,255,255,0.08); overflow: hidden; margin-top: 12px; }
+.gato-siguiente-bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--accent), var(--gold)); transition: width 0.4s ease; }
 .gato-gem-row { display: flex; gap: 6px; }
 .gato-gem { flex: 1; aspect-ratio: 1; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: var(--muted); background: rgba(255,255,255,0.05); border: 1px solid var(--line); }
 .gato-gem.done { background: linear-gradient(145deg, var(--gold), var(--accent)); color: #2a1608; border-color: transparent; clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); }
@@ -731,17 +760,17 @@ select option { background: var(--card-solid); color: var(--ink); }
 .gato-nivel-row.actual .n { color: var(--gold); }
 .gato-nivel-row .chev { color: var(--muted); font-size: 14px; flex-shrink: 0; }
 
-.gato-especial-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.gato-especial-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
 .gato-especial-card {
-  border: 1px solid rgba(255,209,102,0.16); border-radius: 16px; padding: 12px 10px; text-align: center;
+  border: 1px solid rgba(255,209,102,0.16); border-radius: 18px; padding: 16px 12px; text-align: center;
   background: rgba(255,255,255,0.03); cursor: pointer; position: relative;
 }
 .gato-especial-card.bloqueado { border-color: var(--line); }
 .gato-especial-card.bloqueado img { filter: brightness(0) saturate(0); opacity: 0.3; }
 .gato-especial-card.unlocked { box-shadow: inset 0 0 0 1px rgba(255,209,102,0.4), 0 0 14px -4px rgba(255,209,102,0.5); }
-.gato-especial-card img { width: 56px; height: 56px; object-fit: contain; margin-bottom: 6px; }
-.gato-especial-card .nombre { font-size: 11.5px; font-weight: 700; margin-bottom: 2px; }
-.gato-especial-card .req { font-size: 9.5px; color: var(--muted); line-height: 1.35; }
+.gato-especial-card img { width: 84px; height: 84px; object-fit: contain; margin-bottom: 8px; }
+.gato-especial-card .nombre { font-size: 12.5px; font-weight: 700; margin-bottom: 2px; }
+.gato-especial-card .req { font-size: 10px; color: var(--muted); line-height: 1.35; }
 .gato-especial-check {
   position: absolute; top: 8px; right: 8px; width: 16px; height: 16px; border-radius: 50%;
   background: var(--gold); color: #2a1608; font-size: 10px; display: flex; align-items: center; justify-content: center;
@@ -756,7 +785,7 @@ select option { background: var(--card-solid); color: var(--ink); }
   border: 1px solid rgba(255,209,102,0.28); transform: scale(0.94); transition: transform 0.25s ease;
 }
 #overlay-logro-detalle.show .gato-det-sheet { transform: scale(1); }
-.gato-det-img-wrap { width: 90px; height: 90px; margin: 0 auto 10px; position: relative; }
+.gato-det-img-wrap { width: 140px; height: 140px; margin: 0 auto 14px; position: relative; }
 .gato-det-img-wrap::before { content: ''; position: absolute; inset: -18%; background: radial-gradient(circle, rgba(255,209,102,0.3), transparent 70%); }
 .gato-det-img-wrap img { width: 100%; height: 100%; object-fit: contain; position: relative; }
 .gato-det-nombre { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; color: var(--gold); margin-bottom: 8px; }
@@ -862,13 +891,48 @@ select option { background: var(--card-solid); color: var(--ink); }
 
   <div id="inicio-secciones">
 
-  <div class="seccion-inicio" id="seccion-estemes" data-key="estemes">
-    <div class="card preview-card" id="preview-card">
+  <div class="seccion-inicio" id="seccion-analisis" data-key="analisis">
+    <div class="card" id="analisis-inicio-card" style="overflow:hidden">
       <div class="preview-head">
-        <div class="card-lbl" style="margin-bottom:0">Este mes</div>
-        <span class="link">Ver análisis ›</span>
+        <div class="card-lbl" style="margin-bottom:0">Análisis</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <button type="button" class="icon-btn" id="btn-analisis-inicio-editar" aria-label="Elegir qué análisis ver">
+            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          </button>
+          <span class="link" id="btn-analisis-inicio-vertodo">Ver todo ›</span>
+        </div>
       </div>
-      <div class="preview-bars" id="preview-bars"></div>
+      <div class="analisis-inicio-scroll" id="analisis-inicio-scroll">
+        <div class="analisis-inicio-page" data-key="estemes">
+          <div class="analisis-inicio-page-lbl">Este mes</div>
+          <div class="preview-bars" id="preview-bars"></div>
+        </div>
+        <div class="analisis-inicio-page" data-key="categoria">
+          <div class="analisis-inicio-page-lbl">Gasto por categoría</div>
+          <div class="chart-wrap" id="inicio-cat-wrap"></div>
+        </div>
+        <div class="analisis-inicio-page" data-key="promedios">
+          <div class="analisis-inicio-page-lbl">Promedio de gasto</div>
+          <div class="stat-row-2" id="inicio-promedios-wrap"></div>
+        </div>
+        <div class="analisis-inicio-page" data-key="ahorro">
+          <div class="analisis-inicio-page-lbl">Ahorro a través del tiempo</div>
+          <div class="chart-wrap" id="inicio-ahorro-wrap"></div>
+        </div>
+      </div>
+      <div class="analisis-inicio-dots" id="analisis-inicio-dots"></div>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlay-analisis-inicio-editar">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-head">
+        <h2>Qué mostrar en Análisis</h2>
+        <button type="button" class="sheet-close" id="analisis-inicio-editar-close" aria-label="Cerrar">✕</button>
+      </div>
+      <div class="sheet-text">Elige qué páginas ves al deslizar la tarjeta de Análisis en Inicio.</div>
+      <div id="analisis-inicio-filtros-lista" style="margin-top:6px"></div>
     </div>
   </div>
 
@@ -912,27 +976,6 @@ select option { background: var(--card-solid); color: var(--ink); }
       <div class="skeleton" style="opacity:.45"></div>
     </div>
     <button type="button" class="btn-ghost" id="btn-ver-mas" style="display:none"></button>
-  </div>
-
-  <div class="seccion-inicio" id="seccion-categoria" data-key="categoria">
-    <div class="card">
-      <div class="card-lbl">Gasto por categoría</div>
-      <div class="chart-wrap" id="inicio-cat-wrap" style="margin-top:10px"></div>
-    </div>
-  </div>
-
-  <div class="seccion-inicio" id="seccion-promedios" data-key="promedios">
-    <div class="card">
-      <div class="card-lbl">Promedio de gasto</div>
-      <div class="stat-row-2" id="inicio-promedios-wrap" style="margin-top:10px"></div>
-    </div>
-  </div>
-
-  <div class="seccion-inicio" id="seccion-ahorro" data-key="ahorro">
-    <div class="card">
-      <div class="card-lbl">Ahorro a través del tiempo</div>
-      <div class="chart-wrap" id="inicio-ahorro-wrap" style="margin-top:10px"></div>
-    </div>
   </div>
 
   </div>
@@ -1171,9 +1214,6 @@ select option { background: var(--card-solid); color: var(--ink); }
           <h1>Kashly financiero</h1>
         </div>
       </div>
-      <button type="button" class="ajustes-btn-inicio" id="btn-gato-abrir-sheet" aria-label="Ver niveles y logros">
-        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M8 12h8"/><path d="M11 18h2"/></svg>
-      </button>
     </div>
   </div>
 
@@ -1202,7 +1242,10 @@ select option { background: var(--card-solid); color: var(--ink); }
     </div>
 
     <div class="gato-racha-strip">
-      <div class="gato-racha-head"><span class="gato-racha-lbl">Racha semanal</span><span class="gato-racha-mult" id="gato-racha-mult">x1 XP</span></div>
+      <div class="gato-racha-head">
+        <span class="gato-racha-lbl-row"><span class="gato-racha-lbl">Racha semanal</span><span class="gato-info-btn" id="btn-racha-info">?</span></span>
+        <span class="gato-racha-mult" id="gato-racha-mult">x1 XP</span>
+      </div>
       <div class="gato-gem-row" id="gato-gem-row"></div>
     </div>
   </div>
@@ -1230,9 +1273,17 @@ select option { background: var(--card-solid); color: var(--ink); }
     <div><b>Doble XP activo</b><span id="gato-boost-widget-sub">Quedan 24h</span></div>
   </div>
 
-  <div class="card">
+  <div class="card gato-siguiente-card" id="gato-siguiente-card">
     <div class="card-lbl">Para el siguiente nivel</div>
-    <div class="sheet-text" id="gato-avatar-progreso" style="margin-top:8px"></div>
+    <div class="gato-siguiente-row">
+      <div class="gato-siguiente-badge" id="gato-siguiente-badge">2</div>
+      <div class="gato-siguiente-txt">
+        <div class="gato-siguiente-nombre" id="gato-siguiente-nombre">Aprendiz</div>
+        <div class="gato-siguiente-falta" id="gato-siguiente-falta">Te faltan 70 XP</div>
+      </div>
+    </div>
+    <div class="gato-siguiente-bar"><div class="gato-siguiente-bar-fill" id="gato-siguiente-bar-fill"></div></div>
+    <div class="sheet-text" id="gato-avatar-progreso" style="margin-top:10px"></div>
   </div>
 </div>
 
@@ -1333,7 +1384,7 @@ select option { background: var(--card-solid); color: var(--ink); }
       <h2 id="info-titulo">Info</h2>
       <button type="button" class="sheet-close" id="info-close" aria-label="Cerrar">✕</button>
     </div>
-    <div class="gato-stage-wrap" id="info-img-wrap" style="display:none;margin:0 auto 14px;width:84px;height:84px"><img class="gato-img" id="info-img" src="" alt="" style="animation:none"></div>
+    <div class="gato-info-img-wrap" id="info-img-wrap" style="display:none"><span class="gato-aura"></span><img id="info-img" src="" alt=""></div>
     <div class="sheet-text" id="info-texto"></div>
   </div>
 </div>
@@ -1613,9 +1664,12 @@ const FILTROS_DEF = [
   { key: 'ahorro', label: 'Ahorro a través del tiempo', seccion: 'chart-section-ahorro' }
 ];
 const SECCIONES_INICIO = [
-  { key: 'estemes', label: 'Este mes' },
+  { key: 'analisis', label: 'Análisis' },
   { key: 'presupuesto', label: 'Presupuesto' },
-  { key: 'movimientos', label: 'Movimientos' },
+  { key: 'movimientos', label: 'Movimientos' }
+];
+const ANALISIS_INICIO_DEF = [
+  { key: 'estemes', label: 'Este mes' },
   { key: 'categoria', label: 'Gasto por categoría' },
   { key: 'promedios', label: 'Promedio de gasto' },
   { key: 'ahorro', label: 'Ahorro a través del tiempo' }
@@ -1735,7 +1789,69 @@ document.querySelectorAll('.nav-btn').forEach(function(btn) {
   btn.addEventListener('click', function() { mostrarPantalla(btn.dataset.screen); });
 });
 function irA(pantalla) { mostrarPantalla(pantalla); }
-document.getElementById('preview-card').addEventListener('click', function() { irA('analisis'); });
+document.getElementById('btn-analisis-inicio-vertodo').addEventListener('click', function() { irA('analisis'); });
+
+// --- Análisis en Inicio: una sola tarjeta deslizable (Este mes, Gasto por
+// categoría, Promedio de gasto, Ahorro), con control de qué páginas ver ---
+function analisisInicioActuales() {
+  const f = config.analisisInicioFiltros || {};
+  const out = {};
+  ANALISIS_INICIO_DEF.forEach(function(d) { out[d.key] = f[d.key] !== false; });
+  return out;
+}
+function renderAnalisisInicioPaginas() {
+  const cont = document.getElementById('analisis-inicio-scroll');
+  const dots = document.getElementById('analisis-inicio-dots');
+  if (!cont || !dots) return;
+  const activos = analisisInicioActuales();
+  const paginas = Array.from(cont.querySelectorAll('.analisis-inicio-page'));
+  let visibles = 0;
+  paginas.forEach(function(p) {
+    const on = activos[p.dataset.key] !== false;
+    p.style.display = on ? '' : 'none';
+    if (on) visibles++;
+  });
+  dots.innerHTML = '';
+  if (visibles <= 1) return;
+  for (let i = 0; i < visibles; i++) {
+    const dot = document.createElement('span');
+    dot.className = 'analisis-inicio-dot' + (i === 0 ? ' activo' : '');
+    dots.appendChild(dot);
+  }
+}
+document.getElementById('analisis-inicio-scroll').addEventListener('scroll', function() {
+  const cont = this;
+  const idx = Math.round(cont.scrollLeft / cont.clientWidth);
+  document.querySelectorAll('#analisis-inicio-dots .analisis-inicio-dot').forEach(function(d, i) {
+    d.classList.toggle('activo', i === idx);
+  });
+});
+function renderAnalisisInicioFiltrosUI() {
+  const activos = analisisInicioActuales();
+  const html = ANALISIS_INICIO_DEF.map(function(d) {
+    return '<div class="filter-row"><span>' + d.label + '</span><label class="switch"><input type="checkbox" data-analisis-inicio-filtro="' + d.key + '"' + (activos[d.key] ? ' checked' : '') + '><span class="slider"></span></label></div>';
+  }).join('');
+  document.getElementById('analisis-inicio-filtros-lista').innerHTML = html;
+  document.querySelectorAll('[data-analisis-inicio-filtro]').forEach(function(chk) {
+    chk.addEventListener('change', function() {
+      if (!config.analisisInicioFiltros) config.analisisInicioFiltros = {};
+      config.analisisInicioFiltros[chk.dataset.analisisInicioFiltro] = chk.checked;
+      guardarConSincronizacion({ action: 'set-config', key: 'analisisInicioFiltros', value: config.analisisInicioFiltros });
+      renderAnalisisInicioPaginas();
+    });
+  });
+}
+document.getElementById('btn-analisis-inicio-editar').addEventListener('click', function(e) {
+  e.stopPropagation();
+  renderAnalisisInicioFiltrosUI();
+  document.getElementById('overlay-analisis-inicio-editar').classList.add('show');
+});
+document.getElementById('analisis-inicio-editar-close').addEventListener('click', function() {
+  document.getElementById('overlay-analisis-inicio-editar').classList.remove('show');
+});
+document.getElementById('overlay-analisis-inicio-editar').addEventListener('click', function(e) {
+  if (e.target.id === 'overlay-analisis-inicio-editar') this.classList.remove('show');
+});
 document.getElementById('btn-ir-ajustes-presu').addEventListener('click', function() { irA('ajustes'); });
 document.getElementById('btn-ajustes-inicio').addEventListener('click', function() { irA('ajustes'); });
 
@@ -2865,6 +2981,7 @@ function render() {
   renderGastoPorCategoria();
   renderPromedios();
   renderAhorroTiempo();
+  renderAnalisisInicioPaginas();
   renderPresupuesto();
   renderGato();
   renderAjustesResumen();
@@ -3651,9 +3768,10 @@ function renderGato() {
 // Texto explicativo al tocar un nivel: ahora los niveles se otorgan por XP
 // total acumulada, así que solo se compara contra el umbral de ese nivel.
 function mensajeDetalleNivel(n) {
+  if (n === 1) return 'Todos empiezan aquí — en cuanto ganes tus primeros puntos de XP, avanzas al Nivel 2.';
   const xp = totalXPGato();
   const umbral = XP_POR_NIVEL[n];
-  if (xp >= umbral) return '¡Completado! Llevas ' + xp + ' XP (necesitabas ' + umbral + ').';
+  if (xp >= umbral) return '¡Completado! Llevas ' + xp + ' XP — te alcanzó de sobra para este nivel.';
   return 'Necesitas ' + umbral + ' XP en total. Llevas ' + xp + ' XP — te faltan ' + (umbral - xp) + '.';
 }
 
@@ -3750,11 +3868,11 @@ function abrirSheetGato() {
 }
 
 const TEXTOS_ANIMO_INFO = {
-  tranquilo: 'Vas bien: llevas usado menos de la mitad de tu presupuesto de esta quincena.',
-  alerta: 'Ya usaste entre el 50% y el 89% de tu presupuesto de esta quincena — vigila tu gasto.',
-  preocupado: 'Ya usaste entre el 90% y el 99% de tu presupuesto de esta quincena — estás a punto de excederte.',
-  colapsado: 'Ya te pasaste de tu presupuesto de esta quincena (100% o más).',
-  radiante: 'Terminaste tu periodo anterior dentro de presupuesto o alcanzando tu meta de ahorro. Este estado dura 1-2 días y luego vuelve a la normalidad.'
+  tranquilo: 'Vas bien: llevas usado menos de la mitad de tu presupuesto de esta quincena. Sigue registrando tus gastos para mantenerte así hasta el cierre del periodo.',
+  alerta: 'Ya usaste entre el 50% y el 89% de tu presupuesto de esta quincena. No es grave todavía, pero conviene que revises en qué categorías estás gastando más antes de que se acabe el periodo.',
+  preocupado: 'Ya usaste entre el 90% y el 99% de tu presupuesto de esta quincena — estás a punto de excederte. Este es un buen momento para pausar gastos no esenciales hasta tu próximo periodo.',
+  colapsado: 'Ya te pasaste de tu presupuesto de esta quincena (100% o más). No pasa nada, pero te conviene revisar qué categorías se salieron de control para ajustar la próxima vez.',
+  radiante: 'Terminaste tu periodo anterior dentro de presupuesto o alcanzando tu meta de ahorro — por eso Kashly se ve así de contento. Este estado dura 1-2 días y luego vuelve a reflejar tu quincena actual.'
 };
 function mostrarInfoAnimo() {
   const animo = mostrandoRadiante() ? 'radiante' : estadoAnimoBase();
@@ -3856,6 +3974,11 @@ function renderPantallaGato() {
   const barFill = document.getElementById('gato-life-bar-fill');
   const xpActualEl = document.getElementById('gato-life-xp-actual');
   const xpUmbralEl = document.getElementById('gato-life-xp-umbral');
+  const siguienteCard = document.getElementById('gato-siguiente-card');
+  const sigBadge = document.getElementById('gato-siguiente-badge');
+  const sigNombre = document.getElementById('gato-siguiente-nombre');
+  const sigFalta = document.getElementById('gato-siguiente-falta');
+  const sigBar = document.getElementById('gato-siguiente-bar-fill');
   if (siguiente) {
     const prog = progresoHaciaNivel(siguiente);
     subEl.textContent = prog.xpActual + ' / ' + prog.xpUmbral + ' XP';
@@ -3863,14 +3986,20 @@ function renderPantallaGato() {
     xpActualEl.textContent = prog.xpActual + ' XP';
     xpUmbralEl.textContent = prog.xpUmbral + ' XP';
     const sigInfo = NIVELES_GATO.find(function(nv) { return nv.n === siguiente; });
-    progresoEl.textContent = 'Nivel ' + siguiente + ' · ' + sigInfo.nombre + ': ' + mensajeDetalleNivel(siguiente);
+    siguienteCard.style.display = '';
+    sigBadge.textContent = siguiente;
+    sigNombre.textContent = 'Nivel ' + siguiente + ' · ' + sigInfo.nombre;
+    sigFalta.textContent = 'Te faltan ' + Math.max(0, prog.xpUmbral - prog.xpActual) + ' XP';
+    sigBar.style.width = prog.pct + '%';
+    progresoEl.textContent = mensajeDetalleNivel(siguiente);
   } else {
     const xp = totalXPGato();
     subEl.textContent = xp + ' XP';
     barFill.style.width = '100%';
     xpActualEl.textContent = xp + ' XP';
     xpUmbralEl.textContent = 'Máximo';
-    progresoEl.textContent = '¡Alcanzaste el nivel máximo!';
+    siguienteCard.style.display = 'none';
+    progresoEl.textContent = '¡Alcanzaste el nivel máximo! Ya tienes ' + xp + ' XP acumulada.';
   }
 
   renderRachaGems();
@@ -3887,7 +4016,6 @@ document.getElementById('btn-gato-perfil').addEventListener('click', function() 
 document.getElementById('btn-gato-volver').addEventListener('click', function() {
   irA('inicio');
 });
-document.getElementById('btn-gato-abrir-sheet').addEventListener('click', abrirSheetGato);
 document.getElementById('btn-gato-abrir-album').addEventListener('click', abrirSheetGato);
 document.getElementById('btn-gato-animo-info').addEventListener('click', mostrarInfoAnimo);
 document.getElementById('btn-gato-animo-info-inicio').addEventListener('click', function(e) {
@@ -3918,6 +4046,13 @@ document.getElementById('btn-reveal-continuar').addEventListener('click', functi
 
 document.getElementById('gato-boost-tab').addEventListener('click', function() {
   document.getElementById('gato-boost-detail').classList.toggle('show');
+});
+document.getElementById('btn-racha-info').addEventListener('click', function(e) {
+  e.stopPropagation();
+  mostrarInfo('Racha semanal',
+    'Cada día que terminas dentro de tu presupuesto, se marca en la fila de esta semana y ganas XP extra.\n\n' +
+    'Mientras más días seguidos acumules, más rápido "se siente" avanzar tu barra de XP — el multiplicador (x1, x2, x3) sube con la racha, aunque lo que necesitas para subir de nivel no cambia.\n\n' +
+    'Si un día te excedes de presupuesto, ese día no se marca y la racha se reinicia.');
 });
 document.getElementById('btn-boost-info').addEventListener('click', function(e) {
   e.stopPropagation();
