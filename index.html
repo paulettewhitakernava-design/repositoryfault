@@ -837,13 +837,18 @@ select option { background: var(--card-solid); color: var(--ink); }
   transition: opacity 0.4s ease;
 }
 .splash.hide { opacity: 0; pointer-events: none; }
-.splash-mark { width: 260px; height: auto; animation: rise 0.5s ease both; }
+.splash-mark-wrap {
+  width: 190px; height: 190px; border-radius: 42px; overflow: hidden;
+  background: #000; box-shadow: 0 20px 60px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,209,102,0.16);
+  animation: rise 0.5s ease both;
+}
+.splash-mark { width: 100%; height: 100%; object-fit: cover; display: block; }
 </style>
 </head>
 <body>
 
 <div class="splash" id="splash">
-  <img class="splash-mark" src="icon-512.png" alt="Kashly">
+  <div class="splash-mark-wrap"><img class="splash-mark" src="icon-512.png" alt="Kashly"></div>
 </div>
 
 <div id="scroll">
@@ -2437,6 +2442,18 @@ agregarSwipeHorizontal(document.getElementById('screen-analisis'), function(dx) 
 agregarSwipeHorizontal(document.getElementById('screen-gato'), function(dx) {
   if (dx > 0) irA('inicio');
 });
+
+// En conexiones lentas (datos celulares) una imagen puede fallar la primera
+// vez; se reintenta una vez antes de resignarse a dejarla oculta en vez de
+// mostrar el ícono de imagen rota.
+document.addEventListener('error', function(e) {
+  const img = e.target;
+  if (!img || img.tagName !== 'IMG' || !img.classList || !img.classList.contains('gato-img')) return;
+  if (img.dataset.retried) return;
+  img.dataset.retried = '1';
+  const src = img.src;
+  setTimeout(function() { img.src = src + (src.indexOf('?') === -1 ? '?r=1' : '&r=1'); }, 1500);
+}, true);
 
 function iniciarConDatos(datosGastos, datosConfig, offline) {
   gastos = datosGastos || [];
