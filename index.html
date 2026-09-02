@@ -51,7 +51,6 @@ body {
   font-family: 'Manrope', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
-body.letra-mediana { zoom: 0.92; }
 body.letra-pequena { zoom: 0.84; }
 
 #scroll {
@@ -621,8 +620,9 @@ select option { background: var(--card-solid); color: var(--ink); }
 @keyframes gatoSparkle { 0%,100% { opacity: 0; transform: scale(0.4) rotate(0deg); } 50% { opacity: 1; transform: scale(1) rotate(90deg); } }
 @keyframes gatoRingBurst { 0% { transform: scale(0.8); opacity: 0.9; } 100% { transform: scale(1.6); opacity: 0; } }
 .gato-img { width: 100%; height: 100%; object-fit: contain; }
+.gato-img[src=""] { visibility: hidden; }
 @media (prefers-reduced-motion: reduce) {
-  .gato-img, .gato-aura, .gato-mote, .gato-life-bar-fill, .gato-boost-tab::after, .gato-spark, .gato-reveal-ring-burst { animation: none !important; }
+  .gato-img, .gato-aura, .gato-mote, .gato-bar-fill, .gato-life-bar-fill, .gato-boost-tab::after, .gato-spark, .gato-reveal-ring-burst { animation: none !important; }
 }
 
 /* Inicio: tarjeta grande y animada */
@@ -642,7 +642,8 @@ select option { background: var(--card-solid); color: var(--ink); }
 .gato-animo-txt { font-size: 12.5px; color: var(--accent-2); font-weight: 600; }
 .gato-info-btn { width: 16px; height: 16px; border-radius: 50%; background: rgba(255,255,255,0.14); color: var(--ink); font-size: 9px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .gato-bar { height: 9px; border-radius: 5px; background: rgba(0,0,0,0.28); overflow: hidden; }
-.gato-bar-fill { height: 100%; border-radius: 5px; background: linear-gradient(90deg, var(--accent), var(--gold)); transition: width 0.4s ease; }
+.gato-bar-fill { height: 100%; border-radius: 5px; position: relative; background: linear-gradient(90deg, var(--accent), var(--gold)); transition: width 0.4s ease; animation: gatoBarBreathe 2.4s ease-in-out infinite; }
+.gato-bar-fill::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,0.35), transparent 45%); border-radius: inherit; }
 .gato-progreso-txt { font-size: 10.5px; color: var(--muted); margin-top: 7px; line-height: 1.4; }
 .gato-hero-chev { color: var(--muted); font-size: 15px; align-self: flex-start; flex-shrink: 0; }
 
@@ -665,12 +666,12 @@ select option { background: var(--card-solid); color: var(--ink); }
 .gato-vitrina { border-radius: 20px; padding: 24px 18px; text-align: center; position: relative; background: linear-gradient(180deg, #1a1330, #0d0a1c); border: 1px solid rgba(255,209,102,0.18); margin-bottom: 12px; }
 .gato-vitrina::before { content: ''; position: absolute; top: 14px; left: 14px; right: 14px; bottom: 14px; border: 1px solid rgba(255,209,102,0.1); border-radius: 14px; pointer-events: none; }
 .gato-vit-badge {
-  position: absolute; top: 14px; right: 14px; width: 50px; height: 50px; border-radius: 14px;
+  position: absolute; top: 14px; right: 14px; width: 62px; height: 62px; border-radius: 16px;
   background: rgba(255,209,102,0.12); border: 1px solid rgba(255,209,102,0.3); display: flex; align-items: center;
-  justify-content: center; font-size: 22px; cursor: pointer; z-index: 2;
+  justify-content: center; font-size: 28px; cursor: pointer; z-index: 2;
 }
-.gato-vit-badge-count { position: absolute; bottom: -5px; right: -5px; background: var(--gold); color: #2a1608; font-size: 9px; font-weight: 800; border-radius: 999px; padding: 2px 5px; font-family: 'Space Grotesk', sans-serif; white-space: nowrap; }
-.gato-life-stage { width: 130px; height: 130px; margin: 0 auto 14px; position: relative; }
+.gato-vit-badge-count { position: absolute; bottom: -6px; right: -6px; background: var(--gold); color: #2a1608; font-size: 10px; font-weight: 800; border-radius: 999px; padding: 2px 6px; font-family: 'Space Grotesk', sans-serif; white-space: nowrap; }
+.gato-life-stage { width: 130px; height: 130px; margin: 0 auto 14px; position: relative; cursor: pointer; }
 .gato-life-stage::before { content: ''; position: absolute; inset: -14%; background: radial-gradient(circle, rgba(255,209,102,0.22), transparent 70%); animation: gatoAura 3s ease-in-out infinite; }
 .gato-mote { position: absolute; bottom: 34%; left: 50%; width: 4px; height: 4px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 6px 1px rgba(255,209,102,0.8); animation: gatoMote 3.2s ease-in infinite; }
 .gato-mote:nth-child(2) { left: 26%; animation-delay: 0.6s; --mx: -16px; }
@@ -690,6 +691,8 @@ select option { background: var(--card-solid); color: var(--ink); }
 .gato-animo-strip-txt { flex: 1; }
 .gato-animo-strip-lbl { font-size: 8.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 .gato-animo-strip-val { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 700; color: var(--accent-2); }
+.gato-animo-strip-row { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.gato-animo-strip-detalle { font-size: 10px; color: var(--muted); }
 
 .gato-racha-strip { margin-top: 16px; padding-top: 16px; border-top: 1px dashed rgba(255,255,255,0.1); text-align: left; position: relative; z-index: 1; }
 .gato-racha-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 9px; }
@@ -1112,10 +1115,6 @@ select option { background: var(--card-solid); color: var(--ink); }
       <div><div class="ajustes-row-title">Qué mostrar en Análisis</div><div class="ajustes-row-sub" id="resumen-filtros">Todo activo</div></div>
       <span class="ajustes-row-chev">›</span>
     </div>
-    <div class="ajustes-row" data-abrir="overlay-ajustes-letra">
-      <div><div class="ajustes-row-title">Tamaño de letra</div><div class="ajustes-row-sub" id="resumen-letra">Grande</div></div>
-      <span class="ajustes-row-chev">›</span>
-    </div>
   </div>
 
   <div class="card">
@@ -1219,14 +1218,6 @@ select option { background: var(--card-solid); color: var(--ink); }
   </div>
 </div>
 
-<div class="overlay" id="overlay-ajustes-letra">
-  <div class="sheet">
-    <div class="sheet-handle"></div>
-    <div class="sheet-head"><h2>Tamaño de letra</h2><button type="button" class="sheet-close" data-cerrar="overlay-ajustes-letra" aria-label="Cerrar">✕</button></div>
-    <div id="letra-opciones-lista"></div>
-  </div>
-</div>
-
 <!-- ===== KASHLY FINANCIERO (mascota) ===== -->
 <div class="screen" id="screen-gato">
   <div class="header">
@@ -1247,7 +1238,7 @@ select option { background: var(--card-solid); color: var(--ink); }
     <button type="button" class="gato-vit-badge" id="btn-gato-abrir-album" aria-label="Ver logros financieros">
       <span id="gato-vit-badge-ico">🏆</span><span class="gato-vit-badge-count" id="gato-vit-badge-count">0/8</span>
     </button>
-    <div class="gato-life-stage">
+    <div class="gato-life-stage" id="gato-life-stage" role="button" tabindex="0" aria-label="Ver logros financieros">
       <span class="gato-mote"></span><span class="gato-mote"></span><span class="gato-mote"></span>
       <img class="gato-img" id="gato-avatar-img" src="" alt="Tu nivel">
     </div>
@@ -1262,7 +1253,7 @@ select option { background: var(--card-solid); color: var(--ink); }
       <div class="gato-animo-strip-stage"><img class="gato-img" id="gato-avatar-animo-img" src="" alt=""></div>
       <div class="gato-animo-strip-txt">
         <div class="gato-animo-strip-lbl">Ánimo de hoy</div>
-        <div class="gato-animo-strip-val" id="gato-avatar-animo">Tranquilo</div>
+        <div class="gato-animo-strip-row"><span class="gato-animo-strip-val" id="gato-avatar-animo">Tranquilo</span><span class="gato-animo-strip-detalle" id="gato-avatar-animo-detalle"></span></div>
       </div>
       <button type="button" class="gato-info-btn" id="btn-gato-animo-info">?</button>
     </div>
@@ -2111,46 +2102,16 @@ function renderAjustesResumen() {
   const nTotal = Object.keys(f).length;
   document.getElementById('resumen-filtros').textContent = nActivas === nTotal ? 'Todo activo' : nActivas + ' de ' + nTotal + ' activas';
 
-  const letraLbl = LETRA_OPCIONES.find(function(o) { return o.key === (config.tamanoLetra || 'grande'); });
-  document.getElementById('resumen-letra').textContent = letraLbl ? letraLbl.label : 'Grande';
 }
 
-// --- Tamaño de letra: "Grande" es el diseño original (sin escalar); las
-// otras dos opciones reducen todo el app con zoom, para dar sensación real
-// de más chico sin tener que reescribir cada tamaño de fuente. ---
-const LETRA_OPCIONES = [
-  { key: 'grande', label: 'Grande' },
-  { key: 'mediana', label: 'Mediana' },
-  { key: 'pequena', label: 'Pequeña' }
-];
+// El tamaño de letra queda fijo en "Pequeña" (se probó dejarlo elegible pero
+// causaba un glitch visual al cambiar de opción dentro de Ajustes).
 function aplicarTamanoLetra() {
-  const key = config.tamanoLetra || 'grande';
-  document.body.classList.remove('letra-mediana', 'letra-pequena');
-  if (key === 'mediana') document.body.classList.add('letra-mediana');
-  if (key === 'pequena') document.body.classList.add('letra-pequena');
-}
-function renderLetraOpciones() {
-  const actual = config.tamanoLetra || 'grande';
-  document.getElementById('letra-opciones-lista').innerHTML = LETRA_OPCIONES.map(function(o) {
-    return '<div class="ajustes-row letra-opcion-row" data-letra="' + o.key + '">' +
-      '<div class="ajustes-row-title">' + o.label + '</div>' +
-      (o.key === actual ? '<span class="gato-especial-check" style="position:static">✓</span>' : '') +
-    '</div>';
-  }).join('');
-  document.querySelectorAll('.letra-opcion-row').forEach(function(row) {
-    row.addEventListener('click', function() {
-      config.tamanoLetra = row.dataset.letra;
-      guardarConSincronizacion({ action: 'set-config', key: 'tamanoLetra', value: config.tamanoLetra });
-      aplicarTamanoLetra();
-      renderLetraOpciones();
-      renderAjustesResumen();
-    });
-  });
+  document.body.classList.add('letra-pequena');
 }
 
 document.querySelectorAll('.ajustes-row[data-abrir]').forEach(function(row) {
   row.addEventListener('click', function() {
-    if (row.dataset.abrir === 'overlay-ajustes-letra') renderLetraOpciones();
     document.getElementById(row.dataset.abrir).classList.add('show');
   });
 });
@@ -2159,7 +2120,7 @@ document.querySelectorAll('[data-cerrar]').forEach(function(btn) {
     document.getElementById(btn.dataset.cerrar).classList.remove('show');
   });
 });
-['overlay-ajustes-perfil', 'overlay-ajustes-meta', 'overlay-ajustes-saldo', 'overlay-ajustes-categorias', 'overlay-ajustes-filtros', 'overlay-ajustes-letra'].forEach(function(id) {
+['overlay-ajustes-perfil', 'overlay-ajustes-meta', 'overlay-ajustes-saldo', 'overlay-ajustes-categorias', 'overlay-ajustes-filtros'].forEach(function(id) {
   document.getElementById(id).addEventListener('click', function(e) {
     if (e.target.id === id) this.classList.remove('show');
   });
@@ -3577,15 +3538,14 @@ function registrarUsoDiario() {
   config.diasUso = dias;
   guardarConSincronizacion({ action: 'set-config', key: 'diasUso', value: dias });
 }
-// true si hay un registro de uso para cada uno de los últimos n días (sin contar hoy).
-// Racha actual de días de uso seguidos (sin contar hoy, tope de 400 por seguridad).
+// Racha actual de días de uso seguidos, incluyendo hoy si ya tiene registro (tope de 400 por seguridad).
 function diasUsoRacha() {
   const dias = config.diasUso || [];
   const set = {};
   dias.forEach(function(d) { set[d] = true; });
   const hoy = new Date(hoyISO() + 'T00:00:00');
   let racha = 0;
-  for (let i = 1; i <= 400; i++) {
+  for (let i = 0; i <= 400; i++) {
     const d = new Date(hoy); d.setDate(d.getDate() - i);
     const iso = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     if (!set[iso]) break;
@@ -3594,8 +3554,8 @@ function diasUsoRacha() {
   return racha;
 }
 function diasUsoConsecutivos(n) { return diasUsoRacha() >= n; }
-// Racha actual (sin contar hoy) de días seguidos con al menos un movimiento
-// de cada tipo listado (ej. ['gasto'] o ['gasto','ingreso']).
+// Racha actual (incluyendo hoy si ya califica) de días seguidos con al menos
+// un movimiento de cada tipo listado (ej. ['gasto'] o ['gasto','ingreso']).
 function diasConTiposRacha(tipos) {
   const porDia = {};
   gastos.forEach(function(g) {
@@ -3605,7 +3565,7 @@ function diasConTiposRacha(tipos) {
   });
   const hoy = new Date(hoyISO() + 'T00:00:00');
   let racha = 0;
-  for (let i = 1; i <= 400; i++) {
+  for (let i = 0; i <= 400; i++) {
     const d = new Date(hoy); d.setDate(d.getDate() - i);
     const iso = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     const dia = porDia[iso];
@@ -3976,6 +3936,13 @@ function abrirSheetGato() {
   document.getElementById('overlay-gato').classList.add('show');
 }
 
+const TEXTOS_ANIMO_CORTO = {
+  tranquilo: 'Has usado menos del 50% del presupuesto',
+  alerta: 'Has usado el 50 - 89% del presupuesto',
+  preocupado: 'Has usado el 90 - 99% del presupuesto',
+  colapsado: 'Te excediste del presupuesto (100%+)',
+  radiante: 'Cerraste bien tu periodo anterior'
+};
 const TEXTOS_ANIMO_INFO = {
   tranquilo: 'Vas bien: llevas usado menos de la mitad de tu presupuesto de esta quincena.\n\nSigue registrando tus gastos para mantenerte así hasta el cierre del periodo.',
   alerta: 'Ya usaste entre el 50% y el 89% de tu presupuesto de esta quincena.\n\nNo es grave todavía, pero conviene que revises en qué categorías estás gastando más antes de que se acabe el periodo.',
@@ -4079,6 +4046,7 @@ function renderPantallaGato() {
     : 'Nivel ' + nivel + ' · ' + nivelInfo.nombre;
   document.getElementById('gato-avatar-animo-img').src = imagenEstadoGato();
   document.getElementById('gato-avatar-animo').textContent = NOMBRES_ANIMO[animo];
+  document.getElementById('gato-avatar-animo-detalle').textContent = TEXTOS_ANIMO_CORTO[animo] || '';
 
   const siguiente = nivel < 10 ? nivel + 1 : null;
   const progresoEl = document.getElementById('gato-avatar-progreso');
@@ -4129,6 +4097,10 @@ document.getElementById('btn-gato-volver').addEventListener('click', function() 
   irA('inicio');
 });
 document.getElementById('btn-gato-abrir-album').addEventListener('click', abrirSheetGato);
+document.getElementById('gato-life-stage').addEventListener('click', abrirSheetGato);
+document.getElementById('gato-life-stage').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirSheetGato(); }
+});
 document.getElementById('btn-gato-animo-info').addEventListener('click', mostrarInfoAnimo);
 document.getElementById('btn-gato-animo-info-inicio').addEventListener('click', function(e) {
   e.stopPropagation();
@@ -4154,7 +4126,8 @@ document.getElementById('btn-notificaciones-inicio').addEventListener('click', f
   if (config.gatoNivelPendienteRevelar) {
     abrirNivelRevelado();
   } else {
-    showToast('Sin notificaciones nuevas por ahora');
+    irA('gato');
+    renderPantallaGato();
   }
 });
 document.getElementById('btn-reveal-continuar').addEventListener('click', function() {
