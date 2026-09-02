@@ -671,7 +671,7 @@ select option { background: var(--card-solid); color: var(--ink); }
   justify-content: center; font-size: 28px; cursor: pointer; z-index: 2;
 }
 .gato-vit-badge-count { position: absolute; bottom: -6px; right: -6px; background: var(--gold); color: #2a1608; font-size: 10px; font-weight: 800; border-radius: 999px; padding: 2px 6px; font-family: 'Space Grotesk', sans-serif; white-space: nowrap; }
-.gato-life-stage { width: 130px; height: 130px; margin: 0 auto 14px; position: relative; cursor: pointer; }
+.gato-life-stage { width: 190px; height: 190px; margin: 0 auto 14px; position: relative; cursor: pointer; }
 .gato-life-stage::before { content: ''; position: absolute; inset: -14%; background: radial-gradient(circle, rgba(255,209,102,0.22), transparent 70%); animation: gatoAura 3s ease-in-out infinite; }
 .gato-mote { position: absolute; bottom: 34%; left: 50%; width: 4px; height: 4px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 6px 1px rgba(255,209,102,0.8); animation: gatoMote 3.2s ease-in infinite; }
 .gato-mote:nth-child(2) { left: 26%; animation-delay: 0.6s; --mx: -16px; }
@@ -761,6 +761,7 @@ select option { background: var(--card-solid); color: var(--ink); }
   cursor: pointer;
 }
 .gato-nivel-row:last-child { border-bottom: none; }
+.notif-nuevo { display: inline-block; background: var(--accent); color: #2a1608; font-size: 8.5px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; border-radius: 999px; padding: 2px 7px; margin-left: 6px; vertical-align: middle; }
 .gato-nivel-row img { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; opacity: 0.35; }
 .gato-nivel-row.actual img { opacity: 1; }
 .gato-nivel-row .n { flex: 1; font-size: 13px; font-weight: 600; }
@@ -831,7 +832,7 @@ select option { background: var(--card-solid); color: var(--ink); }
 /* ---- Splash ---- */
 .splash {
   position: fixed; inset: 0; z-index: 100;
-  background: #000;
+  background: radial-gradient(120% 100% at 15% 0%, var(--bg-1) 0%, var(--bg-2) 55%);
   display: flex; align-items: center; justify-content: center;
   transition: opacity 0.4s ease;
 }
@@ -1123,6 +1124,24 @@ select option { background: var(--card-solid); color: var(--ink); }
   </div>
 </div>
 
+<!-- ===== NOTIFICACIONES ===== -->
+<div class="screen" id="screen-notificaciones">
+  <div class="header">
+    <div class="header-row">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button type="button" class="ajustes-btn-inicio" id="btn-notif-volver" aria-label="Volver">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div>
+          <div class="eyebrow">Tu actividad</div>
+          <h1>Notificaciones</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card" id="notif-lista"></div>
+</div>
+
 <div class="overlay" id="overlay-ajustes-perfil">
   <div class="sheet">
     <div class="sheet-handle"></div>
@@ -1238,7 +1257,7 @@ select option { background: var(--card-solid); color: var(--ink); }
     <button type="button" class="gato-vit-badge" id="btn-gato-abrir-album" aria-label="Ver logros financieros">
       <span id="gato-vit-badge-ico">🏆</span><span class="gato-vit-badge-count" id="gato-vit-badge-count">0/8</span>
     </button>
-    <div class="gato-life-stage" id="gato-life-stage" role="button" tabindex="0" aria-label="Ver logros financieros">
+    <div class="gato-life-stage" id="gato-life-stage" role="button" tabindex="0" aria-label="Ver tu armario">
       <span class="gato-mote"></span><span class="gato-mote"></span><span class="gato-mote"></span>
       <img class="gato-img" id="gato-avatar-img" src="" alt="Tu nivel">
     </div>
@@ -1462,6 +1481,18 @@ select option { background: var(--card-solid); color: var(--ink); }
     <div class="gato-det-estado" id="logro-det-estado"></div>
     <div class="gato-det-txt" id="logro-det-txt"></div>
     <div class="gato-det-btn-row" id="logro-det-btns"></div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay-armario">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head">
+      <h2>Tu armario</h2>
+      <button type="button" class="sheet-close" data-cerrar="overlay-armario" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="sheet-text" style="margin-bottom:10px">Estos son los diseños que ya desbloqueaste. Toca cualquiera para usarlo.</div>
+    <div class="gato-especial-grid" id="armario-grid"></div>
   </div>
 </div>
 
@@ -2378,6 +2409,35 @@ window.addEventListener('resize', function() {
   togglePresu.set(togglePresu.get());
 });
 
+// --- Gestos de deslizar: cambiar quincenal/mensual con el dedo, y volver
+// atrás deslizando en pantallas sin tabs propios. ---
+function agregarSwipeHorizontal(el, onSwipe) {
+  if (!el) return;
+  let startX = 0, startY = 0, tracking = false;
+  el.addEventListener('touchstart', function(e) {
+    if (e.touches.length !== 1) return;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    tracking = true;
+  }, { passive: true });
+  el.addEventListener('touchend', function(e) {
+    if (!tracking) return;
+    tracking = false;
+    const dx = e.changedTouches[0].clientX - startX;
+    const dy = e.changedTouches[0].clientY - startY;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) onSwipe(dx);
+  }, { passive: true });
+}
+agregarSwipeHorizontal(document.getElementById('seccion-presupuesto'), function(dx) {
+  togglePresu.set(dx < 0 ? 'mensual' : 'quincena');
+});
+agregarSwipeHorizontal(document.getElementById('screen-analisis'), function(dx) {
+  togglePeriodo.set(dx < 0 ? 'mensual' : 'quincena');
+});
+agregarSwipeHorizontal(document.getElementById('screen-gato'), function(dx) {
+  if (dx > 0) irA('inicio');
+});
+
 function iniciarConDatos(datosGastos, datosConfig, offline) {
   gastos = datosGastos || [];
   config = datosConfig || {};
@@ -2710,13 +2770,14 @@ function agruparPorPeriodo(modo) {
   return Object.values(porPeriodo).sort(function(a, b) { return a.start - b.start; });
 }
 
-// --- Vista previa en Inicio: ingreso vs gasto del mes actual ---
+// --- Vista previa en Inicio: ingreso vs gasto del periodo de pago actual ---
 function renderPreview() {
-  const now = new Date();
+  const periodoHoy = periodoDe(hoyISO(), 'quincena');
   let ingreso = 0, gasto = 0;
   gastos.forEach(function(g) {
-    const d = new Date(g.fecha + 'T00:00:00');
-    if (isNaN(d) || d.getFullYear() !== now.getFullYear() || d.getMonth() !== now.getMonth()) return;
+    if (g.tipo !== 'ingreso' && g.tipo !== 'gasto') return;
+    const p = periodoDe(g.fecha, 'quincena');
+    if (!p || !periodoHoy || p.key !== periodoHoy.key) return;
     if (g.tipo === 'ingreso') ingreso += Number(g.monto) || 0;
     if (g.tipo === 'gasto') gasto += Number(g.monto) || 0;
   });
@@ -3436,6 +3497,37 @@ function activarBoost() {
   guardarConSincronizacion({ action: 'set-config', key: 'gatoBoostsDisponibles', value: config.gatoBoostsDisponibles });
 }
 
+// De dónde viene la XP acumulada hasta ahora, para poder explicarle al
+// usuario por qué subió de nivel (en vez de solo mostrar el número final).
+function resumenXPActual() {
+  const movimientos = gastos.filter(function(g) { return g.tipo === 'gasto' || g.tipo === 'ingreso'; }).length;
+  const rachaDias = Object.keys(config.rachaDias || {}).filter(function(k) { return config.rachaDias[k]; }).length;
+  const logrosIds = config.gatoLogrosDesbloqueados || [];
+  const logros = ESPECIALES_GATO.filter(function(e) { return logrosIds.indexOf(e.id) !== -1; });
+  return {
+    movimientos: movimientos,
+    xpMovimientos: movimientos * 5,
+    rachaDias: rachaDias,
+    xpRacha: rachaDias * 15,
+    logros: logros.map(function(e) { return e.nombre; }),
+    xpLogros: logros.reduce(function(s, e) { return s + (e.xp || 0); }, 0)
+  };
+}
+function textoExplicacionNivel(resumen) {
+  const partes = [];
+  if (resumen.movimientos > 0) {
+    partes.push('Registraste ' + resumen.movimientos + (resumen.movimientos === 1 ? ' movimiento' : ' movimientos') + ' (+' + resumen.xpMovimientos + ' XP).');
+  }
+  if (resumen.rachaDias > 0) {
+    partes.push('Te mantuviste dentro de presupuesto ' + resumen.rachaDias + (resumen.rachaDias === 1 ? ' día' : ' días') + ' de tu racha semanal (+' + resumen.xpRacha + ' XP).');
+  }
+  if (resumen.logros.length > 0) {
+    partes.push('Desbloqueaste: ' + resumen.logros.join(', ') + ' (+' + resumen.xpLogros + ' XP).');
+  }
+  if (!partes.length) partes.push('Acumulaste XP usando la app.');
+  return partes.join('\n\n');
+}
+
 // --- XP: se otorga por acciones (registrar movimientos, días dentro de
 // presupuesto) y por logros. otorgarXP() ya aplica el doble si hay boost
 // activo, y detecta si esto alcanza para subir de nivel. ---
@@ -3448,6 +3540,11 @@ function otorgarXP(cantidad) {
   if (nivelDespues > nivelAntes) {
     config.gatoNivelPendienteRevelar = nivelDespues;
     guardarConSincronizacion({ action: 'set-config', key: 'gatoNivelPendienteRevelar', value: nivelDespues });
+    const historial = (config.gatoHistorialNiveles || []).slice();
+    historial.push({ nivel: nivelDespues, fechaISO: hoyISO(), resumen: resumenXPActual() });
+    if (historial.length > 20) historial.splice(0, historial.length - 20);
+    config.gatoHistorialNiveles = historial;
+    guardarConSincronizacion({ action: 'set-config', key: 'gatoHistorialNiveles', value: historial });
   }
 }
 
@@ -3791,11 +3888,67 @@ function imagenEstadoGato() {
 function imagenAvatarGato() {
   const skin = config.gatoSkinEquipado;
   if (skin && skin !== 'nivel') {
-    const especial = ESPECIALES_GATO.find(function(e) { return e.id === skin; });
-    if (especial && (config.gatoLogrosDesbloqueados || []).indexOf(skin) !== -1) return especial.archivo;
+    if (skin.indexOf('nivel-') === 0) {
+      const n = Number(skin.slice(6));
+      if (n >= 1 && n <= nivelActualGato()) return 'gato-nivel-' + n + '.png';
+    } else {
+      const especial = ESPECIALES_GATO.find(function(e) { return e.id === skin; });
+      if (especial && (config.gatoLogrosDesbloqueados || []).indexOf(skin) !== -1) return especial.archivo;
+    }
   }
   return 'gato-nivel-' + nivelActualGato() + '.png';
 }
+
+// --- Armario: solo lo que ya se desbloqueó (niveles alcanzados + logros
+// obtenidos), para usar como diseño. Distinto de "Niveles y logros", que
+// muestra todo (incluso bloqueado) solo para consultar. ---
+function abrirArmario() {
+  renderArmario();
+  document.getElementById('overlay-armario').classList.add('show');
+}
+function renderArmario() {
+  const nivelActual = nivelActualGato();
+  const skin = config.gatoSkinEquipado || 'nivel';
+  const desbloqueados = config.gatoLogrosDesbloqueados || [];
+
+  const nivelesHtml = NIVELES_GATO.filter(function(nv) { return nv.n <= nivelActual; }).map(function(nv) {
+    const equipado = (nv.n === nivelActual && skin === 'nivel') || skin === 'nivel-' + nv.n;
+    return '<div class="gato-especial-card unlocked armario-item" data-skin="nivel-' + nv.n + '">' +
+      (equipado ? '<span class="gato-especial-check">✓</span>' : '') +
+      '<img src="gato-nivel-' + nv.n + '.png" alt="">' +
+      '<div class="nombre">Nivel ' + nv.n + '</div>' +
+      '<div class="req">' + nv.nombre + '</div>' +
+    '</div>';
+  }).join('');
+
+  const logrosHtml = ESPECIALES_GATO.filter(function(e) { return desbloqueados.indexOf(e.id) !== -1; }).map(function(e) {
+    const equipado = skin === e.id;
+    return '<div class="gato-especial-card unlocked armario-item' + (e.negativo ? ' negativo' : '') + '" data-skin="' + e.id + '">' +
+      (equipado ? '<span class="gato-especial-check">✓</span>' : '') +
+      '<img src="' + e.archivo + '" alt="">' +
+      '<div class="nombre">' + e.nombre + '</div>' +
+      '<div class="req">Logro</div>' +
+    '</div>';
+  }).join('');
+
+  document.getElementById('armario-grid').innerHTML = nivelesHtml + logrosHtml;
+  document.querySelectorAll('.armario-item').forEach(function(card) {
+    card.addEventListener('click', function() {
+      const key = card.dataset.skin;
+      const skinActual = config.gatoSkinEquipado || 'nivel';
+      const yaEquipado = skinActual === key || (key === 'nivel-' + nivelActual && skinActual === 'nivel');
+      config.gatoSkinEquipado = yaEquipado ? 'nivel' : key;
+      guardarConSincronizacion({ action: 'set-config', key: 'gatoSkinEquipado', value: config.gatoSkinEquipado });
+      renderArmario();
+      renderGato();
+      renderPantallaGato();
+      document.getElementById('gato-sheet-img').src = imagenAvatarGato();
+    });
+  });
+}
+document.getElementById('overlay-armario').addEventListener('click', function(e) {
+  if (e.target.id === 'overlay-armario') this.classList.remove('show');
+});
 
 function renderGato() {
   if (!document.getElementById('gato-hero-card')) return;
@@ -4017,15 +4170,51 @@ function renderNivelTab() {
     if (dot) dot.style.display = 'none';
   }
 }
+function renderNotificaciones() {
+  const historial = (config.gatoHistorialNiveles || []).slice().reverse();
+  const lista = document.getElementById('notif-lista');
+  if (!historial.length) {
+    lista.innerHTML = '<div class="empty">Aún no tienes notificaciones.<br>Aquí verás tus subidas de nivel.</div>';
+    return;
+  }
+  lista.innerHTML = historial.map(function(h, i) {
+    const nivelInfo = NIVELES_GATO.find(function(nv) { return nv.n === h.nivel; });
+    const esPendiente = i === 0 && config.gatoNivelPendienteRevelar === h.nivel;
+    return '<div class="gato-nivel-row notif-row" data-nivel="' + h.nivel + '" data-pendiente="' + (esPendiente ? '1' : '0') + '">' +
+      '<img src="gato-nivel-' + h.nivel + '.png" alt="" style="width:38px;height:38px;object-fit:contain">' +
+      '<div style="flex:1">' +
+        '<div class="n">¡Subiste a Nivel ' + h.nivel + ' · ' + (nivelInfo ? nivelInfo.nombre : '') + '!' + (esPendiente ? ' <span class="notif-nuevo">Nuevo</span>' : '') + '</div>' +
+        '<div class="req">' + h.fechaISO + '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+  document.querySelectorAll('.notif-row').forEach(function(row) {
+    row.addEventListener('click', function() {
+      const nivel = Number(row.dataset.nivel);
+      if (row.dataset.pendiente === '1') {
+        abrirNivelRevelado();
+        return;
+      }
+      const entrada = (config.gatoHistorialNiveles || []).slice().reverse().find(function(h) { return h.nivel === nivel; });
+      const nivelInfo = NIVELES_GATO.find(function(nv) { return nv.n === nivel; });
+      mostrarInfo('¡Subiste a Nivel ' + nivel + ' · ' + (nivelInfo ? nivelInfo.nombre : '') + '!', entrada ? textoExplicacionNivel(entrada.resumen) : '');
+    });
+  });
+}
+document.getElementById('btn-notif-volver').addEventListener('click', function() { irA('inicio'); });
+
 function abrirNivelRevelado() {
   const n = config.gatoNivelPendienteRevelar;
   if (!n) return;
   const nivelInfo = NIVELES_GATO.find(function(nv) { return nv.n === n; });
+  const historial = config.gatoHistorialNiveles || [];
+  const entrada = historial.slice().reverse().find(function(h) { return h.nivel === n; });
+  const resumen = entrada ? entrada.resumen : resumenXPActual();
   document.getElementById('reveal-nivel-img').src = 'gato-nivel-' + n + '.png';
   document.getElementById('reveal-nivel-badge').textContent = n;
   document.getElementById('reveal-nivel-nombre').textContent = nivelInfo.nombre;
   document.getElementById('reveal-nivel-sub').textContent = 'Nivel ' + n;
-  document.getElementById('reveal-nivel-porque').textContent = 'Acumulaste ' + XP_POR_NIVEL[n] + ' XP en total registrando tus finanzas y cumpliendo logros.';
+  document.getElementById('reveal-nivel-porque').textContent = textoExplicacionNivel(resumen);
   document.getElementById('gato-nivel-tab').classList.remove('show');
   document.getElementById('overlay-nivel-revelado').classList.add('show');
 }
@@ -4097,9 +4286,9 @@ document.getElementById('btn-gato-volver').addEventListener('click', function() 
   irA('inicio');
 });
 document.getElementById('btn-gato-abrir-album').addEventListener('click', abrirSheetGato);
-document.getElementById('gato-life-stage').addEventListener('click', abrirSheetGato);
+document.getElementById('gato-life-stage').addEventListener('click', abrirArmario);
 document.getElementById('gato-life-stage').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirSheetGato(); }
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirArmario(); }
 });
 document.getElementById('btn-gato-animo-info').addEventListener('click', mostrarInfoAnimo);
 document.getElementById('btn-gato-animo-info-inicio').addEventListener('click', function(e) {
@@ -4123,12 +4312,8 @@ document.querySelectorAll('.gato-tab-btn').forEach(function(btn) {
 
 document.getElementById('gato-nivel-tab').addEventListener('click', abrirNivelRevelado);
 document.getElementById('btn-notificaciones-inicio').addEventListener('click', function() {
-  if (config.gatoNivelPendienteRevelar) {
-    abrirNivelRevelado();
-  } else {
-    irA('gato');
-    renderPantallaGato();
-  }
+  irA('notificaciones');
+  renderNotificaciones();
 });
 document.getElementById('btn-reveal-continuar').addEventListener('click', function() {
   document.getElementById('overlay-nivel-revelado').classList.remove('show');
