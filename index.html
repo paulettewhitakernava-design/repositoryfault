@@ -50,6 +50,8 @@ body {
   font-family: 'Manrope', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
+body.letra-mediana { zoom: 0.92; }
+body.letra-pequena { zoom: 0.84; }
 
 #scroll {
   padding: calc(20px + var(--safe-t)) 20px calc(var(--nav-h) + var(--safe-b) + 20px);
@@ -549,6 +551,7 @@ select option { background: var(--card-solid); color: var(--ink); }
   display: flex; align-items: center; justify-content: center; cursor: pointer;
 }
 .ajustes-btn-inicio svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+.notif-dot { position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); border: 1.5px solid var(--bg-2); }
 
 .cat-input-row { display: flex; gap: 8px; margin-top: 10px; }
 .cat-input-row input { flex: 1; }
@@ -629,7 +632,7 @@ select option { background: var(--card-solid); color: var(--ink); }
 }
 .gato-hero-clickzone { display: block; width: 100%; background: none; border: none; padding: 0; margin: 0; text-align: left; cursor: pointer; color: inherit; font: inherit; }
 .gato-hero-row { display: flex; align-items: center; gap: 16px; position: relative; z-index: 1; }
-.gato-stage-wrap { width: 108px; height: 108px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+.gato-stage-wrap { width: 108px; height: 108px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; position: relative; }
 .gato-aura { position: absolute; inset: -14px; border-radius: 50%; background: radial-gradient(circle, rgba(255,209,102,0.4), transparent 68%); animation: gatoAura 2.8s ease-in-out infinite; }
 .gato-stage-wrap .gato-img { position: relative; z-index: 1; animation: gatoSway 4.2s ease-in-out infinite; filter: drop-shadow(0 10px 8px rgba(0,0,0,0.4)); }
 .gato-info { flex: 1; min-width: 0; }
@@ -646,8 +649,9 @@ select option { background: var(--card-solid); color: var(--ink); }
 .gato-info-img-wrap img { width: 100%; height: 100%; object-fit: contain; position: relative; z-index: 1; filter: drop-shadow(0 12px 14px rgba(0,0,0,0.45)); }
 .gato-info-img-wrap .gato-aura { inset: -6px; }
 
+.gato-notif-wrap { position: relative; }
 .gato-nivel-tab {
-  position: absolute; top: 96px; right: -3px; z-index: 5;
+  position: absolute; top: 110px; right: -3px; z-index: 6;
   display: flex; align-items: center; gap: 8px; background: linear-gradient(135deg, var(--accent), #ff5c9e);
   color: #2a1608; border-radius: 14px 0 0 14px; padding: 10px 10px 10px 14px; cursor: pointer;
   box-shadow: -6px 6px 20px rgba(0,0,0,0.4); transform: translateX(120%); transition: transform 0.5s cubic-bezier(.2,.85,.25,1.2);
@@ -768,9 +772,12 @@ select option { background: var(--card-solid); color: var(--ink); }
 .gato-especial-card.bloqueado { border-color: var(--line); }
 .gato-especial-card.bloqueado img { filter: brightness(0) saturate(0); opacity: 0.3; }
 .gato-especial-card.unlocked { box-shadow: inset 0 0 0 1px rgba(255,209,102,0.4), 0 0 14px -4px rgba(255,209,102,0.5); }
+.gato-especial-card.negativo.unlocked { box-shadow: inset 0 0 0 1px rgba(255,138,92,0.5), 0 0 14px -4px rgba(255,138,92,0.55); background: rgba(255,138,92,0.06); }
+.gato-especial-card.negativo .nombre { color: var(--accent); }
 .gato-especial-card img { width: 84px; height: 84px; object-fit: contain; margin-bottom: 8px; }
 .gato-especial-card .nombre { font-size: 12.5px; font-weight: 700; margin-bottom: 2px; }
 .gato-especial-card .req { font-size: 10px; color: var(--muted); line-height: 1.35; }
+.gato-especial-card .prog { font-size: 9px; color: var(--gold); font-weight: 700; margin-top: 4px; }
 .gato-especial-check {
   position: absolute; top: 8px; right: 8px; width: 16px; height: 16px; border-radius: 50%;
   background: var(--gold); color: #2a1608; font-size: 10px; display: flex; align-items: center; justify-content: center;
@@ -845,6 +852,10 @@ select option { background: var(--card-solid); color: var(--ink); }
         <h1>Kashly</h1>
       </div>
       <div style="display:flex;gap:8px">
+        <button type="button" class="ajustes-btn-inicio" id="btn-notificaciones-inicio" aria-label="Notificaciones" style="position:relative">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          <span class="notif-dot" id="notif-dot" style="display:none"></span>
+        </button>
         <button type="button" class="ajustes-btn-inicio" id="btn-filtros-inicio" aria-label="Filtrar secciones">
           <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M8 12h8"/><path d="M11 18h2"/></svg>
         </button>
@@ -855,6 +866,7 @@ select option { background: var(--card-solid); color: var(--ink); }
     </div>
   </div>
 
+  <div class="gato-notif-wrap" id="gato-notif-wrap">
   <div class="card">
     <div class="card-lbl-row">
       <div class="card-lbl" style="margin-bottom:0">Total ahorrado</div>
@@ -886,7 +898,9 @@ select option { background: var(--card-solid); color: var(--ink); }
         <span class="gato-hero-chev">›</span>
       </div>
     </button>
-    <div class="gato-nivel-tab" id="gato-nivel-tab"><img id="gato-nivel-tab-img" src="" alt=""><span>¡Subiste de nivel! Toca aquí</span></div>
+  </div>
+  <div class="gato-nivel-tab" id="gato-nivel-tab"><img id="gato-nivel-tab-img" src="" alt=""><span>¡Subiste de nivel! Toca aquí</span></div>
+  </div>
   </div>
 
   <div id="inicio-secciones">
@@ -1098,6 +1112,10 @@ select option { background: var(--card-solid); color: var(--ink); }
       <div><div class="ajustes-row-title">Qué mostrar en Análisis</div><div class="ajustes-row-sub" id="resumen-filtros">Todo activo</div></div>
       <span class="ajustes-row-chev">›</span>
     </div>
+    <div class="ajustes-row" data-abrir="overlay-ajustes-letra">
+      <div><div class="ajustes-row-title">Tamaño de letra</div><div class="ajustes-row-sub" id="resumen-letra">Grande</div></div>
+      <span class="ajustes-row-chev">›</span>
+    </div>
   </div>
 
   <div class="card">
@@ -1198,6 +1216,14 @@ select option { background: var(--card-solid); color: var(--ink); }
     <div class="sheet-handle"></div>
     <div class="sheet-head"><h2>Qué mostrar en Análisis</h2><button type="button" class="sheet-close" data-cerrar="overlay-ajustes-filtros" aria-label="Cerrar">✕</button></div>
     <div id="ajustes-filtros" style="margin-top:6px"></div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay-ajustes-letra">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h2>Tamaño de letra</h2><button type="button" class="sheet-close" data-cerrar="overlay-ajustes-letra" aria-label="Cerrar">✕</button></div>
+    <div id="letra-opciones-lista"></div>
   </div>
 </div>
 
@@ -2084,10 +2110,47 @@ function renderAjustesResumen() {
   const nActivas = Object.keys(f).filter(function(k) { return f[k]; }).length;
   const nTotal = Object.keys(f).length;
   document.getElementById('resumen-filtros').textContent = nActivas === nTotal ? 'Todo activo' : nActivas + ' de ' + nTotal + ' activas';
+
+  const letraLbl = LETRA_OPCIONES.find(function(o) { return o.key === (config.tamanoLetra || 'grande'); });
+  document.getElementById('resumen-letra').textContent = letraLbl ? letraLbl.label : 'Grande';
+}
+
+// --- Tamaño de letra: "Grande" es el diseño original (sin escalar); las
+// otras dos opciones reducen todo el app con zoom, para dar sensación real
+// de más chico sin tener que reescribir cada tamaño de fuente. ---
+const LETRA_OPCIONES = [
+  { key: 'grande', label: 'Grande' },
+  { key: 'mediana', label: 'Mediana' },
+  { key: 'pequena', label: 'Pequeña' }
+];
+function aplicarTamanoLetra() {
+  const key = config.tamanoLetra || 'grande';
+  document.body.classList.remove('letra-mediana', 'letra-pequena');
+  if (key === 'mediana') document.body.classList.add('letra-mediana');
+  if (key === 'pequena') document.body.classList.add('letra-pequena');
+}
+function renderLetraOpciones() {
+  const actual = config.tamanoLetra || 'grande';
+  document.getElementById('letra-opciones-lista').innerHTML = LETRA_OPCIONES.map(function(o) {
+    return '<div class="ajustes-row letra-opcion-row" data-letra="' + o.key + '">' +
+      '<div class="ajustes-row-title">' + o.label + '</div>' +
+      (o.key === actual ? '<span class="gato-especial-check" style="position:static">✓</span>' : '') +
+    '</div>';
+  }).join('');
+  document.querySelectorAll('.letra-opcion-row').forEach(function(row) {
+    row.addEventListener('click', function() {
+      config.tamanoLetra = row.dataset.letra;
+      guardarConSincronizacion({ action: 'set-config', key: 'tamanoLetra', value: config.tamanoLetra });
+      aplicarTamanoLetra();
+      renderLetraOpciones();
+      renderAjustesResumen();
+    });
+  });
 }
 
 document.querySelectorAll('.ajustes-row[data-abrir]').forEach(function(row) {
   row.addEventListener('click', function() {
+    if (row.dataset.abrir === 'overlay-ajustes-letra') renderLetraOpciones();
     document.getElementById(row.dataset.abrir).classList.add('show');
   });
 });
@@ -2096,7 +2159,7 @@ document.querySelectorAll('[data-cerrar]').forEach(function(btn) {
     document.getElementById(btn.dataset.cerrar).classList.remove('show');
   });
 });
-['overlay-ajustes-perfil', 'overlay-ajustes-meta', 'overlay-ajustes-saldo', 'overlay-ajustes-categorias', 'overlay-ajustes-filtros'].forEach(function(id) {
+['overlay-ajustes-perfil', 'overlay-ajustes-meta', 'overlay-ajustes-saldo', 'overlay-ajustes-categorias', 'overlay-ajustes-filtros', 'overlay-ajustes-letra'].forEach(function(id) {
   document.getElementById(id).addEventListener('click', function(e) {
     if (e.target.id === id) this.classList.remove('show');
   });
@@ -2359,6 +2422,7 @@ function iniciarConDatos(datosGastos, datosConfig, offline) {
   config = datosConfig || {};
   registrarUsoDiario();
   evaluarDiaSiCorresponde();
+  aplicarTamanoLetra();
   cargarCategorias();
   poblarSelectsCategoria();
   renderAjustesCategorias();
@@ -3363,16 +3427,16 @@ function tieneAhorroAlgunaVez() {
 // --- Niveles principales: ahora se otorgan por XP total acumulada de por vida ---
 const XP_POR_NIVEL = { 1: 0, 2: 100, 3: 250, 4: 500, 5: 900, 6: 1400, 7: 2000, 8: 2800, 9: 3800, 10: 5000 };
 const NIVELES_GATO = [
-  { n: 1, nombre: 'Inicial' },
-  { n: 2, nombre: 'Aprendiz' },
-  { n: 3, nombre: 'Previsor' },
-  { n: 4, nombre: 'Estratega' },
-  { n: 5, nombre: 'Financiero' },
-  { n: 6, nombre: 'Maestro' },
-  { n: 7, nombre: 'Sabio' },
-  { n: 8, nombre: 'Ascendido' },
-  { n: 9, nombre: 'Dominio' },
-  { n: 10, nombre: 'Libre' }
+  { n: 1, nombre: 'Inicial', descripcion: 'Todos empiezan aquí. Estás dando tus primeros pasos para tomar el control de tu dinero.' },
+  { n: 2, nombre: 'Aprendiz', descripcion: 'Ya tienes lo básico claro: registras, revisas y empiezas a tomar decisiones más conscientes.' },
+  { n: 3, nombre: 'Previsor', descripcion: 'Empiezas a planear: tu dinero ya no solo entra y sale, lo estás organizando con más intención.' },
+  { n: 4, nombre: 'Estratega', descripcion: 'Tu dinero tiene dirección: usas categorías, metas y presupuesto para guiar tus decisiones.' },
+  { n: 5, nombre: 'Financiero', descripcion: 'Tu disciplina se nota: ya tienes un colchón ahorrado y manejas tu dinero con más seguridad.' },
+  { n: 6, nombre: 'Maestro', descripcion: 'Tu constancia es tu mayor ventaja: mantienes el control mes a mes y tu dinero trabaja mejor para ti.' },
+  { n: 7, nombre: 'Sabio', descripcion: 'Tu experiencia se ve en tus números: tomas decisiones informadas y evitas errores comunes.' },
+  { n: 8, nombre: 'Ascendido', descripcion: 'Tu dinero ya no te limita: tienes márgenes más amplios y más libertad para elegir.' },
+  { n: 9, nombre: 'Dominio', descripcion: 'Tu control es sólido: tu ahorro, presupuesto y hábitos están en otro nivel.' },
+  { n: 10, nombre: 'Libre', descripcion: 'Llegaste a la cima: tu dinero está bajo control y tú decides cómo usarlo, sin que él te controle a ti.' }
 ];
 function totalXPGato() { return Number(config.gatoXP) || 0; }
 function nivelActualGato() {
@@ -3514,21 +3578,25 @@ function registrarUsoDiario() {
   guardarConSincronizacion({ action: 'set-config', key: 'diasUso', value: dias });
 }
 // true si hay un registro de uso para cada uno de los últimos n días (sin contar hoy).
-function diasUsoConsecutivos(n) {
+// Racha actual de días de uso seguidos (sin contar hoy, tope de 400 por seguridad).
+function diasUsoRacha() {
   const dias = config.diasUso || [];
   const set = {};
   dias.forEach(function(d) { set[d] = true; });
   const hoy = new Date(hoyISO() + 'T00:00:00');
-  for (let i = 1; i <= n; i++) {
+  let racha = 0;
+  for (let i = 1; i <= 400; i++) {
     const d = new Date(hoy); d.setDate(d.getDate() - i);
     const iso = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-    if (!set[iso]) return false;
+    if (!set[iso]) break;
+    racha++;
   }
-  return true;
+  return racha;
 }
-// true si, en cada uno de los últimos n días (sin contar hoy), hay al menos
-// un movimiento de cada tipo listado (ej. ['gasto'] o ['gasto','ingreso']).
-function diasConTiposSeguidos(tipos, n) {
+function diasUsoConsecutivos(n) { return diasUsoRacha() >= n; }
+// Racha actual (sin contar hoy) de días seguidos con al menos un movimiento
+// de cada tipo listado (ej. ['gasto'] o ['gasto','ingreso']).
+function diasConTiposRacha(tipos) {
   const porDia = {};
   gastos.forEach(function(g) {
     if (tipos.indexOf(g.tipo) === -1) return;
@@ -3536,13 +3604,36 @@ function diasConTiposSeguidos(tipos, n) {
     porDia[g.fecha][g.tipo] = true;
   });
   const hoy = new Date(hoyISO() + 'T00:00:00');
-  for (let i = 1; i <= n; i++) {
+  let racha = 0;
+  for (let i = 1; i <= 400; i++) {
     const d = new Date(hoy); d.setDate(d.getDate() - i);
     const iso = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     const dia = porDia[iso];
-    if (!dia || !tipos.every(function(t) { return dia[t]; })) return false;
+    if (!dia || !tipos.every(function(t) { return dia[t]; })) break;
+    racha++;
   }
-  return true;
+  return racha;
+}
+function diasConTiposSeguidos(tipos, n) { return diasConTiposRacha(tipos) >= n; }
+// Cuántos periodos de pago se han excedido en el mes (ciclo propio) en curso.
+function excesosMesActual() {
+  const mesActual = periodoDe(hoyISO(), 'mensual');
+  if (!mesActual) return 0;
+  const techo = techoGastoPeriodo('quincena');
+  let n = 0;
+  const periodosVistos = {};
+  gastos.forEach(function(g) {
+    if (g.tipo !== 'gasto') return;
+    const p = periodoDe(g.fecha, 'quincena');
+    if (!p) return;
+    const pm = periodoDe(g.fecha, 'mensual');
+    if (!pm || pm.key !== mesActual.key) return;
+    periodosVistos[p.key] = true;
+  });
+  Object.keys(periodosVistos).forEach(function(key) {
+    if (gastoDePeriodo(key, 'quincena') > techo) n++;
+  });
+  return n;
 }
 // true si algún mes (ciclo propio) tuvo 2 o más periodos de pago excedidos.
 function huboMesConDosExcesos() {
@@ -3583,35 +3674,43 @@ const ESPECIALES_GATO = [
   { id: 'sincargas', nombre: 'Sin cargas', archivo: 'gato-especial-sincargas.png', xp: 250,
     requisito: 'Registra todos tus gastos durante 30 días seguidos sin fallar.',
     explicacion: 'Durante un mes completo, registraste cada gasto sin olvidar ninguno. Tus finanzas ya no tienen cargas ocultas.',
-    cumple: function() { return diasConTiposSeguidos(['gasto'], 30); } },
+    cumple: function() { return diasConTiposSeguidos(['gasto'], 30); },
+    progreso: function() { return { actual: Math.min(30, diasConTiposRacha(['gasto'])), meta: 30, unidad: 'días' }; } },
   { id: 'cuspide', nombre: 'Cúspide', archivo: 'gato-especial-cuspide.png', xp: 150,
     requisito: 'Usa Kashly todos los días durante 2 semanas seguidas.',
     explicacion: 'Entraste a la app 14 días seguidos. Estás en la cima del hábito financiero.',
-    cumple: function() { return diasUsoConsecutivos(14); } },
+    cumple: function() { return diasUsoConsecutivos(14); },
+    progreso: function() { return { actual: Math.min(14, diasUsoRacha()), meta: 14, unidad: 'días' }; } },
   { id: 'libre', nombre: 'Libre', archivo: 'gato-especial-libre.png', xp: 250,
     requisito: 'Completa 4 semanas seguidas registrando ingresos y gastos sin saltarte ningún día.',
     explicacion: 'Un mes completo registrando todo: ingresos y gastos. Tu dinero ya se mueve con libertad y claridad.',
-    cumple: function() { return diasConTiposSeguidos(['gasto', 'ingreso'], 28); } },
+    cumple: function() { return diasConTiposSeguidos(['gasto', 'ingreso'], 28); },
+    progreso: function() { return { actual: Math.min(28, diasConTiposRacha(['gasto', 'ingreso'])), meta: 28, unidad: 'días' }; } },
   { id: 'dominio', nombre: 'Dominio', archivo: 'gato-especial-dominio.png', xp: 400,
     requisito: 'Crea y sigue un presupuesto personalizado durante 3 meses seguidos.',
     explicacion: 'Durante tres meses, creaste un presupuesto y te mantuviste dentro de él. Eso es dominio de tu dinero.',
-    cumple: function() { return rachaDentroDePresupuesto('mensual') >= 3; } },
+    cumple: function() { return rachaDentroDePresupuesto('mensual') >= 3; },
+    progreso: function() { return { actual: Math.min(3, rachaDentroDePresupuesto('mensual')), meta: 3, unidad: 'meses' }; } },
   { id: 'ascendido', nombre: 'Ascendido', archivo: 'gato-especial-ascendido.png', xp: 500, boost: true,
     requisito: 'Alcanza tu meta de ahorro mensual 6 meses seguidos.',
     explicacion: 'Seis meses seguidos cumpliendo tu meta de ahorro. Tu disciplina te ha llevado a otro nivel. Además ganaste 1 uso de Doble XP.',
-    cumple: function() { return rachaMetaAhorro('mensual') >= 6; } },
+    cumple: function() { return rachaMetaAhorro('mensual') >= 6; },
+    progreso: function() { return { actual: Math.min(6, rachaMetaAhorro('mensual')), meta: 6, unidad: 'meses' }; } },
   { id: 'relajado', nombre: 'Relajado', archivo: 'gato-especial-relajado.png', xp: 50, negativo: true,
     requisito: 'Se activa si excedes tu presupuesto quincenal 2 veces en un mismo mes.',
     explicacion: 'Vaya… este mes te pasaste del presupuesto un par de veces. No pasa nada, hasta los más relajados aprenden. Aquí tienes un recordatorio (y un Kashly que lo sabe).',
-    cumple: function() { return huboMesConDosExcesos(); } },
+    cumple: function() { return huboMesConDosExcesos(); },
+    progreso: function() { return { actual: Math.min(2, excesosMesActual()), meta: 2, unidad: 'veces este mes' }; } },
   { id: 'despreocupado', nombre: 'Despreocupado', archivo: 'gato-especial-despreocupado.png', xp: 120,
     requisito: 'Termina 2 meses distintos con saldo positivo (ingresos mayores a gastos).',
     explicacion: 'Dos meses terminaste con más ingresos que gastos. Tu dinero cierra en positivo y tú más despreocupado.',
-    cumple: function() { return mesesConSaldoPositivo() >= 2; } },
+    cumple: function() { return mesesConSaldoPositivo() >= 2; },
+    progreso: function() { return { actual: Math.min(2, mesesConSaldoPositivo()), meta: 2, unidad: 'meses' }; } },
   { id: 'mago', nombre: 'Mago del dinero', archivo: 'gato-especial-mago.png', xp: 450, boost: true,
     requisito: 'Reduce tus gastos totales al menos 10% frente a tu promedio de los 3 meses anteriores, durante 2 meses seguidos.',
     explicacion: 'Dos meses seguidos gastaste al menos 10% menos que tu promedio anterior. Eso no es suerte, es magia financiera. Además ganaste 1 uso de Doble XP.',
-    cumple: function() { return rachaReduccionGasto() >= 2; } }
+    cumple: function() { return rachaReduccionGasto() >= 2; },
+    progreso: function() { return { actual: Math.min(2, rachaReduccionGasto()), meta: 2, unidad: 'meses' }; } }
 ];
 // Corrección única: antes, el ahorro registrado a mano (tipo "ahorro")
 // también contaba para los logros de monto ahorrado. Ya se corrigió para
@@ -3768,11 +3867,19 @@ function renderGato() {
 // Texto explicativo al tocar un nivel: ahora los niveles se otorgan por XP
 // total acumulada, así que solo se compara contra el umbral de ese nivel.
 function mensajeDetalleNivel(n) {
-  if (n === 1) return 'Todos empiezan aquí — en cuanto ganes tus primeros puntos de XP, avanzas al Nivel 2.';
   const xp = totalXPGato();
   const umbral = XP_POR_NIVEL[n];
-  if (xp >= umbral) return '¡Completado! Llevas ' + xp + ' XP — te alcanzó de sobra para este nivel.';
-  return 'Necesitas ' + umbral + ' XP en total. Llevas ' + xp + ' XP — te faltan ' + (umbral - xp) + '.';
+  const nv = NIVELES_GATO.find(function(x) { return x.n === n; });
+  const partes = [];
+  if (xp >= umbral) {
+    partes.push('Progreso: ' + umbral + ' / ' + umbral + ' XP.');
+    partes.push('¡Ya lo completaste!');
+  } else {
+    partes.push('Progreso: ' + xp + ' / ' + umbral + ' XP.');
+    partes.push('Te faltan ' + (umbral - xp) + ' XP para el siguiente nivel.');
+  }
+  partes.push(nv.descripcion);
+  return partes.join('\n\n');
 }
 
 function renderPanelNivelesGato() {
@@ -3799,11 +3906,13 @@ function renderPanelEspecialesGato() {
   document.getElementById('gato-especial-grid').innerHTML = ESPECIALES_GATO.map(function(e) {
     const tiene = desbloqueados.indexOf(e.id) !== -1;
     const estaEquipado = tiene && equipado === e.id;
-    return '<div class="gato-especial-card' + (tiene ? ' unlocked' : ' bloqueado') + '" data-skin="' + e.id + '">' +
-      (estaEquipado ? '<span class="gato-especial-check">✓</span>' : (tiene ? '' : '<span class="gato-especial-check gato-especial-candado">🔒</span>')) +
+    const prog = !tiene && e.progreso ? e.progreso() : null;
+    return '<div class="gato-especial-card' + (tiene ? ' unlocked' : ' bloqueado') + (e.negativo ? ' negativo' : '') + '" data-skin="' + e.id + '">' +
+      (estaEquipado ? '<span class="gato-especial-check">✓</span>' : (tiene ? '' : '<span class="gato-especial-check gato-especial-candado">' + (e.negativo ? '🩹' : '🔒') + '</span>')) +
       '<img src="' + e.archivo + '" alt="">' +
       '<div class="nombre">' + e.nombre + '</div>' +
       '<div class="req">' + (tiene ? (estaEquipado ? 'En uso' : 'Toca para ver') : 'Bloqueado') + '</div>' +
+      (prog ? '<div class="prog">' + prog.actual + '/' + prog.meta + ' ' + prog.unidad + '</div>' : '') +
     '</div>';
   }).join('');
   document.querySelectorAll('.gato-especial-card').forEach(function(card) {
@@ -3868,11 +3977,11 @@ function abrirSheetGato() {
 }
 
 const TEXTOS_ANIMO_INFO = {
-  tranquilo: 'Vas bien: llevas usado menos de la mitad de tu presupuesto de esta quincena. Sigue registrando tus gastos para mantenerte así hasta el cierre del periodo.',
-  alerta: 'Ya usaste entre el 50% y el 89% de tu presupuesto de esta quincena. No es grave todavía, pero conviene que revises en qué categorías estás gastando más antes de que se acabe el periodo.',
-  preocupado: 'Ya usaste entre el 90% y el 99% de tu presupuesto de esta quincena — estás a punto de excederte. Este es un buen momento para pausar gastos no esenciales hasta tu próximo periodo.',
-  colapsado: 'Ya te pasaste de tu presupuesto de esta quincena (100% o más). No pasa nada, pero te conviene revisar qué categorías se salieron de control para ajustar la próxima vez.',
-  radiante: 'Terminaste tu periodo anterior dentro de presupuesto o alcanzando tu meta de ahorro — por eso Kashly se ve así de contento. Este estado dura 1-2 días y luego vuelve a reflejar tu quincena actual.'
+  tranquilo: 'Vas bien: llevas usado menos de la mitad de tu presupuesto de esta quincena.\n\nSigue registrando tus gastos para mantenerte así hasta el cierre del periodo.',
+  alerta: 'Ya usaste entre el 50% y el 89% de tu presupuesto de esta quincena.\n\nNo es grave todavía, pero conviene que revises en qué categorías estás gastando más antes de que se acabe el periodo.',
+  preocupado: 'Ya usaste entre el 90% y el 99% de tu presupuesto de esta quincena.\n\nEstás a punto de excederte. Este es un buen momento para pausar gastos no esenciales hasta tu próximo periodo.',
+  colapsado: 'Ya te pasaste de tu presupuesto de esta quincena (100% o más).\n\nNo pasa nada, pero te conviene revisar qué categorías se salieron de control para ajustar la próxima vez.',
+  radiante: 'Terminaste tu periodo anterior dentro de presupuesto o alcanzando tu meta de ahorro.\n\nPor eso Kashly se ve así de contento. Este estado dura 1-2 días y luego vuelve a reflejar tu quincena actual.'
 };
 function mostrarInfoAnimo() {
   const animo = mostrandoRadiante() ? 'radiante' : estadoAnimoBase();
@@ -3931,11 +4040,14 @@ function renderBoostUI() {
 function renderNivelTab() {
   const tab = document.getElementById('gato-nivel-tab');
   if (!tab) return;
+  const dot = document.getElementById('notif-dot');
   if (config.gatoNivelPendienteRevelar) {
     document.getElementById('gato-nivel-tab-img').src = 'gato-nivel-' + config.gatoNivelPendienteRevelar + '.png';
     tab.classList.add('show');
+    if (dot) dot.style.display = 'block';
   } else {
     tab.classList.remove('show');
+    if (dot) dot.style.display = 'none';
   }
 }
 function abrirNivelRevelado() {
@@ -4038,6 +4150,13 @@ document.querySelectorAll('.gato-tab-btn').forEach(function(btn) {
 });
 
 document.getElementById('gato-nivel-tab').addEventListener('click', abrirNivelRevelado);
+document.getElementById('btn-notificaciones-inicio').addEventListener('click', function() {
+  if (config.gatoNivelPendienteRevelar) {
+    abrirNivelRevelado();
+  } else {
+    showToast('Sin notificaciones nuevas por ahora');
+  }
+});
 document.getElementById('btn-reveal-continuar').addEventListener('click', function() {
   document.getElementById('overlay-nivel-revelado').classList.remove('show');
   config.gatoNivelPendienteRevelar = null;
@@ -4050,9 +4169,9 @@ document.getElementById('gato-boost-tab').addEventListener('click', function() {
 document.getElementById('btn-racha-info').addEventListener('click', function(e) {
   e.stopPropagation();
   mostrarInfo('Racha semanal',
-    'Cada día que terminas dentro de tu presupuesto, se marca en la fila de esta semana y ganas XP extra.\n\n' +
-    'Mientras más días seguidos acumules, más rápido "se siente" avanzar tu barra de XP — el multiplicador (x1, x2, x3) sube con la racha, aunque lo que necesitas para subir de nivel no cambia.\n\n' +
-    'Si un día te excedes de presupuesto, ese día no se marca y la racha se reinicia.');
+    'Cada día que no te excedes del presupuesto, ganas XP extra.\n\n' +
+    'Más días seguidos = multiplicador más alto (x1, x2, x3) y más XP.\n\n' +
+    'Si un día te excedes, la racha se reinicia.');
 });
 document.getElementById('btn-boost-info').addEventListener('click', function(e) {
   e.stopPropagation();
