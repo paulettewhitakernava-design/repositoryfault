@@ -140,16 +140,27 @@ function leerConfig() {
   return config;
 }
 
+// El cliente puede disparar varias llamadas set-config casi al mismo tiempo
+// (una por cada clave que cambia). Sin bloqueo, dos ejecuciones podían leer
+// la hoja antes de que la otra escribiera y una de las dos escrituras se
+// perdía en silencio (por eso config.gatoUltimoDiaEvaluado a veces no
+// quedaba guardado y el día se volvía a evaluar en la siguiente sesión).
 function guardarConfigValor(clave, valor) {
-  const sheet = getConfigSheet();
-  const data = sheet.getDataRange().getValues();
-  const texto = (typeof valor === 'object') ? JSON.stringify(valor) : valor;
-  for (let i = 1; i < data.length; i++) {
-    if (data[i][0] === clave) {
-      sheet.getRange(i + 1, 2).setValue(texto);
-      return true;
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const sheet = getConfigSheet();
+    const data = sheet.getDataRange().getValues();
+    const texto = (typeof valor === 'object') ? JSON.stringify(valor) : valor;
+    for (let i = 1; i < data.length; i++) {
+      if (data[i][0] === clave) {
+        sheet.getRange(i + 1, 2).setValue(texto);
+        return true;
+      }
     }
+    sheet.appendRow([clave, texto]);
+    return true;
+  } finally {
+    lock.releaseLock();
   }
-  sheet.appendRow([clave, texto]);
-  return true;
 }

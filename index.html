@@ -2475,9 +2475,37 @@ document.addEventListener('error', function(e) {
   setTimeout(function() { img.src = src + (src.indexOf('?') === -1 ? '?r=1' : '&r=1'); }, 1500);
 }, true);
 
+// Si el navegador se cerró justo después de otorgar XP, el POST que guarda
+// gatoUltimoDiaEvaluado (y todo lo demás que cambió en ese mismo momento)
+// puede no haber llegado a terminar. La próxima vez que se abre la app, el
+// servidor devuelve esa fecha vieja y el día se vuelve a evaluar, dando XP
+// de más. Si el caché local de este dispositivo quedó más adelantado que lo
+// que responde el servidor, se usa el estado local (más reciente) en su
+// lugar en vez del que llegó del servidor.
+function reconciliarConCacheLocal(configServidor) {
+  const cache = leerCacheLocal();
+  const local = cache && cache.config;
+  if (!local || !local.gatoUltimoDiaEvaluado) return configServidor;
+  const fechaLocal = local.gatoUltimoDiaEvaluado;
+  const fechaServidor = configServidor.gatoUltimoDiaEvaluado || '';
+  if (fechaLocal <= fechaServidor) return configServidor;
+  const combinado = Object.assign({}, configServidor);
+  Object.keys(local).forEach(function(k) {
+    if (k.indexOf('gato') !== 0 && k !== 'rachaDias' && k !== 'diasUso') return;
+    combinado[k] = local[k];
+    // el servidor se había quedado con la versión vieja; se vuelve a
+    // mandar para que quede sincronizado y no se repita en otro dispositivo.
+    apiPost({ action: 'set-config', key: k, value: local[k] }).catch(function() {
+      encolar({ action: 'set-config', key: k, value: local[k] });
+    });
+  });
+  return combinado;
+}
+
 function iniciarConDatos(datosGastos, datosConfig, offline) {
   gastos = datosGastos || [];
   config = datosConfig || {};
+  if (!offline) config = reconciliarConCacheLocal(config);
   registrarUsoDiario();
   evaluarDiaSiCorresponde();
   cargarCategorias();
