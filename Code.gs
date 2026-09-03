@@ -134,7 +134,16 @@ function leerConfig() {
     const clave = data[i][0];
     let valor = data[i][1];
     if (!clave) continue;
-    try { valor = JSON.parse(valor); } catch (e) { /* se queda como texto/numero */ }
+    // Un valor tipo "2026-09-03" (por ejemplo gatoUltimoDiaEvaluado) que se
+    // guardó antes de forzar la celda a texto plano puede haber quedado
+    // convertido por Sheets a una fecha interna; se normaliza de vuelta al
+    // mismo formato yyyy-MM-dd que usa el cliente, si no, la comparación de
+    // fechas en el cliente nunca coincide y el día se re-evalúa sin fin.
+    if (valor instanceof Date) {
+      valor = normalizarFecha(valor);
+    } else {
+      try { valor = JSON.parse(valor); } catch (e) { /* se queda como texto/numero */ }
+    }
     config[clave] = valor;
   }
   return config;
@@ -154,11 +163,16 @@ function guardarConfigValor(clave, valor) {
     const texto = (typeof valor === 'object') ? JSON.stringify(valor) : valor;
     for (let i = 1; i < data.length; i++) {
       if (data[i][0] === clave) {
-        sheet.getRange(i + 1, 2).setValue(texto);
+        const celda = sheet.getRange(i + 1, 2);
+        // Forzar texto plano: si no, Sheets convierte solo un valor como
+        // "2026-09-03" en una fecha interna, y al leerlo de vuelta ya no
+        // coincide con el string que espera el cliente.
+        celda.setNumberFormat('@').setValue(texto);
         return true;
       }
     }
     sheet.appendRow([clave, texto]);
+    sheet.getRange(sheet.getLastRow(), 2).setNumberFormat('@').setValue(texto);
     return true;
   } finally {
     lock.releaseLock();
