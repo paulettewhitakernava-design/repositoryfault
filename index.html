@@ -3521,34 +3521,27 @@ function activarBoost() {
 }
 
 // De dónde viene la XP acumulada hasta ahora, para poder explicarle al
-// usuario por qué subió de nivel (en vez de solo mostrar el número final).
+// usuario por qué subió de nivel. Se arma agrupando el registro real de XP
+// otorgada (gatoXPLog) por motivo — nunca recalculando "en teoría" a partir
+// de los datos actuales, porque eso puede desincronizarse del total real
+// (por ejemplo, después de un reinicio de progreso que no borra gastos).
 function resumenXPActual() {
-  const movimientos = gastos.filter(function(g) { return g.tipo === 'gasto' || g.tipo === 'ingreso'; }).length;
-  const rachaDias = Object.keys(config.rachaDias || {}).filter(function(k) { return config.rachaDias[k]; }).length;
-  const logrosIds = config.gatoLogrosDesbloqueados || [];
-  const logros = ESPECIALES_GATO.filter(function(e) { return logrosIds.indexOf(e.id) !== -1; });
-  return {
-    movimientos: movimientos,
-    xpMovimientos: movimientos * 5,
-    rachaDias: rachaDias,
-    xpRacha: rachaDias * 15,
-    logros: logros.map(function(e) { return e.nombre; }),
-    xpLogros: logros.reduce(function(s, e) { return s + (e.xp || 0); }, 0)
-  };
+  const log = config.gatoXPLog || [];
+  const porMotivo = {};
+  const orden = [];
+  log.forEach(function(l) {
+    if (!porMotivo[l.motivo]) { porMotivo[l.motivo] = { motivo: l.motivo, veces: 0, xp: 0 }; orden.push(l.motivo); }
+    porMotivo[l.motivo].veces++;
+    porMotivo[l.motivo].xp += Number(l.cantidad) || 0;
+  });
+  return orden.map(function(m) { return porMotivo[m]; });
 }
 function textoExplicacionNivel(resumen) {
-  const partes = [];
-  if (resumen.movimientos > 0) {
-    partes.push('Registraste ' + resumen.movimientos + (resumen.movimientos === 1 ? ' movimiento' : ' movimientos') + ' (+' + resumen.xpMovimientos + ' XP).');
-  }
-  if (resumen.rachaDias > 0) {
-    partes.push('Te mantuviste dentro de presupuesto ' + resumen.rachaDias + (resumen.rachaDias === 1 ? ' día' : ' días') + ' de tu racha semanal (+' + resumen.xpRacha + ' XP).');
-  }
-  if (resumen.logros.length > 0) {
-    partes.push('Desbloqueaste: ' + resumen.logros.join(', ') + ' (+' + resumen.xpLogros + ' XP).');
-  }
-  if (!partes.length) partes.push('Acumulaste XP usando la app.');
-  return partes.join('\n\n');
+  if (!resumen || !resumen.length) return 'Aún no has ganado XP.';
+  return resumen.map(function(r) {
+    const vecesTxt = r.veces > 1 ? ' · x' + r.veces : '';
+    return r.motivo + vecesTxt + ' (+' + r.xp + ' XP)';
+  }).join('\n\n');
 }
 
 // --- XP: se otorga por acciones (registrar movimientos, días dentro de
@@ -3564,7 +3557,7 @@ function otorgarXP(cantidad, motivo) {
 
   const log = (config.gatoXPLog || []).slice();
   log.push({ fechaISO: hoyISO(), cantidad: total, motivo: motivo || 'XP ganada' });
-  if (log.length > 40) log.splice(0, log.length - 40);
+  if (log.length > 500) log.splice(0, log.length - 500);
   config.gatoXPLog = log;
   guardarConSincronizacion({ action: 'set-config', key: 'gatoXPLog', value: log });
 
@@ -4309,7 +4302,10 @@ function renderNotificaciones() {
   const historialRaw = config.gatoHistorialNiveles || [];
   const ultimoNivel = historialRaw[historialRaw.length - 1];
   const eventosNivel = historialRaw.map(function(h) { return { tipo: 'nivel', fechaISO: h.fechaISO, data: h }; });
-  const eventosXP = (config.gatoXPLog || []).map(function(l) { return { tipo: 'xp', fechaISO: l.fechaISO, data: l }; });
+  // La lista solo muestra los eventos de XP más recientes (el total y el
+  // resumen de arriba sí usan el registro completo, así que siempre cuadran).
+  const logCompleto = config.gatoXPLog || [];
+  const eventosXP = logCompleto.slice(-30).map(function(l) { return { tipo: 'xp', fechaISO: l.fechaISO, data: l }; });
   const eventos = eventosNivel.concat(eventosXP).sort(function(a, b) {
     if (a.fechaISO === b.fechaISO) return 0;
     return a.fechaISO < b.fechaISO ? 1 : -1;
