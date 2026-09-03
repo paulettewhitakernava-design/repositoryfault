@@ -666,9 +666,9 @@ select option { background: var(--card-solid); color: var(--ink); }
 .gato-vitrina { border-radius: 20px; padding: 24px 18px; text-align: center; position: relative; background: linear-gradient(180deg, #1a1330, #0d0a1c); border: 1px solid rgba(255,209,102,0.18); margin-bottom: 12px; }
 .gato-vitrina::before { content: ''; position: absolute; top: 14px; left: 14px; right: 14px; bottom: 14px; border: 1px solid rgba(255,209,102,0.1); border-radius: 14px; pointer-events: none; }
 .gato-vit-badge {
-  position: absolute; top: 14px; right: 14px; width: 62px; height: 62px; border-radius: 16px;
+  position: absolute; top: 14px; right: 14px; width: 34px; height: 34px; border-radius: 10px;
   background: rgba(255,209,102,0.12); border: 1px solid rgba(255,209,102,0.3); display: flex; align-items: center;
-  justify-content: center; font-size: 24px; cursor: pointer; z-index: 2;
+  justify-content: center; font-size: 15px; cursor: pointer; z-index: 2;
 }
 .gato-vit-badge-count { position: absolute; bottom: -6px; right: -6px; background: var(--gold); color: #2a1608; font-size: 8.5px; font-weight: 800; border-radius: 999px; padding: 2px 6px; font-family: 'Space Grotesk', sans-serif; white-space: nowrap; }
 .gato-life-stage { width: 230px; height: 230px; margin: 0 auto 14px; position: relative; cursor: pointer; }
@@ -1121,6 +1121,12 @@ select option { background: var(--card-solid); color: var(--ink); }
       <div><div class="ajustes-row-title">Qué mostrar en Análisis</div><div class="ajustes-row-sub" id="resumen-filtros">Todo activo</div></div>
       <span class="ajustes-row-chev">›</span>
     </div>
+  </div>
+
+  <div class="card">
+    <div class="card-lbl">Kashly (gamificación)</div>
+    <div style="font-size:9.5px;color:var(--muted);margin:6px 0 14px;line-height:1.5">Reinicia tu XP, nivel, logros y notificaciones para empezar de nuevo. Tus gastos, ingresos y presupuesto no se ven afectados.</div>
+    <button type="button" class="btn-danger" id="btn-reiniciar-gato" style="width:100%">Reiniciar progreso de Kashly</button>
   </div>
 
   <div class="card">
@@ -2536,6 +2542,7 @@ document.getElementById('form-gasto').addEventListener('submit', function(e) {
   gastos.unshift(mov);
   guardarCacheLocal();
   if (tipo === 'gasto' || tipo === 'ingreso') otorgarXP(5, tipo === 'gasto' ? 'Registraste un gasto' : 'Registraste un ingreso');
+  if (tipo === 'gasto') otorgarBonusPeriodoSiCorresponde();
   render();
   document.getElementById('form-gasto').reset();
   document.getElementById('fecha').valueAsDate = new Date();
@@ -3463,7 +3470,7 @@ function tieneAhorroAlgunaVez() {
 }
 
 // --- Niveles principales: ahora se otorgan por XP total acumulada de por vida ---
-const XP_POR_NIVEL = { 1: 0, 2: 100, 3: 250, 4: 500, 5: 900, 6: 1400, 7: 2000, 8: 2800, 9: 3800, 10: 5000 };
+const XP_POR_NIVEL = { 1: 0, 2: 800, 3: 1800, 4: 3000, 5: 4500, 6: 6200, 7: 8000, 8: 10000, 9: 12000, 10: 15000 };
 const NIVELES_GATO = [
   { n: 1, nombre: 'Inicial', descripcion: 'Todos empiezan aquí. Estás dando tus primeros pasos para tomar el control de tu dinero.' },
   { n: 2, nombre: 'Aprendiz', descripcion: 'Ya tienes lo básico claro: registras, revisas y empiezas a tomar decisiones más conscientes.' },
@@ -3575,7 +3582,9 @@ function otorgarXP(cantidad, motivo) {
 
 // --- Racha semanal: una vez por día evalúa si el día anterior se mantuvo
 // dentro del presupuesto del periodo en curso (comparado con el techo
-// completo del periodo, no prorrateado por simplicidad) y otorga XP. ---
+// completo del periodo, no prorrateado por simplicidad), otorga +5 XP por
+// ese día, y un bonus extra de +15 XP cada 7 días seguidos (y +30 XP cada
+// 30 días seguidos). También dispara la revisión de los bonos mensuales. ---
 function evaluarDiaSiCorresponde() {
   const hoy = hoyISO();
   if (config.gatoUltimoDiaEvaluado === hoy) return;
@@ -3594,13 +3603,63 @@ function evaluarDiaSiCorresponde() {
     const dias = Object.assign({}, config.rachaDias || {});
     dias[ayerISO] = bien;
     const keys = Object.keys(dias).sort();
-    if (keys.length > 21) keys.slice(0, keys.length - 21).forEach(function(k) { delete dias[k]; });
+    if (keys.length > 60) keys.slice(0, keys.length - 60).forEach(function(k) { delete dias[k]; });
     config.rachaDias = dias;
     guardarConSincronizacion({ action: 'set-config', key: 'rachaDias', value: dias });
-    if (bien) otorgarXP(15, 'Te mantuviste dentro de presupuesto (racha semanal)');
+    if (bien) {
+      otorgarXP(5, 'Te mantuviste dentro de presupuesto');
+      const racha = rachaDiasSeguidos();
+      if (racha > 0 && racha % 30 === 0) {
+        otorgarXP(30, racha + ' días seguidos sin exceder tu presupuesto');
+      } else if (racha > 0 && racha % 7 === 0) {
+        otorgarXP(15, 'Racha de ' + racha + ' días dentro de presupuesto');
+      }
+    }
   }
+  evaluarBonusMensualSiCorresponde(ayerISO);
   config.gatoUltimoDiaEvaluado = hoy;
   guardarConSincronizacion({ action: 'set-config', key: 'gatoUltimoDiaEvaluado', value: hoy });
+}
+// --- Bonos mensuales: cuando el mes (o ciclo mensual, según la frecuencia
+// de pago) que acaba de terminar cumple cada condición, se otorgan una
+// sola vez por mes (marcados en gatoMesBonusOtorgado). ---
+function evaluarBonusMensualSiCorresponde(ayerISO) {
+  const mesHoy = periodoDe(hoyISO(), 'mensual');
+  const mesAyer = periodoDe(ayerISO, 'mensual');
+  if (!mesHoy || !mesAyer || mesHoy.key === mesAyer.key) return;
+  const otorgados = Object.assign({}, config.gatoMesBonusOtorgado || {});
+  if (otorgados[mesAyer.key]) return;
+  const ingreso = ingresoDePeriodo(mesAyer.key, 'mensual');
+  const gasto = gastoDePeriodo(mesAyer.key, 'mensual');
+  const ahorro = ahorroDePeriodo(mesAyer.key, 'mensual');
+  const meta = Number(config.metaAhorro) || 0;
+  if (ingreso > gasto) otorgarXP(10, 'Terminaste el mes con saldo positivo');
+  if (meta > 0 && ahorro >= meta) otorgarXP(50, 'Alcanzaste tu meta de ahorro mensual');
+  otorgados[mesAyer.key] = true;
+  config.gatoMesBonusOtorgado = otorgados;
+  guardarConSincronizacion({ action: 'set-config', key: 'gatoMesBonusOtorgado', value: otorgados });
+}
+// --- Bono de periodo: 5 días distintos (no necesariamente seguidos) con al
+// menos un gasto registrado dentro del periodo de pago actual, +15 XP una
+// sola vez por periodo. ---
+function otorgarBonusPeriodoSiCorresponde() {
+  const p = periodoDe(hoyISO(), 'quincena');
+  if (!p) return;
+  const otorgados = config.gatoBonusPeriodo || {};
+  if (otorgados[p.key]) return;
+  const diasConGasto = {};
+  gastos.forEach(function(g) {
+    if (g.tipo !== 'gasto') return;
+    const gp = periodoDe(g.fecha, 'quincena');
+    if (gp && gp.key === p.key) diasConGasto[g.fecha] = true;
+  });
+  if (Object.keys(diasConGasto).length >= 5) {
+    otorgarXP(15, 'Registraste gastos en 5 días distintos de tu periodo');
+    const nuevos = Object.assign({}, otorgados);
+    nuevos[p.key] = true;
+    config.gatoBonusPeriodo = nuevos;
+    guardarConSincronizacion({ action: 'set-config', key: 'gatoBonusPeriodo', value: nuevos });
+  }
 }
 // Racha de días seguidos (terminando ayer) marcados como "bien".
 function rachaDiasSeguidos() {
@@ -3753,42 +3812,42 @@ function rachaReduccionGasto() {
 }
 
 const ESPECIALES_GATO = [
-  { id: 'sincargas', nombre: 'Sin cargas', archivo: 'gato-especial-sincargas.png', xp: 250,
+  { id: 'sincargas', nombre: 'Sin cargas', archivo: 'gato-especial-sincargas.png', xp: 150,
     requisito: 'Registra todos tus gastos durante 30 días seguidos sin fallar.',
     explicacion: 'Durante un mes completo, registraste cada gasto sin olvidar ninguno. Tus finanzas ya no tienen cargas ocultas.',
     cumple: function() { return diasConTiposSeguidos(['gasto'], 30); },
     progreso: function() { return { actual: Math.min(30, diasConTiposRacha(['gasto'])), meta: 30, unidad: 'días' }; } },
-  { id: 'cuspide', nombre: 'Cúspide', archivo: 'gato-especial-cuspide.png', xp: 150,
+  { id: 'cuspide', nombre: 'Cúspide', archivo: 'gato-especial-cuspide.png', xp: 80,
     requisito: 'Usa Kashly todos los días durante 2 semanas seguidas.',
     explicacion: 'Entraste a la app 14 días seguidos. Estás en la cima del hábito financiero.',
     cumple: function() { return diasUsoConsecutivos(14); },
     progreso: function() { return { actual: Math.min(14, diasUsoRacha()), meta: 14, unidad: 'días' }; } },
-  { id: 'libre', nombre: 'Libre', archivo: 'gato-especial-libre.png', xp: 250,
+  { id: 'libre', nombre: 'Libre', archivo: 'gato-especial-libre.png', xp: 150,
     requisito: 'Completa 4 semanas seguidas registrando ingresos y gastos sin saltarte ningún día.',
     explicacion: 'Un mes completo registrando todo: ingresos y gastos. Tu dinero ya se mueve con libertad y claridad.',
     cumple: function() { return diasConTiposSeguidos(['gasto', 'ingreso'], 28); },
     progreso: function() { return { actual: Math.min(28, diasConTiposRacha(['gasto', 'ingreso'])), meta: 28, unidad: 'días' }; } },
-  { id: 'dominio', nombre: 'Dominio', archivo: 'gato-especial-dominio.png', xp: 400,
+  { id: 'dominio', nombre: 'Dominio', archivo: 'gato-especial-dominio.png', xp: 250,
     requisito: 'Crea y sigue un presupuesto personalizado durante 3 meses seguidos.',
     explicacion: 'Durante tres meses, creaste un presupuesto y te mantuviste dentro de él. Eso es dominio de tu dinero.',
     cumple: function() { return rachaDentroDePresupuesto('mensual') >= 3; },
     progreso: function() { return { actual: Math.min(3, rachaDentroDePresupuesto('mensual')), meta: 3, unidad: 'meses' }; } },
-  { id: 'ascendido', nombre: 'Ascendido', archivo: 'gato-especial-ascendido.png', xp: 500, boost: true,
+  { id: 'ascendido', nombre: 'Ascendido', archivo: 'gato-especial-ascendido.png', xp: 300, boost: true,
     requisito: 'Alcanza tu meta de ahorro mensual 6 meses seguidos.',
     explicacion: 'Seis meses seguidos cumpliendo tu meta de ahorro. Tu disciplina te ha llevado a otro nivel. Además ganaste 1 uso de Doble XP.',
     cumple: function() { return rachaMetaAhorro('mensual') >= 6; },
     progreso: function() { return { actual: Math.min(6, rachaMetaAhorro('mensual')), meta: 6, unidad: 'meses' }; } },
-  { id: 'relajado', nombre: 'Relajado', archivo: 'gato-especial-relajado.png', xp: 50, negativo: true,
+  { id: 'relajado', nombre: 'Relajado', archivo: 'gato-especial-relajado.png', xp: 20, negativo: true,
     requisito: 'Se activa si excedes tu presupuesto quincenal 2 veces en un mismo mes.',
     explicacion: 'Vaya… este mes te pasaste del presupuesto un par de veces. No pasa nada, hasta los más relajados aprenden. Aquí tienes un recordatorio (y un Kashly que lo sabe).',
     cumple: function() { return huboMesConDosExcesos(); },
     progreso: function() { return { actual: Math.min(2, excesosMesActual()), meta: 2, unidad: 'veces este mes' }; } },
-  { id: 'despreocupado', nombre: 'Despreocupado', archivo: 'gato-especial-despreocupado.png', xp: 120,
+  { id: 'despreocupado', nombre: 'Despreocupado', archivo: 'gato-especial-despreocupado.png', xp: 30,
     requisito: 'Termina 2 meses distintos con saldo positivo (ingresos mayores a gastos).',
     explicacion: 'Dos meses terminaste con más ingresos que gastos. Tu dinero cierra en positivo y tú más despreocupado.',
     cumple: function() { return mesesConSaldoPositivo() >= 2; },
     progreso: function() { return { actual: Math.min(2, mesesConSaldoPositivo()), meta: 2, unidad: 'meses' }; } },
-  { id: 'mago', nombre: 'Mago del dinero', archivo: 'gato-especial-mago.png', xp: 450, boost: true,
+  { id: 'mago', nombre: 'Mago del dinero', archivo: 'gato-especial-mago.png', xp: 250, boost: true,
     requisito: 'Reduce tus gastos totales al menos 10% frente a tu promedio de los 3 meses anteriores, durante 2 meses seguidos.',
     explicacion: 'Dos meses seguidos gastaste al menos 10% menos que tu promedio anterior. Eso no es suerte, es magia financiera. Además ganaste 1 uso de Doble XP.',
     cumple: function() { return rachaReduccionGasto() >= 2; },
@@ -4212,6 +4271,36 @@ function renderNivelTab() {
     if (dot) dot.style.display = 'none';
   }
 }
+// --- Reinicia todo el progreso de gamificación (XP, nivel, logros,
+// notificaciones) sin tocar gastos, ingresos ni presupuesto. ---
+function reiniciarProgresoGato() {
+  if (!confirm('¿Reiniciar tu progreso de Kashly?\n\nPerderás tu XP, nivel, logros y notificaciones.\n\nTus gastos, ingresos y presupuesto NO se borran.')) return;
+  const valores = {
+    gatoXP: 0,
+    gatoNivelPendienteRevelar: null,
+    gatoHistorialNiveles: [],
+    gatoXPLog: [],
+    gatoLogrosDesbloqueados: [],
+    gatoSkinEquipado: 'nivel',
+    gatoBoost: null,
+    gatoBoostsDisponibles: 0,
+    rachaDias: {},
+    gatoMesBonusOtorgado: {},
+    gatoBonusPeriodo: {},
+    gatoUltimoDiaEvaluado: null,
+    diasUso: [],
+    gatoHistorialBackfillV1: true
+  };
+  Object.keys(valores).forEach(function(k) {
+    config[k] = valores[k];
+    guardarConSincronizacion({ action: 'set-config', key: k, value: valores[k] });
+  });
+  renderGato();
+  renderNivelTab();
+  showToast('Tu progreso de Kashly se reinició');
+}
+document.getElementById('btn-reiniciar-gato').addEventListener('click', reiniciarProgresoGato);
+
 function renderNotificaciones() {
   const lista = document.getElementById('notif-lista');
   const totalXP = totalXPGato();
