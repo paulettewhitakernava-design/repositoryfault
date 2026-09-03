@@ -838,11 +838,11 @@ select option { background: var(--card-solid); color: var(--ink); }
   transition: opacity 0.4s ease;
 }
 .splash.hide { opacity: 0; pointer-events: none; }
-@keyframes splashPulse {
-  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(255,209,102,0)); }
-  50% { transform: scale(1.05); filter: drop-shadow(0 0 22px rgba(255,209,102,0.35)); }
+@keyframes splashScale {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
 }
-.splash-mark { width: 220px; height: auto; animation: rise 0.5s ease both, splashPulse 2.2s ease-in-out 0.5s infinite; }
+.splash-mark { width: 220px; height: auto; animation: rise 0.5s ease both, splashScale 2.2s ease-in-out 0.5s infinite; }
 </style>
 </head>
 <body>
