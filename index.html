@@ -762,7 +762,6 @@ select option { background: var(--card-solid); color: var(--ink); }
 }
 .gato-nivel-row:last-child { border-bottom: none; }
 .notif-nuevo { display: inline-block; background: var(--accent); color: #2a1608; font-size: 7px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; border-radius: 999px; padding: 2px 7px; margin-left: 6px; vertical-align: middle; }
-.notif-xp-pill { flex-shrink: 0; min-width: 34px; text-align: center; background: rgba(255,209,102,0.12); border: 1px solid rgba(255,209,102,0.3); color: var(--gold); font-family: 'Space Grotesk', sans-serif; font-weight: 800; font-size: 9px; border-radius: 10px; padding: 5px 6px; }
 .gato-nivel-row img { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; opacity: 0.35; }
 .gato-nivel-row.actual img { opacity: 1; }
 .gato-nivel-row .n { flex: 1; font-size: 11px; font-weight: 600; }
@@ -2542,7 +2541,7 @@ document.getElementById('form-gasto').addEventListener('submit', function(e) {
   gastos.unshift(mov);
   guardarCacheLocal();
   if (tipo === 'gasto' || tipo === 'ingreso') otorgarXP(5, tipo === 'gasto' ? 'Registraste un gasto' : 'Registraste un ingreso');
-  if (tipo === 'gasto') otorgarBonusPeriodoSiCorresponde();
+  if (tipo === 'gasto') { otorgarBonusPeriodoSiCorresponde(); evaluarNotifPresupuesto(); }
   render();
   document.getElementById('form-gasto').reset();
   document.getElementById('fecha').valueAsDate = new Date();
@@ -3544,6 +3543,59 @@ function textoExplicacionNivel(resumen) {
   }).join('\n\n');
 }
 
+// --- Notificaciones: solo los eventos que realmente importan (avisos de
+// presupuesto, XP semanal, logros, subidas de nivel, cerca del siguiente
+// nivel). Registrar un movimiento o un día dentro de presupuesto NO genera
+// notificación, aunque sí otorgan XP silenciosamente. ---
+function agregarNotificacion(titulo, texto, extra) {
+  const lista = (config.gatoNotificaciones || []).slice();
+  const entrada = Object.assign({ fechaISO: hoyISO(), titulo: titulo, texto: texto }, extra || {});
+  lista.push(entrada);
+  if (lista.length > 100) lista.splice(0, lista.length - 100);
+  config.gatoNotificaciones = lista;
+  guardarConSincronizacion({ action: 'set-config', key: 'gatoNotificaciones', value: lista });
+  config.gatoNotifNoLeidas = (Number(config.gatoNotifNoLeidas) || 0) + 1;
+  guardarConSincronizacion({ action: 'set-config', key: 'gatoNotifNoLeidas', value: config.gatoNotifNoLeidas });
+  renderNivelTab();
+}
+// Avisa una sola vez por mes al cruzar 50-89% y al cruzar 90%+ del
+// presupuesto quincenal (la alerta de 90%+ tiene prioridad si aplican las
+// dos en el mismo mes).
+function evaluarNotifPresupuesto() {
+  const pct = porcentajePresupuestoUsado();
+  const mes = periodoDe(hoyISO(), 'mensual');
+  if (!mes) return;
+  const otorgados = Object.assign({}, config.gatoNotifPresupuestoMes || {});
+  const estado = Object.assign({}, otorgados[mes.key] || {});
+  if (pct >= 90 && !estado.alerta) {
+    agregarNotificacion('Presupuesto por acabarse', 'Tu presupuesto está por acabarse. Ya usaste más del 90% de tu presupuesto quincenal. ¡Cuida tus gastos restantes!');
+    estado.alerta = true;
+  } else if (pct >= 50 && pct < 90 && !estado.advertencia) {
+    agregarNotificacion('Presupuesto en advertencia', 'Ya usaste entre 50% y 89% de tu presupuesto quincenal. Revisa tus categorías antes de que termine el periodo.');
+    estado.advertencia = true;
+  }
+  otorgados[mes.key] = estado;
+  config.gatoNotifPresupuestoMes = otorgados;
+  guardarConSincronizacion({ action: 'set-config', key: 'gatoNotifPresupuestoMes', value: otorgados });
+}
+// Avisa una sola vez por nivel objetivo, cuando el avance hacia el
+// siguiente nivel llega al 75%.
+function evaluarNotifCercaNivel() {
+  const nivel = nivelActualGato();
+  const siguiente = nivel < 10 ? nivel + 1 : null;
+  if (!siguiente) return;
+  const prog = progresoHaciaNivel(siguiente);
+  const otorgados = Object.assign({}, config.gatoNotif75Nivel || {});
+  if (prog.pct >= 75 && !otorgados[siguiente]) {
+    const nivelInfo = NIVELES_GATO.find(function(nv) { return nv.n === siguiente; });
+    const falta = Math.max(0, prog.xpUmbral - prog.xpActual);
+    agregarNotificacion('¡Ya casi!', 'Te faltan ' + falta + ' XP para llegar a Nivel ' + siguiente + ' · ' + (nivelInfo ? nivelInfo.nombre : '') + '. ¡Tú puedes!');
+    otorgados[siguiente] = true;
+    config.gatoNotif75Nivel = otorgados;
+    guardarConSincronizacion({ action: 'set-config', key: 'gatoNotif75Nivel', value: otorgados });
+  }
+}
+
 // --- XP: se otorga por acciones (registrar movimientos, días dentro de
 // presupuesto) y por logros. otorgarXP() ya aplica el doble si hay boost
 // activo, deja registro de por qué se otorgó (para poder explicarlo luego
@@ -3570,7 +3622,12 @@ function otorgarXP(cantidad, motivo) {
     if (historial.length > 20) historial.splice(0, historial.length - 20);
     config.gatoHistorialNiveles = historial;
     guardarConSincronizacion({ action: 'set-config', key: 'gatoHistorialNiveles', value: historial });
+    const nivelInfo = NIVELES_GATO.find(function(nv) { return nv.n === nivelDespues; });
+    agregarNotificacion('¡Subiste de nivel!',
+      '¡Subiste de nivel! Ahora eres Nivel ' + nivelDespues + ' · ' + (nivelInfo ? nivelInfo.nombre : '') + '. Sigue así para desbloquear más diseños de Kashly.',
+      { nivel: nivelDespues });
   }
+  evaluarNotifCercaNivel();
 }
 
 // --- Racha semanal: una vez por día evalúa si el día anterior se mantuvo
@@ -3606,9 +3663,11 @@ function evaluarDiaSiCorresponde() {
         otorgarXP(30, racha + ' días seguidos sin exceder tu presupuesto');
       } else if (racha > 0 && racha % 7 === 0) {
         otorgarXP(15, 'Racha de ' + racha + ' días dentro de presupuesto');
+        agregarNotificacion('XP semanal acreditada', 'Tu XP semanal fue acreditada. Revisa tu progreso en la pestaña de niveles.');
       }
     }
   }
+  evaluarNotifPresupuesto();
   evaluarBonusMensualSiCorresponde(ayerISO);
   config.gatoUltimoDiaEvaluado = hoy;
   guardarConSincronizacion({ action: 'set-config', key: 'gatoUltimoDiaEvaluado', value: hoy });
@@ -3906,6 +3965,7 @@ function revisarLogrosGato() {
       if (e.xp) otorgarXP(e.xp, 'Logro desbloqueado: ' + e.nombre);
       if (e.boost) otorgarUsoBoost();
       showToast('¡Desbloqueaste "' + e.nombre + '"! 🐾');
+      agregarNotificacion('¡Logro desbloqueado!', '¡Logro desbloqueado: ' + e.nombre + '! Has ganado: ' + e.xp + ' XP + diseño especial de Kashly.');
     });
   }
 }
@@ -4258,11 +4318,10 @@ function renderNivelTab() {
   if (config.gatoNivelPendienteRevelar) {
     document.getElementById('gato-nivel-tab-img').src = 'gato-nivel-' + config.gatoNivelPendienteRevelar + '.png';
     tab.classList.add('show');
-    if (dot) dot.style.display = 'block';
   } else {
     tab.classList.remove('show');
-    if (dot) dot.style.display = 'none';
   }
+  if (dot) dot.style.display = (config.gatoNivelPendienteRevelar || (Number(config.gatoNotifNoLeidas) || 0) > 0) ? 'block' : 'none';
 }
 // --- Reinicia todo el progreso de gamificación (XP, nivel, logros,
 // notificaciones) sin tocar gastos, ingresos ni presupuesto. ---
@@ -4282,7 +4341,11 @@ function reiniciarProgresoGato() {
     gatoBonusPeriodo: {},
     gatoUltimoDiaEvaluado: null,
     diasUso: [],
-    gatoHistorialBackfillV1: true
+    gatoHistorialBackfillV1: true,
+    gatoNotificaciones: [],
+    gatoNotifNoLeidas: 0,
+    gatoNotifPresupuestoMes: {},
+    gatoNotif75Nivel: {}
   };
   Object.keys(valores).forEach(function(k) {
     config[k] = valores[k];
@@ -4299,39 +4362,16 @@ function renderNotificaciones() {
   const totalXP = totalXPGato();
   const resumenTxt = textoExplicacionNivel(resumenXPActual()).split('\n\n').join('\n');
 
-  const historialRaw = config.gatoHistorialNiveles || [];
-  const ultimoNivel = historialRaw[historialRaw.length - 1];
-  const eventosNivel = historialRaw.map(function(h) { return { tipo: 'nivel', fechaISO: h.fechaISO, data: h }; });
-  // La lista solo muestra los eventos de XP más recientes (el total y el
-  // resumen de arriba sí usan el registro completo, así que siempre cuadran).
-  const logCompleto = config.gatoXPLog || [];
-  const eventosXP = logCompleto.slice(-30).map(function(l) { return { tipo: 'xp', fechaISO: l.fechaISO, data: l }; });
-  const eventos = eventosNivel.concat(eventosXP).sort(function(a, b) {
-    if (a.fechaISO === b.fechaISO) return 0;
-    return a.fechaISO < b.fechaISO ? 1 : -1;
-  });
-
-  let filasHtml = '<div class="empty">Aún no tienes actividad registrada.</div>';
-  if (eventos.length) {
-    filasHtml = eventos.map(function(ev) {
-      if (ev.tipo === 'nivel') {
-        const h = ev.data;
-        const nivelInfo = NIVELES_GATO.find(function(nv) { return nv.n === h.nivel; });
-        const esPendiente = h === ultimoNivel && config.gatoNivelPendienteRevelar === h.nivel;
-        return '<div class="gato-nivel-row notif-row" data-nivel="' + h.nivel + '" data-pendiente="' + (esPendiente ? '1' : '0') + '">' +
-          '<img src="gato-nivel-' + h.nivel + '.png" alt="" style="width:38px;height:38px;object-fit:contain">' +
-          '<div style="flex:1">' +
-            '<div class="n">¡Subiste a Nivel ' + h.nivel + ' · ' + (nivelInfo ? nivelInfo.nombre : '') + '!' + (esPendiente ? ' <span class="notif-nuevo">Nuevo</span>' : '') + '</div>' +
-            '<div class="req">' + h.fechaISO + '</div>' +
-          '</div>' +
-        '</div>';
-      }
-      const l = ev.data;
-      return '<div class="gato-nivel-row notif-row-xp">' +
-        '<div class="notif-xp-pill">+' + l.cantidad + '</div>' +
+  const notifs = (config.gatoNotificaciones || []).slice().reverse();
+  let filasHtml = '<div class="empty">Aún no tienes notificaciones.</div>';
+  if (notifs.length) {
+    filasHtml = notifs.map(function(n, i) {
+      const esPendiente = !!n.nivel && i === 0 && config.gatoNivelPendienteRevelar === n.nivel;
+      return '<div class="gato-nivel-row notif-row"' + (n.nivel ? ' data-nivel="' + n.nivel + '" data-pendiente="' + (esPendiente ? '1' : '0') + '"' : '') + '>' +
         '<div style="flex:1">' +
-          '<div class="n" style="font-size:11.5px">' + l.motivo + '</div>' +
-          '<div class="req">' + l.fechaISO + '</div>' +
+          '<div class="n">' + n.titulo + (esPendiente ? ' <span class="notif-nuevo">Nuevo</span>' : '') + '</div>' +
+          '<div class="req" style="margin-top:3px;line-height:1.4">' + n.texto + '</div>' +
+          '<div class="req" style="margin-top:5px;opacity:.6">' + n.fechaISO + '</div>' +
         '</div>' +
       '</div>';
     }).join('');
@@ -4344,7 +4384,7 @@ function renderNotificaciones() {
     '</div>' +
     '<div class="card" style="margin-top:12px">' + filasHtml + '</div>';
 
-  document.querySelectorAll('.notif-row').forEach(function(row) {
+  document.querySelectorAll('.notif-row[data-nivel]').forEach(function(row) {
     row.addEventListener('click', function() {
       const nivel = Number(row.dataset.nivel);
       if (row.dataset.pendiente === '1') {
@@ -4356,6 +4396,10 @@ function renderNotificaciones() {
       mostrarInfo('¡Subiste a Nivel ' + nivel + ' · ' + (nivelInfo ? nivelInfo.nombre : '') + '!', entrada ? textoExplicacionNivel(entrada.resumen) : '');
     });
   });
+
+  config.gatoNotifNoLeidas = 0;
+  guardarConSincronizacion({ action: 'set-config', key: 'gatoNotifNoLeidas', value: 0 });
+  renderNivelTab();
 }
 document.getElementById('btn-notif-volver').addEventListener('click', function() { irA('inicio', 'atras'); });
 
