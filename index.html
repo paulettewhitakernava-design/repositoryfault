@@ -3565,13 +3565,14 @@ function evaluarNotifPresupuesto() {
   const pct = porcentajePresupuestoUsado();
   const mes = periodoDe(hoyISO(), 'mensual');
   if (!mes) return;
+  const freq = nombreFrecuenciaCorta().toLowerCase();
   const otorgados = Object.assign({}, config.gatoNotifPresupuestoMes || {});
   const estado = Object.assign({}, otorgados[mes.key] || {});
   if (pct >= 90 && !estado.alerta) {
-    agregarNotificacion('Presupuesto por acabarse', 'Tu presupuesto está por acabarse. Ya usaste más del 90% de tu presupuesto quincenal. ¡Cuida tus gastos restantes!');
+    agregarNotificacion('Presupuesto por acabarse', 'Tu presupuesto está por acabarse. Ya usaste más del 90% de tu presupuesto ' + freq + '. ¡Cuida tus gastos restantes!');
     estado.alerta = true;
   } else if (pct >= 50 && pct < 90 && !estado.advertencia) {
-    agregarNotificacion('Presupuesto en advertencia', 'Ya usaste entre 50% y 89% de tu presupuesto quincenal. Revisa tus categorías antes de que termine el periodo.');
+    agregarNotificacion('Presupuesto en advertencia', 'Ya usaste entre 50% y 89% de tu presupuesto ' + freq + '. Revisa tus categorías antes de que termine el periodo.');
     estado.advertencia = true;
   }
   otorgados[mes.key] = estado;
@@ -3808,6 +3809,36 @@ function diasConTiposRacha(tipos) {
   return racha;
 }
 function diasConTiposSeguidos(tipos, n) { return diasConTiposRacha(tipos) >= n; }
+// Racha de semanas (lunes a domingo) seguidas, terminando en la semana
+// actual, donde cada semana tiene al menos un movimiento de cada tipo
+// listado. No exige que sea todos los días, solo que la semana no se
+// quede sin ese tipo de movimiento.
+function semanaKeyDe(fechaISO) {
+  const d = new Date(fechaISO + 'T00:00:00');
+  const diaSemana = (d.getDay() + 6) % 7; // 0 = lunes
+  const lunes = new Date(d); lunes.setDate(lunes.getDate() - diaSemana);
+  return lunes.getFullYear() + '-' + String(lunes.getMonth() + 1).padStart(2, '0') + '-' + String(lunes.getDate()).padStart(2, '0');
+}
+function semanasConTiposRacha(tipos) {
+  const porSemana = {};
+  gastos.forEach(function(g) {
+    if (tipos.indexOf(g.tipo) === -1) return;
+    const key = semanaKeyDe(g.fecha);
+    if (!porSemana[key]) porSemana[key] = {};
+    porSemana[key][g.tipo] = true;
+  });
+  let racha = 0;
+  const cursor = new Date(hoyISO() + 'T00:00:00');
+  for (let i = 0; i < 60; i++) {
+    const key = semanaKeyDe(cursor.getFullYear() + '-' + String(cursor.getMonth() + 1).padStart(2, '0') + '-' + String(cursor.getDate()).padStart(2, '0'));
+    const semana = porSemana[key];
+    if (!semana || !tipos.every(function(t) { return semana[t]; })) break;
+    racha++;
+    cursor.setDate(cursor.getDate() - 7);
+  }
+  return racha;
+}
+function semanasConTiposSeguidas(tipos, n) { return semanasConTiposRacha(tipos) >= n; }
 // Cuántos periodos de pago se han excedido en el mes (ciclo propio) en curso.
 function excesosMesActual() {
   const mesActual = periodoDe(hoyISO(), 'mensual');
@@ -3875,10 +3906,10 @@ const ESPECIALES_GATO = [
     cumple: function() { return diasUsoConsecutivos(14); },
     progreso: function() { return { actual: Math.min(14, diasUsoRacha()), meta: 14, unidad: 'días' }; } },
   { id: 'libre', nombre: 'Libre', archivo: 'gato-especial-libre.png', xp: 150,
-    requisito: 'Completa 4 semanas seguidas registrando ingresos y gastos sin saltarte ningún día.',
-    explicacion: 'Un mes completo registrando todo: ingresos y gastos. Tu dinero ya se mueve con libertad y claridad.',
-    cumple: function() { return diasConTiposSeguidos(['gasto', 'ingreso'], 28); },
-    progreso: function() { return { actual: Math.min(28, diasConTiposRacha(['gasto', 'ingreso'])), meta: 28, unidad: 'días' }; } },
+    requisito: 'Registra al menos un ingreso y un gasto en cada una de 4 semanas seguidas.',
+    explicacion: 'Cuatro semanas seguidas registrando tanto ingresos como gastos. Tu dinero ya se mueve con libertad y claridad.',
+    cumple: function() { return semanasConTiposSeguidas(['gasto', 'ingreso'], 4); },
+    progreso: function() { return { actual: Math.min(4, semanasConTiposRacha(['gasto', 'ingreso'])), meta: 4, unidad: 'semanas' }; } },
   { id: 'dominio', nombre: 'Dominio', archivo: 'gato-especial-dominio.png', xp: 250,
     requisito: 'Crea y sigue un presupuesto personalizado durante 3 meses seguidos.',
     explicacion: 'Durante tres meses, creaste un presupuesto y te mantuviste dentro de él. Eso es dominio de tu dinero.',
