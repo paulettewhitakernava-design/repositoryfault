@@ -833,23 +833,22 @@ select option { background: var(--card-solid); color: var(--ink); }
 /* ---- Splash ---- */
 .splash {
   position: fixed; inset: 0; z-index: 100;
-  background: radial-gradient(120% 100% at 15% 0%, var(--bg-1) 0%, var(--bg-2) 55%);
+  background: #000;
   display: flex; align-items: center; justify-content: center;
   transition: opacity 0.4s ease;
 }
 .splash.hide { opacity: 0; pointer-events: none; }
-.splash-mark-wrap {
-  width: 190px; height: 190px; border-radius: 42px; overflow: hidden;
-  background: #000; box-shadow: 0 20px 60px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,209,102,0.16);
-  animation: rise 0.5s ease both;
+@keyframes splashPulse {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(255,209,102,0)); }
+  50% { transform: scale(1.05); filter: drop-shadow(0 0 22px rgba(255,209,102,0.35)); }
 }
-.splash-mark { width: 100%; height: 100%; object-fit: cover; display: block; }
+.splash-mark { width: 220px; height: auto; animation: rise 0.5s ease both, splashPulse 2.2s ease-in-out 0.5s infinite; }
 </style>
 </head>
 <body>
 
 <div class="splash" id="splash">
-  <div class="splash-mark-wrap"><img class="splash-mark" src="icon-512.png" alt="Kashly"></div>
+  <img class="splash-mark" src="icon-512.png" alt="Kashly">
 </div>
 
 <div id="scroll">
