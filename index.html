@@ -4431,6 +4431,17 @@ function reiniciarProgresoGato() {
 document.getElementById('btn-reiniciar-gato').addEventListener('click', reiniciarProgresoGato);
 
 const NOTIF_ICONOS = { presupuesto: '⚠', xpsemanal: '✦', cercanivel: '→', logro: '🏆', nivel: '★' };
+// Notificaciones guardadas antes de que existiera el campo "tipo" no lo
+// tienen; se infiere por el título para que no les toque el ícono de
+// repuesto (logro) por defecto.
+function inferirTipoNotif(n) {
+  if (n.tipo) return n.tipo;
+  if (n.nivel) return 'nivel';
+  if (n.titulo === 'XP semanal acreditada') return 'xpsemanal';
+  if (n.titulo === '¡Ya casi!') return 'cercanivel';
+  if (n.titulo === 'Presupuesto en advertencia' || n.titulo === 'Presupuesto por acabarse') return 'presupuesto';
+  return 'logro';
+}
 function etiquetaFechaNotif(fechaISO) {
   if (fechaISO === hoyISO()) return 'Hoy';
   const ayer = new Date(hoyISO() + 'T00:00:00'); ayer.setDate(ayer.getDate() - 1);
@@ -4447,7 +4458,7 @@ function renderNotificaciones() {
   let filasHtml = '<div class="empty">Aún no tienes notificaciones.</div>';
   if (notifs.length) {
     filasHtml = notifs.map(function(n, i) {
-      const tipo = n.tipo || 'logro';
+      const tipo = inferirTipoNotif(n);
       const icono = NOTIF_ICONOS[tipo] || '•';
       const noLeida = n.leida !== true;
       const esPendiente = !!n.nivel && i === 0 && config.gatoNivelPendienteRevelar === n.nivel;
