@@ -2,7 +2,7 @@
 // íconos) para que abra sin internet. Los datos (movimientos, config) NUNCA
 // se cachean aquí — eso lo maneja index.html con localStorage, porque
 // necesita lógica propia para encolar y reintentar cambios pendientes.
-const CACHE_NAME = 'kashly-shell-v1';
+const CACHE_NAME = 'kashly-shell-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -38,15 +38,20 @@ self.addEventListener('fetch', function(event) {
   if (url.hostname.indexOf('script.google.com') !== -1) return;
   if (event.request.method !== 'GET') return;
 
+  // Red primero: si hay internet, siempre se sirve la versión más reciente
+  // (y de paso se refresca la caché). Solo se usa lo guardado en caché si
+  // la red falla (sin conexión). Antes era al revés (caché primero, red de
+  // fondo solo para la próxima vez), lo que hacía que cada actualización de
+  // la app se viera un paso tarde — la sesión seguía mostrando lo anterior
+  // hasta la siguiente carga.
   event.respondWith(
-    caches.match(event.request).then(function(cached) {
-      const fetchPromise = fetch(event.request).then(function(networkResponse) {
-        if (networkResponse && networkResponse.ok) {
-          caches.open(CACHE_NAME).then(function(cache) { cache.put(event.request, networkResponse.clone()); });
-        }
-        return networkResponse;
-      }).catch(function() { return cached; });
-      return cached || fetchPromise;
+    fetch(event.request).then(function(networkResponse) {
+      if (networkResponse && networkResponse.ok) {
+        caches.open(CACHE_NAME).then(function(cache) { cache.put(event.request, networkResponse.clone()); });
+      }
+      return networkResponse;
+    }).catch(function() {
+      return caches.match(event.request);
     })
   );
 });
