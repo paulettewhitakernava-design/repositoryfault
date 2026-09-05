@@ -3402,18 +3402,42 @@ document.getElementById('cat-guardar').addEventListener('click', function() {
   const nuevo = parseFloat(document.getElementById('cat-monto').value);
   if (isNaN(nuevo) || nuevo < 0) { showToast('Monto inválido', true); return; }
   const p = calcularPresupuesto(modoPresupuesto);
-  const overrides = (config.categoriaOverrides && config.categoriaOverrides[p.overrideKey]) || {};
-  let sumaOtrosManuales = 0;
-  Object.keys(overrides).forEach(function(c) {
-    if (c !== categoriaEnEdicion) sumaOtrosManuales += Number(overrides[c]);
-  });
-  if (sumaOtrosManuales + nuevo > p.disponibleGasto + 0.5) {
-    showToast('Excede tu presupuesto por ' + fmt(sumaOtrosManuales + nuevo - p.disponibleGasto), true);
-    return;
-  }
+  const filaActual = p.filas.find(function(f) { return f.cat === categoriaEnEdicion; });
+  const delta = nuevo - filaActual.limite;
+
   if (!config.categoriaOverrides) config.categoriaOverrides = {};
   if (!config.categoriaOverrides[p.overrideKey]) config.categoriaOverrides[p.overrideKey] = {};
-  config.categoriaOverrides[p.overrideKey][categoriaEnEdicion] = nuevo;
+  const overrides = config.categoriaOverrides[p.overrideKey];
+
+  // La suma de los límites de todas las categorías nunca debe rebasar el
+  // presupuesto del periodo. Si subes una categoría, el faltante se le quita
+  // a la(s) categoría(s) con más gastado (que sí tengan espacio libre para
+  // ceder). Si la bajas, el espacio que liberas se le da a la categoría con
+  // más gastado. Así el total se mantiene ajustado solo.
+  if (delta > 0.01) {
+    const otras = p.filas.filter(function(f) { return f.cat !== categoriaEnEdicion; })
+      .sort(function(a, b) { return b.gastado - a.gastado; });
+    let faltante = delta;
+    const ajustes = {};
+    for (let i = 0; i < otras.length && faltante > 0.01; i++) {
+      const f = otras[i];
+      const disponibleParaQuitar = Math.max(0, f.limite - f.gastado);
+      const quitar = Math.min(disponibleParaQuitar, faltante);
+      if (quitar > 0) { ajustes[f.cat] = f.limite - quitar; faltante -= quitar; }
+    }
+    if (faltante > 0.01) {
+      showToast('No hay espacio: te faltan ' + fmt(faltante) + ' de tu presupuesto para subir esto', true);
+      return;
+    }
+    Object.keys(ajustes).forEach(function(c) { overrides[c] = ajustes[c]; });
+  } else if (delta < -0.01) {
+    const libre = -delta;
+    const candidata = p.filas.filter(function(f) { return f.cat !== categoriaEnEdicion; })
+      .sort(function(a, b) { return b.gastado - a.gastado; })[0];
+    if (candidata) overrides[candidata.cat] = candidata.limite + libre;
+  }
+
+  overrides[categoriaEnEdicion] = nuevo;
   guardarOverrides();
   renderPresupuesto();
   document.getElementById('overlay-cat').classList.remove('show');
