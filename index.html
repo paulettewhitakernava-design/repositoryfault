@@ -777,6 +777,28 @@ select option { background: var(--card-solid); color: var(--ink); }
 .inbox-time { font-size: 9.5px; color: var(--muted); flex-shrink: 0; white-space: nowrap; margin-top: 1px; }
 .inbox-txt { font-size: 11px; color: var(--muted); line-height: 1.4; margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .inbox-unread-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 4px; }
+
+.xp-strip { display: flex; align-items: center; gap: 10px; background: rgba(255,209,102,0.08); border: 1px solid rgba(255,209,102,0.22); border-radius: 14px; padding: 10px 14px; margin: 0 0 14px; cursor: pointer; }
+.xp-strip-ico { font-size: 16px; }
+.xp-strip-body { flex: 1; min-width: 0; }
+.xp-strip-txt { font-size: 12px; font-weight: 700; }
+.xp-strip-sub { font-size: 10px; color: var(--muted); font-weight: 500; }
+.xp-strip-chev { color: var(--gold); font-size: 13px; }
+
+.xp-sheet { position: relative; padding: 20px 20px 8px; display: flex; flex-direction: column; }
+.xp-sheet-close { position: absolute; top: 14px; right: 14px; }
+.xp-sheet-total { text-align: center; padding: 6px 0 14px; border-bottom: 1px solid var(--line); flex-shrink: 0; }
+.xp-sheet-total-num { font-family: 'Space Grotesk', sans-serif; font-size: 30px; font-weight: 700; color: var(--gold); }
+.xp-sheet-total-lbl { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+.xp-sheet-body { overflow-y: auto; padding: 4px 0 14px; }
+.xp-day-hdr { font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 700; padding: 14px 0 6px; }
+.xp-day-hdr:first-child { padding-top: 10px; }
+.xp-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.xp-row:last-child { border-bottom: none; }
+.xp-ico { width: 28px; height: 28px; border-radius: 8px; background: rgba(255,209,102,0.12); color: var(--gold); display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+.xp-ico.logro { background: rgba(124,245,196,0.16); color: var(--accent-2); }
+.xp-lbl { flex: 1; font-size: 11.5px; font-weight: 600; line-height: 1.3; }
+.xp-amt { font-family: 'Space Grotesk', sans-serif; font-size: 12.5px; font-weight: 700; color: var(--gold); flex-shrink: 0; }
 .gato-nivel-row img { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; opacity: 0.35; }
 .gato-nivel-row.actual img { opacity: 1; }
 .gato-nivel-row .n { flex: 1; font-size: 11px; font-weight: 600; }
@@ -1162,10 +1184,28 @@ select option { background: var(--card-solid); color: var(--ink); }
           <h1>Notificaciones</h1>
         </div>
       </div>
-      <span class="gato-info-btn" id="btn-notif-xp-info" style="margin-left:auto">?</span>
     </div>
   </div>
+  <div class="xp-strip clicable" id="btn-notif-xp-info">
+    <span class="xp-strip-ico">⚡</span>
+    <div class="xp-strip-body">
+      <div class="xp-strip-txt" id="xp-strip-txt">0 XP en total</div>
+      <div class="xp-strip-sub">Toca para ver de dónde viene</div>
+    </div>
+    <span class="xp-strip-chev">›</span>
+  </div>
   <div class="card" id="notif-lista"></div>
+</div>
+
+<div class="overlay" id="overlay-xp-historial">
+  <div class="sheet xp-sheet">
+    <button type="button" class="sheet-close xp-sheet-close" id="xp-historial-close" aria-label="Cerrar">✕</button>
+    <div class="xp-sheet-total">
+      <div class="xp-sheet-total-num" id="xp-historial-total">0 XP</div>
+      <div class="xp-sheet-total-lbl">Acumulados en total</div>
+    </div>
+    <div class="xp-sheet-body" id="xp-historial-body"></div>
+  </div>
 </div>
 
 <div class="overlay" id="overlay-ajustes-perfil">
@@ -3400,12 +3440,13 @@ document.getElementById('cat-auto').addEventListener('click', function() {
 });
 // La suma de los límites de todas las categorías nunca debe rebasar el
 // presupuesto del periodo. Si subes una categoría, el faltante se le quita
-// a la(s) categoría(s) con más gastado (que sí tengan espacio libre/restante
-// para ceder). Si la bajas, el espacio que liberas se le da a la categoría
-// con más gastado. Así el total se mantiene ajustado solo. Si al subir una
-// categoría no alcanza el restante de las demás, se ofrece bajar la Meta de
-// ahorro mensual justo lo necesario para cubrir la diferencia, en vez de
-// solo bloquear el cambio.
+// a la(s) categoría(s) con más "restante" libre (limite - gastado), empezando
+// por la que menos porcentaje de su límite ha usado — una categoría ya al
+// 100% de uso nunca se toca. Si la bajas, el espacio que liberas se le da a
+// la categoría con más gastado. Así el total se mantiene ajustado solo. Solo
+// si el restante de TODAS las demás categorías no alcanza para cubrir la
+// diferencia, se ofrece bajar la Meta de ahorro mensual (nunca automático:
+// el usuario decide con un confirm si acepta o no).
 function aplicarLimiteCategoria(cat, nuevo) {
   const p = calcularPresupuesto(modoPresupuesto);
   const filaActual = p.filas.find(function(f) { return f.cat === cat; });
@@ -3417,7 +3458,7 @@ function aplicarLimiteCategoria(cat, nuevo) {
 
   if (delta > 0.01) {
     const otras = p.filas.filter(function(f) { return f.cat !== cat; })
-      .sort(function(a, b) { return b.gastado - a.gastado; });
+      .sort(function(a, b) { return (b.limite - b.gastado) - (a.limite - a.gastado); });
     let faltante = delta;
     const ajustes = {};
     for (let i = 0; i < otras.length && faltante > 0.01; i++) {
@@ -4495,10 +4536,58 @@ function etiquetaFechaNotif(fechaISO) {
   if (fechaISO === ayerISO) return 'Ayer';
   return fechaISO;
 }
+const MESES_CORTOS_XP = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+function etiquetaFechaCorta(fechaISO) {
+  const base = etiquetaFechaNotif(fechaISO);
+  if (base === 'Hoy' || base === 'Ayer') return base;
+  const partes = fechaISO.split('-');
+  return Number(partes[2]) + ' ' + MESES_CORTOS_XP[Number(partes[1]) - 1];
+}
+// Ícono por motivo de XP: se infiere del texto exacto que usa otorgarXP(),
+// para que cada renglón del historial se vea consistente con las notificaciones.
+function iconoParaMotivoXP(motivo) {
+  const m = motivo || '';
+  if (m.indexOf('Logro desbloqueado') === 0) return { ico: '🏆', cls: 'logro' };
+  if (m.indexOf('presupuesto') !== -1) return { ico: '⚠', cls: '' };
+  if (m.indexOf('días distintos') !== -1) return { ico: '📅', cls: '' };
+  if (m.indexOf('gasto') !== -1 || m.indexOf('ingreso') !== -1) return { ico: '＋', cls: '' };
+  if (m.indexOf('ahorro') !== -1 || m.indexOf('saldo positivo') !== -1) return { ico: '✦', cls: '' };
+  return { ico: '⚡', cls: '' };
+}
+function renderXPHistorial() {
+  document.getElementById('xp-historial-total').textContent = totalXPGato() + ' XP';
+  const body = document.getElementById('xp-historial-body');
+  const log = (config.gatoXPLog || []).slice().reverse();
+  if (!log.length) {
+    body.innerHTML = '<div class="empty">Aún no has ganado XP.</div>';
+    return;
+  }
+  let fechaAnterior = null;
+  body.innerHTML = log.map(function(l) {
+    const info = iconoParaMotivoXP(l.motivo);
+    let html = '';
+    if (l.fechaISO !== fechaAnterior) {
+      html += '<div class="xp-day-hdr">' + etiquetaFechaCorta(l.fechaISO) + '</div>';
+      fechaAnterior = l.fechaISO;
+    }
+    html += '<div class="xp-row">' +
+      '<div class="xp-ico ' + info.cls + '">' + info.ico + '</div>' +
+      '<div class="xp-lbl">' + l.motivo + '</div>' +
+      '<div class="xp-amt">+' + l.cantidad + '</div>' +
+    '</div>';
+    return html;
+  }).join('');
+}
+document.getElementById('xp-historial-close').addEventListener('click', function() {
+  document.getElementById('overlay-xp-historial').classList.remove('show');
+});
+document.getElementById('overlay-xp-historial').addEventListener('click', function(e) {
+  if (e.target.id === 'overlay-xp-historial') this.classList.remove('show');
+});
 function renderNotificaciones() {
   const lista = document.getElementById('notif-lista');
   const totalXP = totalXPGato();
-  const resumenTxt = textoExplicacionNivel(resumenXPActual()).split('\n\n').join('\n');
+  document.getElementById('xp-strip-txt').textContent = totalXP + ' XP en total';
 
   const notifs = (config.gatoNotificaciones || []).slice().reverse();
   let filasHtml = '<div class="empty">Aún no tienes notificaciones.</div>';
@@ -4526,7 +4615,8 @@ function renderNotificaciones() {
   const btnInfo = document.getElementById('btn-notif-xp-info');
   if (btnInfo) {
     btnInfo.onclick = function() {
-      mostrarInfo('Tu XP · ' + totalXP + ' en total', resumenTxt);
+      renderXPHistorial();
+      document.getElementById('overlay-xp-historial').classList.add('show');
     };
   }
 
