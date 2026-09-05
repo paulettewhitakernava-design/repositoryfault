@@ -773,9 +773,9 @@ select option { background: var(--card-solid); color: var(--ink); }
 .inbox-avatar.nivel { background: linear-gradient(135deg, var(--gold), var(--accent)); color: #2a1608; }
 .inbox-body { flex: 1; min-width: 0; }
 .inbox-top { display: flex; justify-content: space-between; gap: 8px; }
-.inbox-title { font-size: 10.5px; font-weight: 700; }
-.inbox-time { font-size: 8px; color: var(--muted); flex-shrink: 0; white-space: nowrap; margin-top: 1px; }
-.inbox-txt { font-size: 9.5px; color: var(--muted); line-height: 1.4; margin-top: 2px; }
+.inbox-title { font-size: 12px; font-weight: 700; }
+.inbox-time { font-size: 9.5px; color: var(--muted); flex-shrink: 0; white-space: nowrap; margin-top: 1px; }
+.inbox-txt { font-size: 11px; color: var(--muted); line-height: 1.4; margin-top: 2px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .inbox-unread-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 4px; }
 .gato-nivel-row img { width: 40px; height: 40px; object-fit: contain; flex-shrink: 0; opacity: 0.35; }
 .gato-nivel-row.actual img { opacity: 1; }
@@ -1162,6 +1162,7 @@ select option { background: var(--card-solid); color: var(--ink); }
           <h1>Notificaciones</h1>
         </div>
       </div>
+      <span class="gato-info-btn" id="btn-notif-xp-info" style="margin-left:auto">?</span>
     </div>
   </div>
   <div class="card" id="notif-lista"></div>
@@ -4476,12 +4477,13 @@ function renderNotificaciones() {
     }).join('');
   }
 
-  lista.innerHTML =
-    '<div class="card" id="notif-resumen-card">' +
-      '<div class="card-lbl" style="margin-bottom:8px">Tu XP · ' + totalXP + ' en total</div>' +
-      '<div style="font-size:10.5px;color:var(--muted);line-height:1.6;white-space:pre-line">' + resumenTxt + '</div>' +
-    '</div>' +
-    '<div class="card" style="margin-top:12px">' + filasHtml + '</div>';
+  lista.innerHTML = filasHtml;
+  const btnInfo = document.getElementById('btn-notif-xp-info');
+  if (btnInfo) {
+    btnInfo.onclick = function() {
+      mostrarInfo('Tu XP · ' + totalXP + ' en total', resumenTxt);
+    };
+  }
 
   document.querySelectorAll('.inbox-row[data-nivel]').forEach(function(row) {
     row.addEventListener('click', function() {
