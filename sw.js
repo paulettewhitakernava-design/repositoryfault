@@ -44,8 +44,12 @@ self.addEventListener('fetch', function(event) {
   // fondo solo para la próxima vez), lo que hacía que cada actualización de
   // la app se viera un paso tarde — la sesión seguía mostrando lo anterior
   // hasta la siguiente carga.
+  // { cache: 'no-store' } para que el propio navegador tampoco sirva una
+  // respuesta guardada suya (GitHub Pages manda cache-control: max-age=600,
+  // así que sin esto una recarga hecha minutos después de publicar un
+  // cambio podía seguir recibiendo la versión de antes).
   event.respondWith(
-    fetch(event.request).then(function(networkResponse) {
+    fetch(event.request, { cache: 'no-store' }).then(function(networkResponse) {
       if (networkResponse && networkResponse.ok) {
         caches.open(CACHE_NAME).then(function(cache) { cache.put(event.request, networkResponse.clone()); });
       }
