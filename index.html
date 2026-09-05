@@ -1149,6 +1149,10 @@ select option { background: var(--card-solid); color: var(--ink); }
       <div><div class="ajustes-row-title">Saldo ahorrado</div><div class="ajustes-row-sub" id="resumen-saldo">$0.00</div></div>
       <span class="ajustes-row-chev">›</span>
     </div>
+    <div class="ajustes-row" data-abrir="overlay-ajustes-saldo-inicial">
+      <div><div class="ajustes-row-title">Saldo inicial</div><div class="ajustes-row-sub" id="resumen-saldo-inicial">Sin configurar</div></div>
+      <span class="ajustes-row-chev">›</span>
+    </div>
     <div class="ajustes-row" data-abrir="overlay-ajustes-categorias">
       <div><div class="ajustes-row-title">Categorías</div><div class="ajustes-row-sub" id="resumen-categorias">0 categorías</div></div>
       <span class="ajustes-row-chev">›</span>
@@ -1277,6 +1281,16 @@ select option { background: var(--card-solid); color: var(--ink); }
     <label class="field-label" for="saldo-ahorrado-input">Dinero que ya tenías ahorrado antes de usar Kashly</label>
     <input type="number" id="saldo-ahorrado-input" placeholder="0.00" step="0.01">
     <button type="button" class="btn-add" id="btn-guardar-saldo-ajustes" style="margin-top:16px">Guardar</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay-ajustes-saldo-inicial">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h2>Saldo inicial <button type="button" class="info-btn" id="btn-info-saldo-inicial">?</button></h2><button type="button" class="sheet-close" data-cerrar="overlay-ajustes-saldo-inicial" aria-label="Cerrar">✕</button></div>
+    <label class="field-label" for="saldo-inicial-input">¿Cuánto dinero tienes actualmente en tu cuenta bancaria (disponible para gastar)?</label>
+    <input type="number" id="saldo-inicial-input" placeholder="0.00" step="0.01">
+    <button type="button" class="btn-add" id="btn-guardar-saldo-inicial-ajustes" style="margin-top:16px">Guardar</button>
   </div>
 </div>
 
@@ -2142,6 +2156,22 @@ document.getElementById('btn-guardar-saldo-ajustes').addEventListener('click', f
   guardarConSincronizacion({ action: 'set-config', key: 'saldoAhorrado', value: val });
 });
 
+// --- Saldo inicial: lo que ya tenías en el banco antes de usar Kashly, se
+// usa solo para calcular "Disponible" (no afecta Total ahorrado, ese es el
+// de "Saldo ahorrado"). Se captura una sola vez al configurar la app. ---
+document.getElementById('btn-info-saldo-inicial').addEventListener('click', function() {
+  mostrarInfo('Saldo inicial', 'El dinero que tenías en tu cuenta bancaria antes de empezar a usar Kashly.\n\nSe usa solo para calcular tu "Disponible" correctamente: Disponible = Saldo inicial + Ingresos del periodo − Gastos del periodo − Ahorro del periodo.\n\nNo afecta tu "Saldo ahorrado" ni tu Total ahorrado — son cosas distintas.');
+});
+document.getElementById('btn-guardar-saldo-inicial-ajustes').addEventListener('click', function() {
+  const val = parseFloat(document.getElementById('saldo-inicial-input').value);
+  if (isNaN(val) || val < 0) { showToast('Monto inválido', true); return; }
+  config.saldoInicial = val;
+  render();
+  showToast('Saldo inicial guardado');
+  guardarConSincronizacion({ action: 'set-config', key: 'saldoInicial', value: val });
+  document.getElementById('overlay-ajustes-saldo-inicial').classList.remove('show');
+});
+
 // --- Editar meta desde el Presupuesto: sheet propio, no manda a Ajustes ---
 document.getElementById('btn-editar-meta').addEventListener('click', function() {
   document.getElementById('meta-monto-edit').value = config.metaAhorro || '';
@@ -2184,6 +2214,7 @@ function cargarFormAjustes() {
   document.getElementById('quincena-dia2').value = config.quincenaDia2 || 16;
   document.getElementById('semana-dia').value = config.semanaDia !== undefined ? config.semanaDia : 5;
   document.getElementById('saldo-ahorrado-input').value = Number(config.saldoAhorrado) || 0;
+  document.getElementById('saldo-inicial-input').value = config.saldoInicial !== undefined && config.saldoInicial !== null ? Number(config.saldoInicial) : '';
   renderAjustesResumen();
 }
 
@@ -2196,6 +2227,10 @@ function renderAjustesResumen() {
     : 'Sin configurar';
 
   document.getElementById('resumen-saldo').textContent = fmt(Number(config.saldoAhorrado) || 0);
+
+  document.getElementById('resumen-saldo-inicial').textContent =
+    (config.saldoInicial !== undefined && config.saldoInicial !== null && config.saldoInicial !== '')
+      ? fmt(Number(config.saldoInicial)) : 'Sin configurar';
 
   const nCat = CATEGORIAS.length;
   document.getElementById('resumen-categorias').textContent = nCat + (nCat === 1 ? ' categoría' : ' categorías');
@@ -2217,7 +2252,7 @@ document.querySelectorAll('[data-cerrar]').forEach(function(btn) {
     document.getElementById(btn.dataset.cerrar).classList.remove('show');
   });
 });
-['overlay-ajustes-perfil', 'overlay-ajustes-meta', 'overlay-ajustes-saldo', 'overlay-ajustes-categorias', 'overlay-ajustes-filtros'].forEach(function(id) {
+['overlay-ajustes-perfil', 'overlay-ajustes-meta', 'overlay-ajustes-saldo', 'overlay-ajustes-saldo-inicial', 'overlay-ajustes-categorias', 'overlay-ajustes-filtros'].forEach(function(id) {
   document.getElementById(id).addEventListener('click', function(e) {
     if (e.target.id === id) this.classList.remove('show');
   });
@@ -3161,7 +3196,8 @@ function render() {
   const totalAhorroMov = gastos.filter(g => g.tipo === 'ahorro').reduce((s, g) => s + Number(g.monto), 0);
   const saldoManual = Number(config.saldoAhorrado) || 0;
   const totalAhorro = totalAhorroMov + saldoManual;
-  const disponible = totalIngreso - totalGasto - totalAhorroMov;
+  const saldoInicial = Number(config.saldoInicial) || 0;
+  const disponible = saldoInicial + totalIngreso - totalGasto - totalAhorroMov;
 
   document.getElementById('sum-ingreso').textContent = fmt(totalIngreso);
   document.getElementById('sum-gasto').textContent = fmt(totalGasto);
