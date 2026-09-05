@@ -3398,24 +3398,25 @@ document.getElementById('cat-auto').addEventListener('click', function() {
   document.getElementById('overlay-cat').classList.remove('show');
   showToast('Vuelto a automático');
 });
-document.getElementById('cat-guardar').addEventListener('click', function() {
-  const nuevo = parseFloat(document.getElementById('cat-monto').value);
-  if (isNaN(nuevo) || nuevo < 0) { showToast('Monto inválido', true); return; }
+// La suma de los límites de todas las categorías nunca debe rebasar el
+// presupuesto del periodo. Si subes una categoría, el faltante se le quita
+// a la(s) categoría(s) con más gastado (que sí tengan espacio libre/restante
+// para ceder). Si la bajas, el espacio que liberas se le da a la categoría
+// con más gastado. Así el total se mantiene ajustado solo. Si al subir una
+// categoría no alcanza el restante de las demás, se ofrece bajar la Meta de
+// ahorro mensual justo lo necesario para cubrir la diferencia, en vez de
+// solo bloquear el cambio.
+function aplicarLimiteCategoria(cat, nuevo) {
   const p = calcularPresupuesto(modoPresupuesto);
-  const filaActual = p.filas.find(function(f) { return f.cat === categoriaEnEdicion; });
+  const filaActual = p.filas.find(function(f) { return f.cat === cat; });
   const delta = nuevo - filaActual.limite;
 
   if (!config.categoriaOverrides) config.categoriaOverrides = {};
   if (!config.categoriaOverrides[p.overrideKey]) config.categoriaOverrides[p.overrideKey] = {};
   const overrides = config.categoriaOverrides[p.overrideKey];
 
-  // La suma de los límites de todas las categorías nunca debe rebasar el
-  // presupuesto del periodo. Si subes una categoría, el faltante se le quita
-  // a la(s) categoría(s) con más gastado (que sí tengan espacio libre para
-  // ceder). Si la bajas, el espacio que liberas se le da a la categoría con
-  // más gastado. Así el total se mantiene ajustado solo.
   if (delta > 0.01) {
-    const otras = p.filas.filter(function(f) { return f.cat !== categoriaEnEdicion; })
+    const otras = p.filas.filter(function(f) { return f.cat !== cat; })
       .sort(function(a, b) { return b.gastado - a.gastado; });
     let faltante = delta;
     const ajustes = {};
@@ -3426,19 +3427,39 @@ document.getElementById('cat-guardar').addEventListener('click', function() {
       if (quitar > 0) { ajustes[f.cat] = f.limite - quitar; faltante -= quitar; }
     }
     if (faltante > 0.01) {
-      showToast('No hay espacio: te faltan ' + fmt(faltante) + ' de tu presupuesto para subir esto', true);
-      return;
+      const metaActual = Number(config.metaAhorro) || 0;
+      const reduccionMensual = modoPresupuesto === 'quincena' ? faltante * 2 : faltante;
+      if (metaActual <= 0) {
+        showToast('No hay espacio: te faltan ' + fmt(faltante) + ' de tu presupuesto para subir esto', true);
+        return false;
+      }
+      const metaRecomendada = Math.max(0, Math.round(metaActual - reduccionMensual));
+      const acepta = confirm(
+        'No hay presupuesto suficiente: te faltan ' + fmt(faltante) + '.\n\n' +
+        'Para poder agregar esto, tu Meta de ahorro mensual tendría que bajar de ' + fmt(metaActual) + ' a ' + fmt(metaRecomendada) + '.\n\n' +
+        '¿Quieres bajar tu meta a ' + fmt(metaRecomendada) + ' y aplicar este cambio?'
+      );
+      if (!acepta) return false;
+      config.metaAhorro = metaRecomendada;
+      guardarConSincronizacion({ action: 'set-config', key: 'metaAhorro', value: metaRecomendada });
+      return aplicarLimiteCategoria(cat, nuevo);
     }
     Object.keys(ajustes).forEach(function(c) { overrides[c] = ajustes[c]; });
   } else if (delta < -0.01) {
     const libre = -delta;
-    const candidata = p.filas.filter(function(f) { return f.cat !== categoriaEnEdicion; })
+    const candidata = p.filas.filter(function(f) { return f.cat !== cat; })
       .sort(function(a, b) { return b.gastado - a.gastado; })[0];
     if (candidata) overrides[candidata.cat] = candidata.limite + libre;
   }
 
-  overrides[categoriaEnEdicion] = nuevo;
+  overrides[cat] = nuevo;
   guardarOverrides();
+  return true;
+}
+document.getElementById('cat-guardar').addEventListener('click', function() {
+  const nuevo = parseFloat(document.getElementById('cat-monto').value);
+  if (isNaN(nuevo) || nuevo < 0) { showToast('Monto inválido', true); return; }
+  if (!aplicarLimiteCategoria(categoriaEnEdicion, nuevo)) return;
   renderPresupuesto();
   document.getElementById('overlay-cat').classList.remove('show');
   showToast('Categoría actualizada');
