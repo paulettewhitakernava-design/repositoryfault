@@ -4463,7 +4463,7 @@ function renderNotificaciones() {
       const icono = NOTIF_ICONOS[tipo] || '•';
       const noLeida = n.leida !== true;
       const esPendiente = !!n.nivel && i === 0 && config.gatoNivelPendienteRevelar === n.nivel;
-      return '<div class="inbox-row' + (noLeida ? ' unread' : '') + (n.nivel ? ' clicable' : '') + '"' + (n.nivel ? ' data-nivel="' + n.nivel + '" data-pendiente="' + (esPendiente ? '1' : '0') + '"' : '') + '>' +
+      return '<div class="inbox-row clicable' + (noLeida ? ' unread' : '') + '" data-index="' + i + '"' + (n.nivel ? ' data-nivel="' + n.nivel + '" data-pendiente="' + (esPendiente ? '1' : '0') + '"' : '') + '>' +
         '<div class="inbox-avatar ' + tipo + '">' + icono + '</div>' +
         '<div class="inbox-body">' +
           '<div class="inbox-top">' +
@@ -4485,16 +4485,21 @@ function renderNotificaciones() {
     };
   }
 
-  document.querySelectorAll('.inbox-row[data-nivel]').forEach(function(row) {
+  document.querySelectorAll('.inbox-row').forEach(function(row) {
     row.addEventListener('click', function() {
-      const nivel = Number(row.dataset.nivel);
-      if (row.dataset.pendiente === '1') {
-        abrirNivelRevelado();
+      if (row.dataset.nivel) {
+        const nivel = Number(row.dataset.nivel);
+        if (row.dataset.pendiente === '1') {
+          abrirNivelRevelado();
+          return;
+        }
+        const entrada = (config.gatoHistorialNiveles || []).slice().reverse().find(function(h) { return h.nivel === nivel; });
+        const nivelInfo = NIVELES_GATO.find(function(nv) { return nv.n === nivel; });
+        mostrarInfo('¡Subiste a Nivel ' + nivel + ' · ' + (nivelInfo ? nivelInfo.nombre : '') + '!', entrada ? textoExplicacionNivel(entrada.resumen) : '');
         return;
       }
-      const entrada = (config.gatoHistorialNiveles || []).slice().reverse().find(function(h) { return h.nivel === nivel; });
-      const nivelInfo = NIVELES_GATO.find(function(nv) { return nv.n === nivel; });
-      mostrarInfo('¡Subiste a Nivel ' + nivel + ' · ' + (nivelInfo ? nivelInfo.nombre : '') + '!', entrada ? textoExplicacionNivel(entrada.resumen) : '');
+      const n = notifs[Number(row.dataset.index)];
+      if (n) mostrarInfo(n.titulo, n.texto);
     });
   });
 
