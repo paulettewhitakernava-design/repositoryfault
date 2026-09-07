@@ -922,16 +922,12 @@ select option { background: var(--card-solid); color: var(--ink); }
 .ci-close { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.08); border: none; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #cbb9e0; cursor: pointer; flex-shrink: 0; }
 .ci-scroll { flex: 1; overflow-y: auto; padding: 14px 20px 10px; position: relative; z-index: 2; }
 .ci-cat-wrap { text-align: center; margin-bottom: 8px; position: relative; height: 220px; display: flex; align-items: center; justify-content: center; }
-.ci-cat-aura { position: absolute; width: 210px; height: 210px; border-radius: 50%; background: radial-gradient(circle, rgba(255,209,102,0.4), rgba(255,138,92,0.16) 55%, transparent 72%); animation: gatoAura 2.8s ease-in-out infinite; }
-.ci-cat-ring { position: absolute; width: 190px; height: 190px; border-radius: 50%; border: 2px solid rgba(255,209,102,0.55); animation: gatoRingBurst 2.6s ease-out infinite; }
-.ci-cat-img { width: 220px; height: 220px; object-fit: contain; position: relative; z-index: 1; animation: ciBreathe 2.6s ease-in-out infinite; filter: drop-shadow(0 10px 16px rgba(0,0,0,0.35)); }
-@keyframes ciBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+.ci-cat-img { width: 220px; height: 220px; object-fit: contain; position: relative; z-index: 1; animation: ciBreathe 5s ease-in-out infinite; filter: drop-shadow(0 10px 16px rgba(0,0,0,0.35)); }
+@keyframes ciBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.045); } }
 .ci-cat-spark { position: absolute; color: var(--gold); font-size: 13px; animation: gatoSparkle 1.9s ease-in-out infinite; z-index: 1; }
 .ci-eyebrow {
   font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 800; text-align: center; margin-bottom: 6px;
-  background: linear-gradient(90deg, var(--accent), var(--gold), var(--accent-2)); background-size: 200% auto;
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-  animation: gatoShine 3.5s linear infinite;
+  color: var(--gold);
 }
 .ci-q { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 600; color: #fff; line-height: 1.32; text-align: center; margin-bottom: 20px; }
 .ci-lbl { font-size: 10px; color: #cbb9e0; font-weight: 700; margin-bottom: 8px; display: block; }
@@ -958,9 +954,9 @@ select option { background: var(--card-solid); color: var(--ink); }
 .ci-btn { flex: 1; text-align: center; padding: 15px; border-radius: 999px; font-weight: 800; font-size: 13px; font-family: 'Space Grotesk', sans-serif; border: none; cursor: pointer; transition: transform 0.15s ease; }
 .ci-btn:active { transform: scale(0.96); }
 .ci-btn.back { background: rgba(255,255,255,0.08); color: #cbb9e0; }
-.ci-btn.next { background: linear-gradient(115deg, var(--gold), var(--accent), var(--gold)); background-size: 220% auto; color: #2a1608; animation: gatoShine 4s linear infinite; box-shadow: 0 8px 22px -8px rgba(255,209,102,0.55); }
+.ci-btn.next { background: var(--gold); color: #2a1608; box-shadow: 0 8px 22px -8px rgba(255,209,102,0.55); }
 @media (prefers-reduced-motion: reduce) {
-  .ci-blob-1, .ci-blob-2, .ci-blob-3, .ci-cat-img, .ci-cat-aura, .ci-cat-ring, .ci-cat-spark, .ci-eyebrow, .ci-btn.next, .ci-paw.on.actual { animation: none !important; }
+  .ci-blob-1, .ci-blob-2, .ci-blob-3, .ci-cat-img, .ci-cat-spark, .ci-paw.on.actual { animation: none !important; }
 }
 </style>
 </head>
@@ -1402,8 +1398,6 @@ select option { background: var(--card-solid); color: var(--ink); }
     </div>
     <div class="ci-scroll">
       <div class="ci-cat-wrap">
-        <div class="ci-cat-aura"></div>
-        <div class="ci-cat-ring"></div>
         <span class="ci-cat-spark" style="top:6%;left:10%;animation-delay:0s">✦</span>
         <span class="ci-cat-spark" style="top:14%;right:8%;animation-delay:0.6s">✦</span>
         <span class="ci-cat-spark" style="bottom:10%;left:16%;animation-delay:1.2s">✦</span>
