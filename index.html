@@ -879,12 +879,76 @@ select option { background: var(--card-solid); color: var(--ink); }
   50% { transform: scale(1.04); }
 }
 .splash-mark { width: 220px; height: auto; animation: rise 0.5s ease both, splashScale 2.2s ease-in-out 0.5s infinite; }
+
+/* ---- Aviso de Configuración inicial incompleta (fijo, visible en toda la app) ---- */
+.ci-warn-banner {
+  position: fixed; top: var(--safe-t); left: 0; right: 0; z-index: 32;
+  display: none; align-items: center; gap: 9px;
+  padding: 10px calc(20px + env(safe-area-inset-right, 0px)) 10px calc(20px + env(safe-area-inset-left, 0px));
+  background: rgba(255,138,138,0.14); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255,138,138,0.3);
+  cursor: pointer;
+}
+.ci-warn-banner.show { display: flex; }
+.ci-warn-banner-ico { font-size: 13px; flex-shrink: 0; }
+.ci-warn-banner-txt { font-size: 10.5px; line-height: 1.4; color: var(--ink); }
+.ci-warn-banner-txt b { color: var(--danger); }
+.ci-warn-banner-txt u { color: var(--gold); text-decoration: underline; }
+
+/* ---- Configuración inicial: asistente por pasos, estilo "gatito cálido" ---- */
+#overlay-config-inicial { z-index: 50; align-items: stretch; padding: 0; }
+.ci-panel {
+  width: 100%; max-width: 480px; margin: 0 auto; height: 100%;
+  background: linear-gradient(180deg, #3a1f3d 0%, #1c1433 55%, #150f28 100%);
+  display: flex; flex-direction: column; position: relative; overflow: hidden;
+  animation: overlayIn 0.2s ease;
+}
+.ci-blob { position: absolute; top: -70px; right: -60px; width: 220px; height: 220px; border-radius: 50%; background: radial-gradient(circle, rgba(255,138,92,0.32), transparent 70%); pointer-events: none; }
+.ci-top { display: flex; align-items: center; justify-content: space-between; padding: calc(16px + var(--safe-t)) 20px 0; position: relative; z-index: 2; flex-shrink: 0; }
+.ci-paws { display: flex; gap: 6px; }
+.ci-paw { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,0.15); transition: background 0.2s ease; }
+.ci-paw.on { background: var(--gold); }
+.ci-close { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.08); border: none; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #cbb9e0; cursor: pointer; flex-shrink: 0; }
+.ci-scroll { flex: 1; overflow-y: auto; padding: 14px 20px 10px; position: relative; z-index: 2; }
+.ci-cat-wrap { text-align: center; margin-bottom: 8px; }
+.ci-cat-img { width: 96px; height: 96px; object-fit: contain; animation: ciBreathe 2.4s ease-in-out infinite; }
+@keyframes ciBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+.ci-eyebrow { font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: #cbb9e0; font-weight: 700; text-align: center; margin-bottom: 6px; }
+.ci-q { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 600; color: #fff; line-height: 1.32; text-align: center; margin-bottom: 20px; }
+.ci-lbl { font-size: 10px; color: #cbb9e0; font-weight: 700; margin-bottom: 8px; display: block; }
+.ci-input { width: 100%; background: rgba(255,255,255,0.1); border: 2px solid transparent; border-radius: 18px; padding: 14px 16px; color: #fff; font-size: 16px; font-weight: 700; font-family: 'Space Grotesk', sans-serif; margin-bottom: 18px; }
+.ci-input:focus { border-color: var(--gold); outline: none; }
+.ci-input::placeholder { color: rgba(255,255,255,0.35); font-weight: 500; }
+.ci-help { font-size: 10.5px; color: #cbb9e0; line-height: 1.55; margin: -8px 0 18px; padding: 11px 13px; background: rgba(255,255,255,0.06); border-radius: 14px; }
+.ci-help b { color: var(--gold); }
+.ci-chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
+.ci-chip { flex: 0 0 auto; padding: 10px 15px; border-radius: 999px; background: rgba(255,255,255,0.08); border: none; font-size: 11.5px; font-weight: 700; color: #cbb9e0; font-family: 'Manrope', sans-serif; cursor: pointer; }
+.ci-chip.sel { background: var(--accent); color: #2a1608; }
+.ci-plan-card { border: 2px solid transparent; background: rgba(255,255,255,0.06); border-radius: 18px; padding: 15px 16px; margin-bottom: 12px; cursor: pointer; }
+.ci-plan-card.sel { border-color: var(--gold); background: rgba(255,209,102,0.1); }
+.ci-plan-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.ci-plan-name { font-family: 'Space Grotesk', sans-serif; font-size: 14.5px; font-weight: 700; color: #fff; }
+.ci-plan-check { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid rgba(255,255,255,0.3); flex-shrink: 0; }
+.ci-plan-card.sel .ci-plan-check { border-color: var(--gold); background: var(--gold); position: relative; }
+.ci-plan-card.sel .ci-plan-check::after { content: '✓'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #2a1608; font-weight: 700; }
+.ci-plan-desc { font-size: 10.5px; color: #cbb9e0; line-height: 1.5; }
+.ci-step { display: none; }
+.ci-step.active { display: block; animation: rise 0.25s ease both; }
+.ci-nav { flex-shrink: 0; padding: 12px 20px calc(18px + var(--safe-b)); display: flex; gap: 10px; position: relative; z-index: 2; }
+.ci-btn { flex: 1; text-align: center; padding: 15px; border-radius: 999px; font-weight: 800; font-size: 13px; font-family: 'Space Grotesk', sans-serif; border: none; cursor: pointer; }
+.ci-btn.back { background: rgba(255,255,255,0.08); color: #cbb9e0; }
+.ci-btn.next { background: var(--gold); color: #2a1608; }
 </style>
 </head>
 <body>
 
 <div class="splash" id="splash">
   <img class="splash-mark" src="icon-512.png" alt="Kashly">
+</div>
+
+<div class="ci-warn-banner" id="ci-warn-banner">
+  <span class="ci-warn-banner-ico">⚠</span>
+  <span class="ci-warn-banner-txt"><b>No has terminado de configurar tus datos.</b> Completa tu <u>Configuración inicial en Ajustes</u>.</span>
 </div>
 
 <div id="scroll">
@@ -1137,6 +1201,13 @@ select option { background: var(--card-solid); color: var(--ink); }
   </div>
 
   <div class="card" style="padding-top:6px;padding-bottom:6px">
+    <div class="ajustes-row" id="btn-abrir-config-inicial">
+      <div><div class="ajustes-row-title">Configuración inicial</div><div class="ajustes-row-sub" id="resumen-config-inicial">Sin terminar</div></div>
+      <span class="ajustes-row-chev">›</span>
+    </div>
+  </div>
+
+  <div class="card" style="padding-top:6px;padding-bottom:6px">
     <div class="ajustes-row" data-abrir="overlay-ajustes-perfil">
       <div><div class="ajustes-row-title">Perfil</div><div class="ajustes-row-sub" id="resumen-perfil">Sin nombre</div></div>
       <span class="ajustes-row-chev">›</span>
@@ -1291,6 +1362,71 @@ select option { background: var(--card-solid); color: var(--ink); }
     <label class="field-label" for="saldo-inicial-input">¿Cuánto dinero tienes actualmente en tu cuenta bancaria (disponible para gastar)?</label>
     <input type="number" id="saldo-inicial-input" placeholder="0.00" step="0.01">
     <button type="button" class="btn-add" id="btn-guardar-saldo-inicial-ajustes" style="margin-top:16px">Guardar</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay-config-inicial">
+  <div class="ci-panel">
+    <div class="ci-blob"></div>
+    <div class="ci-top">
+      <div class="ci-paws" id="ci-paws">
+        <div class="ci-paw" data-p="1"></div><div class="ci-paw" data-p="2"></div><div class="ci-paw" data-p="3"></div><div class="ci-paw" data-p="4"></div><div class="ci-paw" data-p="5"></div>
+      </div>
+      <button type="button" class="ci-close" id="ci-close" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="ci-scroll">
+      <div class="ci-cat-wrap"><img class="ci-cat-img" id="ci-cat-img" src="gato-inicio1.png" alt=""></div>
+      <div class="ci-eyebrow">Configuración inicial</div>
+
+      <div class="ci-step" data-step="1">
+        <div class="ci-q">¿Cuánto es tu ingreso mensual aproximado?</div>
+        <label class="ci-lbl">MONTO</label>
+        <input type="number" class="ci-input" id="ci-ingreso" placeholder="0.00" step="0.01">
+        <label class="ci-lbl" style="margin-top:2px">¿CON QUÉ FRECUENCIA TE PAGAN?</label>
+        <div class="ci-chip-row" id="ci-freq-chips">
+          <button type="button" class="ci-chip" data-freq="semanal">Semanal</button>
+          <button type="button" class="ci-chip" data-freq="quincenal">Quincenal</button>
+          <button type="button" class="ci-chip" data-freq="catorcenal">Catorcenal</button>
+          <button type="button" class="ci-chip" data-freq="decenal">Decenal</button>
+          <button type="button" class="ci-chip" data-freq="mensual">Mensual</button>
+        </div>
+      </div>
+
+      <div class="ci-step" data-step="2">
+        <div class="ci-q">¿Cuánto quieres ahorrar cada mes?</div>
+        <label class="ci-lbl">META DE AHORRO MENSUAL</label>
+        <input type="number" class="ci-input" id="ci-meta" placeholder="0.00" step="0.01">
+        <div class="ci-help" id="ci-meta-help" style="display:none"></div>
+      </div>
+
+      <div class="ci-step" data-step="3">
+        <div class="ci-q">¿Cuánto dinero tienes actualmente en tu cuenta bancaria (disponible para gastar)?</div>
+        <input type="number" class="ci-input" id="ci-saldo-inicial" placeholder="0.00" step="0.01">
+        <div class="ci-help">Si tienes más de una cuenta, suma el dinero de todas y pon el total. O solo pon el saldo de tu cuenta principal (la que más usas).</div>
+      </div>
+
+      <div class="ci-step" data-step="4">
+        <div class="ci-q">¿Cuánto dinero tienes ya ahorrado (en tu cuenta de ahorros)?</div>
+        <label class="ci-lbl">OPCIONAL</label>
+        <input type="number" class="ci-input" id="ci-saldo-ahorrado" placeholder="0.00" step="0.01">
+      </div>
+
+      <div class="ci-step" data-step="5">
+        <div class="ci-q">¿Qué tipo de presupuesto quieres llevar?</div>
+        <div class="ci-plan-card" data-plan="estricto">
+          <div class="ci-plan-top"><span class="ci-plan-name">Estricto</span><div class="ci-plan-check"></div></div>
+          <div class="ci-plan-desc">Tu presupuesto total no cambia. Si gastas más en una categoría, otra baja automáticamente. Ideal si quieres control total y no salirte del presupuesto.</div>
+        </div>
+        <div class="ci-plan-card" data-plan="flexible">
+          <div class="ci-plan-top"><span class="ci-plan-name">Flexible</span><div class="ci-plan-check"></div></div>
+          <div class="ci-plan-desc">Tu presupuesto total puede cambiar cada mes. Si quieres gastar más, puedes hacerlo, pero el sistema te avisa. Ideal si prefieres flexibilidad.</div>
+        </div>
+      </div>
+    </div>
+    <div class="ci-nav">
+      <button type="button" class="ci-btn back" id="ci-btn-back" style="display:none">Atrás</button>
+      <button type="button" class="ci-btn next" id="ci-btn-next" style="flex:1">Siguiente</button>
+    </div>
   </div>
 </div>
 
@@ -2240,7 +2376,175 @@ function renderAjustesResumen() {
   const nTotal = Object.keys(f).length;
   document.getElementById('resumen-filtros').textContent = nActivas === nTotal ? 'Todo activo' : nActivas + ' de ' + nTotal + ' activas';
 
+  document.getElementById('resumen-config-inicial').textContent = configEsCompleta() ? 'Completa' : 'Sin terminar';
+  actualizarAvisoConfigIncompleta();
 }
+
+// ==================================================================
+// --- Configuración inicial: asistente por pasos que aparece la      --
+// --- primera vez que se abre la app, y se puede reabrir/editar      --
+// --- desde Ajustes cuando se quiera.                                --
+// ==================================================================
+function configEsCompleta() {
+  const tieneIngreso = Number(config.ingresoMensualEstimado) > 0;
+  const tieneFreq = !!config.frecuenciaPago;
+  const tieneMeta = config.metaAhorro !== undefined && config.metaAhorro !== null && config.metaAhorro !== '';
+  const tieneSaldoInicial = config.saldoInicial !== undefined && config.saldoInicial !== null && config.saldoInicial !== '';
+  const tienePlan = !!config.tipoPresupuesto;
+  return tieneIngreso && tieneFreq && tieneMeta && tieneSaldoInicial && tienePlan;
+}
+function actualizarAvisoConfigIncompleta() {
+  const banner = document.getElementById('ci-warn-banner');
+  banner.classList.toggle('show', !configEsCompleta());
+}
+
+let ciPaso = 1;
+const CI_TOTAL_PASOS = 5;
+let ciCatIntervalo = null;
+function ciIniciarRespiracion() {
+  const img = document.getElementById('ci-cat-img');
+  let frame = 1;
+  clearInterval(ciCatIntervalo);
+  ciCatIntervalo = setInterval(function() {
+    frame = frame >= 8 ? 1 : frame + 1;
+    img.src = 'gato-inicio' + frame + '.png';
+  }, 550);
+}
+function ciDetenerRespiracion() {
+  clearInterval(ciCatIntervalo);
+  ciCatIntervalo = null;
+}
+function ciRenderPaso() {
+  document.querySelectorAll('.ci-step').forEach(function(el) {
+    el.classList.toggle('active', Number(el.dataset.step) === ciPaso);
+  });
+  document.querySelectorAll('.ci-paw').forEach(function(el) {
+    el.classList.toggle('on', Number(el.dataset.p) <= ciPaso);
+  });
+  document.getElementById('ci-btn-back').style.display = ciPaso === 1 ? 'none' : 'block';
+  document.getElementById('ci-btn-next').textContent = ciPaso === CI_TOTAL_PASOS ? 'Guardar y empezar' : 'Siguiente';
+
+  if (ciPaso === 2) {
+    const meta = parseFloat(document.getElementById('ci-meta').value) || 0;
+    const help = document.getElementById('ci-meta-help');
+    if (meta > 0) {
+      const freqSel = document.querySelector('#ci-freq-chips .ci-chip.sel');
+      const freq = freqSel ? freqSel.dataset.freq : 'quincenal';
+      const divisor = (freq === 'quincenal' || freq === 'catorcenal') ? 2
+        : freq === 'semanal' ? (52 / 12)
+        : freq === 'decenal' ? 3 : 1;
+      const CI_PERIODO_LBL = { semanal: 'semana', quincenal: 'quincena', catorcenal: 'catorcena', decenal: 'periodo decenal', mensual: 'mes' };
+      help.innerHTML = 'Con tu ingreso y frecuencia, esto equivale a <b>' + fmt(meta / divisor) + '</b> de ahorro automático cada ' + (CI_PERIODO_LBL[freq] || 'periodo') + '.';
+      help.style.display = 'block';
+    } else {
+      help.style.display = 'none';
+    }
+  }
+}
+document.querySelectorAll('#ci-freq-chips .ci-chip').forEach(function(chip) {
+  chip.addEventListener('click', function() {
+    document.querySelectorAll('#ci-freq-chips .ci-chip').forEach(function(c) { c.classList.remove('sel'); });
+    chip.classList.add('sel');
+  });
+});
+document.querySelectorAll('.ci-plan-card').forEach(function(card) {
+  card.addEventListener('click', function() {
+    document.querySelectorAll('.ci-plan-card').forEach(function(c) { c.classList.remove('sel'); });
+    card.classList.add('sel');
+  });
+});
+document.getElementById('ci-meta').addEventListener('input', function() {
+  if (ciPaso === 2) ciRenderPaso();
+});
+
+function abrirConfigInicial() {
+  document.getElementById('ci-ingreso').value = config.ingresoMensualEstimado || '';
+  document.getElementById('ci-meta').value = config.metaAhorro !== undefined && config.metaAhorro !== null ? config.metaAhorro : '';
+  document.getElementById('ci-saldo-inicial').value = config.saldoInicial !== undefined && config.saldoInicial !== null ? config.saldoInicial : '';
+  document.getElementById('ci-saldo-ahorrado').value = config.saldoAhorrado || '';
+
+  const freq = config.frecuenciaPago || 'quincenal';
+  document.querySelectorAll('#ci-freq-chips .ci-chip').forEach(function(c) {
+    c.classList.toggle('sel', c.dataset.freq === freq);
+  });
+  const plan = config.tipoPresupuesto || 'estricto';
+  document.querySelectorAll('.ci-plan-card').forEach(function(c) {
+    c.classList.toggle('sel', c.dataset.plan === plan);
+  });
+
+  ciPaso = 1;
+  ciRenderPaso();
+  ciIniciarRespiracion();
+  document.getElementById('overlay-config-inicial').classList.add('show');
+}
+function cerrarConfigInicial() {
+  document.getElementById('overlay-config-inicial').classList.remove('show');
+  ciDetenerRespiracion();
+  if (!configEsCompleta() && !config.configInicialCerrada) {
+    config.configInicialCerrada = true;
+    guardarConSincronizacion({ action: 'set-config', key: 'configInicialCerrada', value: true });
+  }
+  actualizarAvisoConfigIncompleta();
+}
+document.getElementById('ci-close').addEventListener('click', cerrarConfigInicial);
+document.getElementById('btn-abrir-config-inicial').addEventListener('click', abrirConfigInicial);
+
+document.getElementById('ci-btn-back').addEventListener('click', function() {
+  if (ciPaso > 1) { ciPaso--; ciRenderPaso(); }
+});
+document.getElementById('ci-btn-next').addEventListener('click', function() {
+  if (ciPaso === 1) {
+    const ingreso = parseFloat(document.getElementById('ci-ingreso').value);
+    const freqSel = document.querySelector('#ci-freq-chips .ci-chip.sel');
+    if (isNaN(ingreso) || ingreso <= 0) { showToast('Ingresa tu ingreso mensual', true); return; }
+    if (!freqSel) { showToast('Elige con qué frecuencia te pagan', true); return; }
+  } else if (ciPaso === 2) {
+    const meta = parseFloat(document.getElementById('ci-meta').value);
+    if (isNaN(meta) || meta < 0) { showToast('Ingresa tu meta de ahorro', true); return; }
+  } else if (ciPaso === 3) {
+    const saldo = parseFloat(document.getElementById('ci-saldo-inicial').value);
+    if (isNaN(saldo) || saldo < 0) { showToast('Ingresa tu saldo actual', true); return; }
+  }
+
+  if (ciPaso < CI_TOTAL_PASOS) {
+    ciPaso++;
+    ciRenderPaso();
+    return;
+  }
+
+  // Último paso: guardar todo de una vez.
+  const plan = document.querySelector('.ci-plan-card.sel');
+  if (!plan) { showToast('Elige un tipo de presupuesto', true); return; }
+
+  const ingreso = parseFloat(document.getElementById('ci-ingreso').value) || 0;
+  const freq = document.querySelector('#ci-freq-chips .ci-chip.sel').dataset.freq;
+  const meta = parseFloat(document.getElementById('ci-meta').value) || 0;
+  const saldoInicial = parseFloat(document.getElementById('ci-saldo-inicial').value) || 0;
+  const saldoAhorrado = parseFloat(document.getElementById('ci-saldo-ahorrado').value) || 0;
+  const tipoPresupuesto = plan.dataset.plan;
+
+  config.ingresoMensualEstimado = ingreso;
+  config.frecuenciaPago = freq;
+  config.metaAhorro = meta;
+  config.saldoInicial = saldoInicial;
+  config.saldoAhorrado = saldoAhorrado;
+  config.tipoPresupuesto = tipoPresupuesto;
+
+  guardarConSincronizacion({ action: 'set-config', key: 'ingresoMensualEstimado', value: ingreso });
+  guardarConSincronizacion({ action: 'set-config', key: 'frecuenciaPago', value: freq });
+  guardarConSincronizacion({ action: 'set-config', key: 'metaAhorro', value: meta });
+  guardarConSincronizacion({ action: 'set-config', key: 'saldoInicial', value: saldoInicial });
+  guardarConSincronizacion({ action: 'set-config', key: 'saldoAhorrado', value: saldoAhorrado });
+  guardarConSincronizacion({ action: 'set-config', key: 'tipoPresupuesto', value: tipoPresupuesto });
+
+  acreditarAhorroAutomaticoSiCorresponde();
+  actualizarTextosPeriodo();
+  cargarFormAjustes();
+  render();
+  renderPresupuesto();
+  cerrarConfigInicial();
+  showToast('Configuración inicial guardada');
+});
 
 document.querySelectorAll('.ajustes-row[data-abrir]').forEach(function(row) {
   row.addEventListener('click', function() {
@@ -2583,6 +2887,7 @@ function iniciarConDatos(datosGastos, datosConfig, offline) {
   config = datosConfig || {};
   if (!offline) config = reconciliarConCacheLocal(config);
   registrarUsoDiario();
+  acreditarAhorroAutomaticoSiCorresponde();
   evaluarDiaSiCorresponde();
   cargarCategorias();
   poblarSelectsCategoria();
@@ -2600,6 +2905,7 @@ function iniciarConDatos(datosGastos, datosConfig, offline) {
     revisarCierre();
     procesarCola();
   }
+  if (!configEsCompleta() && !config.configInicialCerrada) abrirConfigInicial();
 }
 
 function cargarDatos() {
@@ -3195,9 +3501,14 @@ function render() {
   const totalGasto = gastos.filter(g => g.tipo === 'gasto').reduce((s, g) => s + Number(g.monto), 0);
   const totalAhorroMov = gastos.filter(g => g.tipo === 'ahorro').reduce((s, g) => s + Number(g.monto), 0);
   const saldoManual = Number(config.saldoAhorrado) || 0;
-  const totalAhorro = totalAhorroMov + saldoManual;
+  const ahorroAuto = Number(config.ahorroAutomaticoAcumulado) || 0;
+  // El ahorro automático (tu meta de ahorro repartida por periodo) sí cuenta
+  // como ahorro real, pero el ahorro manual que registras en "Agregar" no
+  // debe restarse de Disponible: es dinero que ya tenías, no parte del
+  // ingreso de este periodo.
+  const totalAhorro = totalAhorroMov + saldoManual + ahorroAuto;
   const saldoInicial = Number(config.saldoInicial) || 0;
-  const disponible = saldoInicial + totalIngreso - totalGasto - totalAhorroMov;
+  const disponible = saldoInicial + (totalIngreso - ahorroAuto) - totalGasto;
 
   document.getElementById('sum-ingreso').textContent = fmt(totalIngreso);
   document.getElementById('sum-gasto').textContent = fmt(totalGasto);
@@ -3491,6 +3802,19 @@ function aplicarLimiteCategoria(cat, nuevo) {
   if (!config.categoriaOverrides) config.categoriaOverrides = {};
   if (!config.categoriaOverrides[p.overrideKey]) config.categoriaOverrides[p.overrideKey] = {};
   const overrides = config.categoriaOverrides[p.overrideKey];
+
+  // Presupuesto flexible: el total puede cambiar, así que el cambio se
+  // aplica directo sin quitarle a otras categorías ni ofrecer bajar la
+  // meta — solo se avisa cuando el total sube por encima de lo planeado.
+  if ((config.tipoPresupuesto || 'estricto') === 'flexible') {
+    overrides[cat] = nuevo;
+    guardarOverrides();
+    if (delta > 0.01) {
+      const nuevoTotal = p.disponibleGasto + delta;
+      showToast('Tu presupuesto total subió a ' + fmt(nuevoTotal) + ' este periodo (antes ' + fmt(p.disponibleGasto) + ')');
+    }
+    return true;
+  }
 
   if (delta > 0.01) {
     const otras = p.filas.filter(function(f) { return f.cat !== cat; })
@@ -3800,6 +4124,25 @@ function otorgarXP(cantidad, motivo) {
 // completo del periodo, no prorrateado por simplicidad), otorga +5 XP por
 // ese día, y un bonus extra de +15 XP cada 7 días seguidos (y +30 XP cada
 // 30 días seguidos). También dispara la revisión de los bonos mensuales. ---
+// Acredita tu meta de ahorro repartida por periodo (ej. meta mensual / 2 si
+// pagas quincenal) una sola vez por periodo, sin importar si registraste un
+// movimiento de ahorro manual o no — así "Disponible" siempre refleja que
+// ese dinero ya está apartado. Es acumulativo: cada periodo nuevo que pasa
+// suma otro tanto, igual que fue pasando el tiempo real.
+function acreditarAhorroAutomaticoSiCorresponde() {
+  const meta = Number(config.metaAhorro) || 0;
+  if (meta <= 0) return;
+  const periodo = periodoDe(hoyISO(), 'quincena');
+  if (!periodo) return;
+  const acreditados = Object.assign({}, config.ahorroAutoPeriodos || {});
+  if (acreditados[periodo.key]) return;
+  const metaAhorroPeriodo = meta / periodosPorMes();
+  acreditados[periodo.key] = true;
+  config.ahorroAutoPeriodos = acreditados;
+  config.ahorroAutomaticoAcumulado = (Number(config.ahorroAutomaticoAcumulado) || 0) + metaAhorroPeriodo;
+  guardarConSincronizacion({ action: 'set-config', key: 'ahorroAutoPeriodos', value: acreditados });
+  guardarConSincronizacion({ action: 'set-config', key: 'ahorroAutomaticoAcumulado', value: config.ahorroAutomaticoAcumulado });
+}
 function evaluarDiaSiCorresponde() {
   const hoy = hoyISO();
   if (config.gatoUltimoDiaEvaluado === hoy) return;
