@@ -127,20 +127,28 @@ h1 { font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 22px
 .preview-card { cursor: pointer; }
 .preview-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .preview-head .link { font-size: 9.5px; color: var(--accent); font-weight: 700; }
-.preview-bars { display: flex; align-items: flex-end; gap: 16px; height: 54px; }
-.preview-bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
-.preview-bar { width: 100%; max-width: 46px; border-radius: 6px 6px 2px 2px; min-height: 4px; }
-.preview-bar.ingreso { background: var(--accent-2); }
-.preview-bar.gasto { background: var(--danger); }
-.preview-bar-lbl { font-size: 8.5px; color: var(--muted); }
-.preview-bar-val { font-size: 9.5px; font-weight: 700; color: var(--ink); }
+.preview-donut-row { display: flex; align-items: center; gap: 16px; }
+.preview-donut-wrap { position: relative; width: 84px; height: 84px; flex-shrink: 0; }
+.preview-donut { width: 84px; height: 84px; border-radius: 50%; }
+.preview-donut-hole { position: absolute; inset: 11px; border-radius: 50%; background: var(--card-solid); display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.preview-donut-pct { font-family: 'Space Grotesk', sans-serif; font-size: 14px; font-weight: 700; }
+.preview-donut-sub { font-size: 7.5px; color: var(--muted); }
+.preview-donut-legend { display: flex; flex-direction: column; gap: 9px; flex: 1; min-width: 0; }
+.preview-donut-leg-item { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--muted); }
+.preview-donut-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.preview-donut-leg-val { font-weight: 700; color: var(--ink); margin-left: auto; }
 
 .analisis-inicio-scroll {
-  display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 0;
-  margin: 0 -22px; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 12px;
+  padding: 2px 2px 4px; -webkit-overflow-scrolling: touch; scrollbar-width: none;
 }
 .analisis-inicio-scroll::-webkit-scrollbar { display: none; }
-.analisis-inicio-page { flex: 0 0 100%; scroll-snap-align: start; min-width: 100%; box-sizing: border-box; padding: 0 22px; }
+.analisis-inicio-page {
+  flex: 0 0 84%; scroll-snap-align: start; box-sizing: border-box; padding: 16px;
+  background: var(--card); border: 1px solid var(--line); border-radius: 20px;
+  opacity: 0.45; transition: opacity 0.2s ease;
+}
+.analisis-inicio-page.activa { opacity: 1; }
 .analisis-inicio-page-lbl { font-size: 9px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
 .analisis-inicio-dots { display: flex; justify-content: center; gap: 6px; margin-top: 14px; }
 .analisis-inicio-dot { width: 6px; height: 6px; border-radius: 999px; background: rgba(255,255,255,0.14); transition: background 0.2s, width 0.2s; }
@@ -1035,7 +1043,7 @@ select option { background: var(--card-solid); color: var(--ink); }
   <div id="inicio-secciones">
 
   <div class="seccion-inicio" id="seccion-analisis" data-key="analisis">
-    <div class="card" id="analisis-inicio-card" style="overflow:hidden">
+    <div id="analisis-inicio-card">
       <div class="preview-head">
         <div class="card-lbl" style="margin-bottom:0">Análisis</div>
         <div style="display:flex;align-items:center;gap:10px">
@@ -1048,7 +1056,7 @@ select option { background: var(--card-solid); color: var(--ink); }
       <div class="analisis-inicio-scroll" id="analisis-inicio-scroll">
         <div class="analisis-inicio-page" data-key="estemes">
           <div class="analisis-inicio-page-lbl">Este mes</div>
-          <div class="preview-bars" id="preview-bars"></div>
+          <div class="preview-donut-row" id="preview-donut-row"></div>
         </div>
         <div class="analisis-inicio-page" data-key="categoria">
           <div class="analisis-inicio-page-lbl">Gasto por categoría</div>
@@ -2106,6 +2114,7 @@ function renderAnalisisInicioPaginas() {
   paginas.forEach(function(p) {
     const on = activos[p.dataset.key] !== false;
     p.style.display = on ? '' : 'none';
+    p.classList.toggle('activa', on && visibles === 0);
     if (on) visibles++;
   });
   dots.innerHTML = '';
@@ -2118,7 +2127,11 @@ function renderAnalisisInicioPaginas() {
 }
 document.getElementById('analisis-inicio-scroll').addEventListener('scroll', function() {
   const cont = this;
-  const idx = Math.round(cont.scrollLeft / cont.clientWidth);
+  const visibles = Array.from(cont.querySelectorAll('.analisis-inicio-page')).filter(function(p) { return p.style.display !== 'none'; });
+  if (!visibles.length) return;
+  const paso = visibles[0].offsetWidth + 12; // ancho de tarjeta + gap
+  const idx = Math.max(0, Math.min(visibles.length - 1, Math.round(cont.scrollLeft / paso)));
+  visibles.forEach(function(p, i) { p.classList.toggle('activa', i === idx); });
   document.querySelectorAll('#analisis-inicio-dots .analisis-inicio-dot').forEach(function(d, i) {
     d.classList.toggle('activo', i === idx);
   });
@@ -3246,18 +3259,16 @@ function renderPreview() {
     if (g.tipo === 'ingreso') ingreso += Number(g.monto) || 0;
     if (g.tipo === 'gasto') gasto += Number(g.monto) || 0;
   });
-  const max = Math.max(1, ingreso, gasto);
-  const wrap = document.getElementById('preview-bars');
+  const pct = ingreso > 0 ? Math.min(100, Math.round((gasto / ingreso) * 100)) : (gasto > 0 ? 100 : 0);
+  const wrap = document.getElementById('preview-donut-row');
   wrap.innerHTML =
-    '<div class="preview-bar-col">' +
-      '<span class="preview-bar-val">' + fmtCompact(ingreso) + '</span>' +
-      '<div class="preview-bar ingreso" style="height:' + Math.max(6, (ingreso / max) * 100) + '%"></div>' +
-      '<span class="preview-bar-lbl">Ingreso</span>' +
+    '<div class="preview-donut-wrap">' +
+      '<div class="preview-donut" style="background:conic-gradient(var(--danger) 0% ' + pct + '%, var(--accent-2) ' + pct + '% 100%)"></div>' +
+      '<div class="preview-donut-hole"><span class="preview-donut-pct">' + pct + '%</span><span class="preview-donut-sub">gastado</span></div>' +
     '</div>' +
-    '<div class="preview-bar-col">' +
-      '<span class="preview-bar-val">' + fmtCompact(gasto) + '</span>' +
-      '<div class="preview-bar gasto" style="height:' + Math.max(6, (gasto / max) * 100) + '%"></div>' +
-      '<span class="preview-bar-lbl">Gasto</span>' +
+    '<div class="preview-donut-legend">' +
+      '<div class="preview-donut-leg-item"><span class="preview-donut-dot" style="background:var(--accent-2)"></span>Ingreso<span class="preview-donut-leg-val">' + fmtCompact(ingreso) + '</span></div>' +
+      '<div class="preview-donut-leg-item"><span class="preview-donut-dot" style="background:var(--danger)"></span>Gasto<span class="preview-donut-leg-val">' + fmtCompact(gasto) + '</span></div>' +
     '</div>';
 }
 
