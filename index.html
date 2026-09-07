@@ -3786,14 +3786,18 @@ document.getElementById('cat-auto').addEventListener('click', function() {
   showToast('Vuelto a automático');
 });
 // La suma de los límites de todas las categorías nunca debe rebasar el
-// presupuesto del periodo. Si subes una categoría, el faltante se le quita
-// a la(s) categoría(s) con más "restante" libre (limite - gastado), empezando
-// por la que menos porcentaje de su límite ha usado — una categoría ya al
-// 100% de uso nunca se toca. Si la bajas, el espacio que liberas se le da a
-// la categoría con más gastado. Así el total se mantiene ajustado solo. Solo
-// si el restante de TODAS las demás categorías no alcanza para cubrir la
-// diferencia, se ofrece bajar la Meta de ahorro mensual (nunca automático:
-// el usuario decide con un confirm si acepta o no).
+// presupuesto del periodo, en Estricto Y en Flexible: subir una categoría
+// siempre le quita el faltante a la(s) categoría(s) con más "restante"
+// libre (limite - gastado), empezando por la que menos porcentaje de su
+// límite ha usado — una categoría ya al 100% de uso nunca se toca. Bajar
+// una categoría le da el espacio liberado a la que más ha gastado.
+//
+// La única diferencia entre los dos tipos es qué pasa cuando el restante de
+// TODAS las demás categorías no alcanza para cubrir la diferencia:
+//   - Estricto: se bloquea el cambio. La meta de ahorro nunca se toca.
+//   - Flexible: se ofrece bajar la Meta de ahorro mensual justo lo necesario
+//     para que el presupuesto total suba y quepa el cambio (el usuario
+//     decide con un confirm si acepta o no).
 function aplicarLimiteCategoria(cat, nuevo) {
   const p = calcularPresupuesto(modoPresupuesto);
   const filaActual = p.filas.find(function(f) { return f.cat === cat; });
@@ -3802,19 +3806,6 @@ function aplicarLimiteCategoria(cat, nuevo) {
   if (!config.categoriaOverrides) config.categoriaOverrides = {};
   if (!config.categoriaOverrides[p.overrideKey]) config.categoriaOverrides[p.overrideKey] = {};
   const overrides = config.categoriaOverrides[p.overrideKey];
-
-  // Presupuesto flexible: el total puede cambiar, así que el cambio se
-  // aplica directo sin quitarle a otras categorías ni ofrecer bajar la
-  // meta — solo se avisa cuando el total sube por encima de lo planeado.
-  if ((config.tipoPresupuesto || 'estricto') === 'flexible') {
-    overrides[cat] = nuevo;
-    guardarOverrides();
-    if (delta > 0.01) {
-      const nuevoTotal = p.disponibleGasto + delta;
-      showToast('Tu presupuesto total subió a ' + fmt(nuevoTotal) + ' este periodo (antes ' + fmt(p.disponibleGasto) + ')');
-    }
-    return true;
-  }
 
   if (delta > 0.01) {
     const otras = p.filas.filter(function(f) { return f.cat !== cat; })
@@ -3828,6 +3819,11 @@ function aplicarLimiteCategoria(cat, nuevo) {
       if (quitar > 0) { ajustes[f.cat] = f.limite - quitar; faltante -= quitar; }
     }
     if (faltante > 0.01) {
+      const esFlexible = (config.tipoPresupuesto || 'estricto') === 'flexible';
+      if (!esFlexible) {
+        showToast('No hay espacio: te faltan ' + fmt(faltante) + ' de tu presupuesto para subir esto', true);
+        return false;
+      }
       const metaActual = Number(config.metaAhorro) || 0;
       const reduccionMensual = modoPresupuesto === 'quincena' ? faltante * 2 : faltante;
       if (metaActual <= 0) {
