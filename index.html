@@ -970,6 +970,18 @@ select option { background: var(--card-solid); color: var(--ink); }
 .cuenta-chip { display: flex; align-items: center; gap: 6px; padding: 9px 14px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1.5px solid transparent; font-size: 12px; font-weight: 700; color: var(--muted); cursor: pointer; }
 .cuenta-chip.sel { border-color: #7f6fd6; background: rgba(127,111,214,0.16); color: #f3f0fb; }
 .cuenta-chip-ico svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 2; display: block; }
+.recurrente-freq-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.recurrente-freq-opt { padding: 9px 14px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1.5px solid transparent; font-size: 12px; font-weight: 700; color: var(--muted); cursor: pointer; }
+.recurrente-freq-opt.sel { border-color: #7f6fd6; background: rgba(127,111,214,0.16); color: #f3f0fb; }
+.tag-automatico { font-size: 11px; font-weight: 700; color: var(--muted); background: rgba(255,255,255,0.07); border-radius: 999px; padding: 2px 8px; margin-left: 6px; }
+.recurrente-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.recurrente-item:last-child { border-bottom: none; }
+.recurrente-item-titulo { font-size: 13px; font-weight: 700; }
+.recurrente-item-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.recurrente-item-acciones { display: flex; gap: 8px; flex-shrink: 0; }
+.recurrente-item-btn { font-size: 11px; font-weight: 700; padding: 7px 12px; border-radius: 999px; background: rgba(255,255,255,0.06); color: var(--text); cursor: pointer; border: none; }
+.recurrente-item-btn.pausada { color: var(--gold); }
+.recurrente-item.inactiva { opacity: 0.5; }
 
 #overlay-mis-tarjetas .sheet, #overlay-cuenta-editar .sheet { background: linear-gradient(180deg, #241a35, #1a1428); border: 0.5px solid #3a2d52; }
 .bank-card { width: 100%; aspect-ratio: 1.8; border-radius: 18px; padding: 15px 17px; margin-bottom: 12px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; box-shadow: 0 12px 22px -14px rgba(0,0,0,0.55); }
@@ -1328,6 +1340,21 @@ select option { background: var(--card-solid); color: var(--ink); }
       <label class="field-label" for="nota">Nota</label>
       <input type="text" id="nota" placeholder="ej. transporte, quincena, etc.">
     </div>
+    <div style="margin-top:14px">
+      <label class="field-label">¿Esto se repite?</label>
+      <div class="cuenta-chip-row" id="recurrente-toggle-row">
+        <div class="cuenta-chip sel" data-val="no">No</div>
+        <div class="cuenta-chip" data-val="si">Sí</div>
+      </div>
+    </div>
+    <div id="campo-recurrente-frecuencia" style="display:none;margin-top:14px">
+      <label class="field-label">¿Cada cuándo?</label>
+      <div class="recurrente-freq-row" id="recurrente-freq-row">
+        <div class="recurrente-freq-opt sel" data-freq="semanal">Cada semana</div>
+        <div class="recurrente-freq-opt" data-freq="quincenal">Cada quincena</div>
+        <div class="recurrente-freq-opt" data-freq="mensual">Cada mes</div>
+      </div>
+    </div>
     <button type="submit" class="btn-add" id="btn-add">Agregar</button>
   </form>
 </div>
@@ -1369,6 +1396,10 @@ select option { background: var(--card-solid); color: var(--ink); }
     </div>
     <div class="ajustes-row" data-abrir="overlay-ajustes-filtros">
       <div><div class="ajustes-row-title">Qué mostrar en Análisis</div><div class="ajustes-row-sub" id="resumen-filtros">Todo activo</div></div>
+      <span class="ajustes-row-chev">›</span>
+    </div>
+    <div class="ajustes-row" id="btn-abrir-recurrentes">
+      <div><div class="ajustes-row-title">Transacciones recurrentes</div><div class="ajustes-row-sub" id="resumen-recurrentes">Ninguna activa</div></div>
       <span class="ajustes-row-chev">›</span>
     </div>
   </div>
@@ -1599,6 +1630,14 @@ select option { background: var(--card-solid); color: var(--ink); }
     <div class="cuenta-icon-row" id="cuenta-icon-row"></div>
     <button type="button" class="btn-add" id="btn-guardar-cuenta" style="margin-top:16px">Guardar</button>
     <button type="button" class="btn-danger" id="btn-eliminar-cuenta" style="width:100%;margin-top:10px;display:none">Eliminar tarjeta</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay-recurrentes">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h2>Transacciones recurrentes</h2><button type="button" class="sheet-close" id="recurrentes-close" aria-label="Cerrar">✕</button></div>
+    <div id="recurrentes-lista"></div>
   </div>
 </div>
 
@@ -3106,6 +3145,7 @@ function iniciarConDatos(datosGastos, datosConfig, offline) {
   registrarUsoDiario();
   inicializarCuentasSiCorresponde();
   asignarMisionSemanalSiCorresponde();
+  generarMovimientosRecurrentesSiCorresponde();
   acreditarAhorroAutomaticoSiCorresponde();
   evaluarDiaSiCorresponde();
   cargarCategorias();
@@ -3181,6 +3221,20 @@ document.getElementById('form-gasto').addEventListener('submit', function(e) {
   const cuentaId = cuentaSeleccionadaForm || cuentaPrincipalId();
   const mov = { id: String(Date.now()), monto, fecha, nota, tipo, categoria, cuentaId: cuentaId };
 
+  if (recurrenteActivadoForm) {
+    if (!config.recurrentes) config.recurrentes = [];
+    config.recurrentes.push({
+      id: 'rec_' + Date.now(),
+      tipo, monto, categoria, cuentaId,
+      descripcion: nota,
+      frecuencia: recurrenteFrecuenciaForm,
+      fechaInicio: fecha,
+      proximaFechaEjecucion: siguienteFechaRecurrente(fecha, recurrenteFrecuenciaForm),
+      activa: true
+    });
+    guardarRecurrentes();
+  }
+
   // Se guarda de inmediato en el dispositivo y se muestra al instante; si no
   // hay internet, el envío se encola y se reintenta solo (ver apiPost/encolar).
   gastos.unshift(mov);
@@ -3194,6 +3248,7 @@ document.getElementById('form-gasto').addEventListener('submit', function(e) {
   document.getElementById('form-gasto').reset();
   document.getElementById('fecha').valueAsDate = new Date();
   toggleAdd.set('gasto');
+  reiniciarRecurrenteForm();
   irA('inicio');
 
   apiPost({ action: 'add', mov: mov }).then(function(res) {
@@ -3683,7 +3738,7 @@ function render() {
               '<div class="icon ' + g.tipo + '">' + (iconos[g.tipo] || '•') + '</div>' +
               '<div class="text">' +
                 '<span class="monto ' + g.tipo + '">' + (signos[g.tipo] || '') + ' ' + fmt(g.monto) + '</span>' +
-                '<span class="meta">' + (etiquetas[g.tipo] || g.tipo) + (g.nota ? ' — ' + g.nota : '') + ' · ' + g.fecha + '</span>' +
+                '<span class="meta">' + (etiquetas[g.tipo] || g.tipo) + (g.nota ? ' — ' + g.nota : '') + ' · ' + g.fecha + (g.origenRecurrenteId ? '<span class="tag-automatico">🔁 automático</span>' : '') + '</span>' +
               '</div>' +
             '</div>' +
             '<span class="chev">›</span>' +
@@ -4576,6 +4631,134 @@ function renderSelectorCuentaForm() {
     });
   });
 }
+
+// ---- Toggle "¿Esto se repite?" y selector de frecuencia en Agregar ----
+let recurrenteActivadoForm = false;
+let recurrenteFrecuenciaForm = 'semanal';
+document.getElementById('recurrente-toggle-row').querySelectorAll('.cuenta-chip').forEach(function(el) {
+  el.addEventListener('click', function() {
+    recurrenteActivadoForm = el.dataset.val === 'si';
+    document.getElementById('recurrente-toggle-row').querySelectorAll('.cuenta-chip').forEach(function(x) {
+      x.classList.toggle('sel', x === el);
+    });
+    document.getElementById('campo-recurrente-frecuencia').style.display = recurrenteActivadoForm ? 'block' : 'none';
+  });
+});
+document.getElementById('recurrente-freq-row').querySelectorAll('.recurrente-freq-opt').forEach(function(el) {
+  el.addEventListener('click', function() {
+    recurrenteFrecuenciaForm = el.dataset.freq;
+    document.getElementById('recurrente-freq-row').querySelectorAll('.recurrente-freq-opt').forEach(function(x) {
+      x.classList.toggle('sel', x === el);
+    });
+  });
+});
+function reiniciarRecurrenteForm() {
+  recurrenteActivadoForm = false;
+  recurrenteFrecuenciaForm = 'semanal';
+  document.getElementById('recurrente-toggle-row').querySelectorAll('.cuenta-chip').forEach(function(x) {
+    x.classList.toggle('sel', x.dataset.val === 'no');
+  });
+  document.getElementById('recurrente-freq-row').querySelectorAll('.recurrente-freq-opt').forEach(function(x) {
+    x.classList.toggle('sel', x.dataset.freq === 'semanal');
+  });
+  document.getElementById('campo-recurrente-frecuencia').style.display = 'none';
+}
+
+function siguienteFechaRecurrente(fechaISO, frecuencia) {
+  const d = new Date(fechaISO + 'T00:00:00');
+  if (frecuencia === 'semanal') d.setDate(d.getDate() + 7);
+  else if (frecuencia === 'quincenal') d.setDate(d.getDate() + 14);
+  else d.setMonth(d.getMonth() + 1);
+  return d.toISOString().slice(0, 10);
+}
+
+function guardarRecurrentes() {
+  guardarConSincronizacion({ action: 'set-config', key: 'recurrentes', value: config.recurrentes || [] });
+}
+
+function generarMovimientosRecurrentesSiCorresponde() {
+  if (!config.recurrentes || !config.recurrentes.length) return;
+  const hoy = hoyISO();
+  let huboCambios = false;
+  config.recurrentes.forEach(function(r) {
+    if (!r.activa) return;
+    let iter = 0;
+    while (r.proximaFechaEjecucion <= hoy && iter < 60) {
+      const mov = {
+        id: String(Date.now()) + '_' + Math.random().toString(36).slice(2, 7),
+        monto: r.monto,
+        fecha: r.proximaFechaEjecucion,
+        nota: r.descripcion || '',
+        tipo: r.tipo,
+        categoria: r.categoria || '',
+        cuentaId: r.cuentaId || cuentaPrincipalId(),
+        origenRecurrenteId: r.id
+      };
+      gastos.unshift(mov);
+      apiPost({ action: 'add', mov: mov }).catch(function() { encolar({ action: 'add', mov: mov }); });
+      if (mov.tipo === 'gasto') otorgarXP(8, 'Registraste un gasto');
+      if (mov.tipo === 'ingreso') otorgarXP(15, 'Registraste un ingreso');
+      r.proximaFechaEjecucion = siguienteFechaRecurrente(r.proximaFechaEjecucion, r.frecuencia);
+      huboCambios = true;
+      iter++;
+    }
+  });
+  if (huboCambios) {
+    guardarCacheLocal();
+    guardarRecurrentes();
+  }
+}
+
+function nombreCategoriaRecurrente(cat) {
+  const el = document.querySelector('#categoria option[value="' + cat + '"]');
+  return el ? el.textContent : cat;
+}
+const FRECUENCIA_TXT = { semanal: 'Cada semana', quincenal: 'Cada quincena', mensual: 'Cada mes' };
+function renderRecurrentes() {
+  const lista = document.getElementById('recurrentes-lista');
+  const recs = config.recurrentes || [];
+  document.getElementById('resumen-recurrentes').textContent =
+    recs.filter(function(r) { return r.activa; }).length + ' activa' + (recs.filter(function(r) { return r.activa; }).length === 1 ? '' : 's');
+  if (!recs.length) {
+    lista.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:10px 0">No tienes transacciones recurrentes. Actívalas desde "Agregar" con "¿Esto se repite?".</div>';
+    return;
+  }
+  lista.innerHTML = recs.map(function(r) {
+    const cuenta = cuentaPorId(r.cuentaId);
+    const desc = r.descripcion || (r.tipo === 'gasto' ? nombreCategoriaRecurrente(r.categoria) : 'Ingreso');
+    return '<div class="recurrente-item' + (r.activa ? '' : ' inactiva') + '">' +
+      '<div><div class="recurrente-item-titulo">' + desc + ' · ' + fmt(r.monto) + '</div>' +
+      '<div class="recurrente-item-sub">' + FRECUENCIA_TXT[r.frecuencia] + (cuenta ? ' · ' + cuenta.nombre : '') + ' · próxima: ' + r.proximaFechaEjecucion + '</div></div>' +
+      '<div class="recurrente-item-acciones">' +
+        '<button type="button" class="recurrente-item-btn' + (r.activa ? '' : ' pausada') + '" data-accion="pausar" data-id="' + r.id + '">' + (r.activa ? 'Pausar' : 'Reanudar') + '</button>' +
+        '<button type="button" class="recurrente-item-btn" data-accion="eliminar" data-id="' + r.id + '">Eliminar</button>' +
+      '</div></div>';
+  }).join('');
+  lista.querySelectorAll('.recurrente-item-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const id = btn.dataset.id;
+      const r = (config.recurrentes || []).find(function(x) { return x.id === id; });
+      if (!r) return;
+      if (btn.dataset.accion === 'pausar') {
+        r.activa = !r.activa;
+      } else {
+        config.recurrentes = config.recurrentes.filter(function(x) { return x.id !== id; });
+      }
+      guardarRecurrentes();
+      renderRecurrentes();
+    });
+  });
+}
+document.getElementById('btn-abrir-recurrentes').addEventListener('click', function() {
+  renderRecurrentes();
+  document.getElementById('overlay-recurrentes').classList.add('show');
+});
+document.getElementById('recurrentes-close').addEventListener('click', function() {
+  document.getElementById('overlay-recurrentes').classList.remove('show');
+});
+document.getElementById('overlay-recurrentes').addEventListener('click', function(e) {
+  if (e.target.id === 'overlay-recurrentes') this.classList.remove('show');
+});
 
 // ==================================================================
 // --- Misiones semanales rotativas (estilo Coin Master): máximo 1    --

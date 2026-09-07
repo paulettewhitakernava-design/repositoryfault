@@ -49,11 +49,18 @@ function getSheet() {
   let sheet = ss.getSheetByName('Movimientos');
   if (!sheet) {
     sheet = ss.insertSheet('Movimientos');
-    sheet.appendRow(['id', 'monto', 'fecha', 'nota', 'tipo', 'categoria', 'cuentaId']);
-  } else if (sheet.getRange(1, 7).getValue() === '') {
-    // Hoja creada antes de que existiera "Mis tarjetas": se le agrega la
-    // columna sin tocar las filas que ya tenía.
-    sheet.getRange(1, 7).setValue('cuentaId');
+    sheet.appendRow(['id', 'monto', 'fecha', 'nota', 'tipo', 'categoria', 'cuentaId', 'origenRecurrenteId']);
+  } else {
+    if (sheet.getRange(1, 7).getValue() === '') {
+      // Hoja creada antes de que existiera "Mis tarjetas": se le agrega la
+      // columna sin tocar las filas que ya tenía.
+      sheet.getRange(1, 7).setValue('cuentaId');
+    }
+    if (sheet.getRange(1, 8).getValue() === '') {
+      // Hoja creada antes de "Transacciones recurrentes": misma lógica, se
+      // agrega la columna nueva sin afectar las filas existentes.
+      sheet.getRange(1, 8).setValue('origenRecurrenteId');
+    }
   }
   return sheet;
 }
@@ -81,14 +88,15 @@ function obtenerMovimientos() {
       nota: String(r[3] || ''),
       tipo: String(r[4] || '').trim().toLowerCase(),
       categoria: String(r[5] || '').trim().toLowerCase(),
-      cuentaId: String(r[6] || '')
+      cuentaId: String(r[6] || ''),
+      origenRecurrenteId: String(r[7] || '')
     }))
     .reverse();
 }
 
 function guardarMovimiento(mov) {
   const sheet = getSheet();
-  sheet.appendRow([String(mov.id), Number(mov.monto), mov.fecha, mov.nota || '', mov.tipo, mov.categoria || '', mov.cuentaId || '']);
+  sheet.appendRow([String(mov.id), Number(mov.monto), mov.fecha, mov.nota || '', mov.tipo, mov.categoria || '', mov.cuentaId || '', mov.origenRecurrenteId || '']);
   return true;
 }
 
@@ -97,8 +105,8 @@ function actualizarMovimiento(mov) {
   const data = sheet.getDataRange().getValues();
   for (let i = 1; i < data.length; i++) {
     if (String(data[i][0]) === String(mov.id)) {
-      sheet.getRange(i + 1, 1, 1, 7).setValues([[
-        String(mov.id), Number(mov.monto), mov.fecha, mov.nota || '', mov.tipo, mov.categoria || '', mov.cuentaId || (String(data[i][6] || ''))
+      sheet.getRange(i + 1, 1, 1, 8).setValues([[
+        String(mov.id), Number(mov.monto), mov.fecha, mov.nota || '', mov.tipo, mov.categoria || '', mov.cuentaId || (String(data[i][6] || '')), mov.origenRecurrenteId || (String(data[i][7] || ''))
       ]]);
       return true;
     }
