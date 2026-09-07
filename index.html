@@ -827,6 +827,14 @@ select option { background: var(--card-solid); color: var(--ink); }
   background: var(--gold); color: #2a1608; font-size: 8.5px; display: flex; align-items: center; justify-content: center;
 }
 .gato-especial-check.gato-especial-candado { background: rgba(0,0,0,0.5); font-size: 7.5px; }
+.marco-nivel { background-image: url('recuadro-niveles.png'); background-size: contain; background-position: center; background-repeat: no-repeat; }
+.marco-logro { background-image: url('recuadro-logrosfinancieros.png'); background-size: contain; background-position: center; background-repeat: no-repeat; }
+.gato-especial-card img.marco-nivel, .gato-especial-card img.marco-logro { box-sizing: border-box; padding: 11px; }
+.gato-info-img-wrap img.marco-nivel { box-sizing: border-box; padding: 18px; }
+.gato-det-img-wrap img.marco-logro { box-sizing: border-box; padding: 18px; }
+.gato-reveal-stage img.marco-nivel { box-sizing: border-box; padding: 16px; }
+.gato-life-stage .gato-img.marco-nivel, .gato-life-stage .gato-img.marco-logro { box-sizing: border-box; padding: 26px; }
+.gato-nivel-row img.marco-nivel { box-sizing: border-box; padding: 4px; }
 
 /* Detalle de logro */
 #overlay-logro-detalle { z-index: 41; }
@@ -1004,24 +1012,21 @@ select option { background: var(--card-solid); color: var(--ink); }
 .cuenta-icon-opt.sel { border-color: #7f6fd6; background: rgba(127,111,214,0.15); color: #f3f0fb; }
 
 /* ---- Íconos flotantes (estilo Coin Master), dentro del sheet de Kashly ---- */
-.float-badge { position: absolute; width: 52px; border-radius: 16px; padding: 8px 6px; text-align: center; border: 1.5px solid; background: none; cursor: pointer; transition: transform 0.2s ease; z-index: 2; }
+.float-badge { position: absolute; width: 56px; text-align: center; border: none; background: none; padding: 0; cursor: pointer; transition: transform 0.2s ease; z-index: 2; }
 .float-badge.pos-tl { top: 14px; left: 14px; }
-.float-badge.pos-bl { top: 78px; left: 14px; }
+.float-badge.pos-bl { top: 88px; left: 14px; }
 .float-badge.pos-tr { top: 14px; right: 14px; }
-.float-badge.pos-br { top: 78px; right: 14px; }
+.float-badge.pos-br { top: 88px; right: 14px; }
 .float-badge:active { transform: scale(0.9); }
-.float-badge.trophy { background: linear-gradient(180deg, #3a2d1a, #241a35); border-color: #f2b544; }
-.float-badge.mission { background: linear-gradient(180deg, #2a1a45, #1a1428); border-color: #7f6fd6; display: none; }
+.float-badge.mission { display: none; }
 .float-badge.mission.show { display: block; }
-.float-badge.chest { background: linear-gradient(135deg, #f2b544, #e8823c); border-color: #f2b544; }
 .float-badge.chest.sin-pendientes { filter: grayscale(1); opacity: 0.5; }
-.float-badge.streak { background: linear-gradient(180deg, #3a251f, #241a35); border-color: #f28b7a; }
-.float-ico { font-size: 20px; display: block; margin-bottom: 4px; }
-.float-cnt { display: block; font-size: 11px; font-weight: 500; font-family: 'Manrope', sans-serif; }
-.float-badge.trophy .float-cnt, .float-badge.trophy .float-ico { color: #f2b544; }
-.float-badge.mission .float-cnt, .float-badge.mission .float-ico { color: #b8a8f0; }
-.float-badge.chest .float-ico { color: #2a1a08; }
-.float-badge.streak .float-cnt, .float-badge.streak .float-ico { color: #f28b7a; }
+.float-ico-img { width: 56px; height: 56px; object-fit: contain; display: block; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); }
+.float-cnt {
+  display: block; margin: -8px auto 0; width: fit-content; padding: 1px 8px; border-radius: 999px; position: relative;
+  font-size: 10px; font-weight: 700; font-family: 'Manrope', sans-serif; color: #fff2d8;
+  background: rgba(20,15,10,0.85); border: 1px solid rgba(255,209,102,0.4);
+}
 .float-dot { position: absolute; top: -3px; right: -3px; width: 9px; height: 9px; border-radius: 50%; background: #ff4d4d; border: 2px solid #14101f; display: none; }
 .float-dot.show { display: block; }
 .float-badge.pulsando { animation: floatPulse 1.2s ease-in-out infinite; }
@@ -1049,6 +1054,9 @@ select option { background: var(--card-solid); color: var(--ink); }
 .mm-spark.s2 { top: 26px; right: 34px; animation-delay: 0.5s; }
 .mm-spark.s3 { bottom: 90px; left: 18px; animation-delay: 1s; }
 .mm-spark.s4 { bottom: 96px; right: 20px; animation-delay: 1.5s; }
+.mm-gato-wrap { text-align: center; margin: -6px 0 4px; position: relative; z-index: 1; animation: mmGatoPop 0.55s cubic-bezier(.34,1.56,.64,1) 0.15s both; }
+.mm-gato-wrap img { width: 108px; filter: drop-shadow(0 10px 14px rgba(0,0,0,0.5)); }
+@keyframes mmGatoPop { 0% { transform: translateY(18px) scale(0.6); opacity: 0; } 70% { transform: translateY(-4px) scale(1.05); opacity: 1; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
 .mm-ribbon { text-align: center; margin: 4px 0 18px; position: relative; z-index: 1; }
 .mm-ribbon span { display: inline-block; background: linear-gradient(135deg, #7f6fd6, #4a3d8f); color: #fff; font-size: 11.5px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; padding: 8px 20px; border-radius: 999px; box-shadow: 0 6px 18px -6px rgba(127,111,214,0.75); }
 .mm-timer { display: flex; align-items: center; justify-content: center; gap: 5px; background: #1a1428; border: 1px solid #f2b544; border-radius: 999px; padding: 5px 15px; font-size: 12.5px; font-weight: 800; color: #f2b544; margin: 0 auto 18px; width: fit-content; position: relative; z-index: 1; animation: mmTimerPulse 1s ease-in-out infinite; }
@@ -1646,6 +1654,7 @@ select option { background: var(--card-solid); color: var(--ink); }
     <div class="mm-glow"></div>
     <div class="mm-corner tl"></div><div class="mm-corner tr"></div><div class="mm-corner bl"></div><div class="mm-corner br"></div>
     <span class="mm-spark s1">✦</span><span class="mm-spark s2">✧</span><span class="mm-spark s3">✦</span><span class="mm-spark s4">✧</span>
+    <div class="mm-gato-wrap"><img src="gato-mision-semanal.png" alt=""></div>
     <div class="mm-ribbon"><span>Misión de la semana</span></div>
     <div class="mm-timer" id="mm-timer"><span class="mm-timer-ico">⏱</span><span id="mm-timer-txt">3d 14h</span></div>
     <div class="mm-icon-wrap">
@@ -1724,16 +1733,16 @@ select option { background: var(--card-solid); color: var(--ink); }
 
   <div class="gato-vitrina" id="gato-vitrina">
     <button type="button" class="float-badge trophy pos-tl" id="btn-float-trophy" aria-label="Logros financieros">
-      <span class="float-ico" id="gato-vit-badge-ico">🏆</span><span class="float-cnt" id="gato-vit-badge-count">0/8</span>
+      <img class="float-ico-img" id="gato-vit-badge-ico" src="icono-trofeos.png" alt=""><span class="float-cnt" id="gato-vit-badge-count">0/8</span>
     </button>
     <button type="button" class="float-badge chest pos-bl" id="btn-float-chest" aria-label="Cofre de recompensas">
-      <span class="float-ico">🎁</span><span class="float-dot" id="float-chest-dot"></span>
+      <img class="float-ico-img" src="icono-cofres.png" alt=""><span class="float-dot" id="float-chest-dot"></span>
     </button>
     <button type="button" class="float-badge mission pos-tr" id="btn-float-mission" aria-label="Misión de la semana">
-      <span class="float-ico">🎯</span><span class="float-cnt" id="float-mission-count">0/4</span>
+      <img class="float-ico-img" src="icono-mision-semanal.png" alt=""><span class="float-cnt" id="float-mission-count">0/4</span>
     </button>
     <button type="button" class="float-badge streak pos-br" id="btn-float-streak" aria-label="Racha">
-      <span class="float-ico">🔥</span><span class="float-cnt" id="float-streak-count">0</span>
+      <img class="float-ico-img" src="icono-racha.png" alt=""><span class="float-cnt" id="float-streak-count">0</span>
     </button>
     <div class="gato-life-stage" id="gato-life-stage" role="button" tabindex="0" aria-label="Ver tu armario">
       <span class="gato-mote"></span><span class="gato-mote"></span><span class="gato-mote"></span>
@@ -1898,7 +1907,7 @@ select option { background: var(--card-solid); color: var(--ink); }
       <h2 id="info-titulo">Info</h2>
       <button type="button" class="sheet-close" id="info-close" aria-label="Cerrar">✕</button>
     </div>
-    <div class="gato-info-img-wrap" id="info-img-wrap" style="display:none"><span class="gato-aura"></span><img id="info-img" src="" alt=""></div>
+    <div class="gato-info-img-wrap" id="info-img-wrap" style="display:none"><span class="gato-aura"></span><img id="info-img" class="marco-nivel" src="" alt=""></div>
     <div class="sheet-text" id="info-texto"></div>
   </div>
 </div>
@@ -1954,7 +1963,7 @@ select option { background: var(--card-solid); color: var(--ink); }
 
 <div class="overlay" id="overlay-logro-detalle">
   <div class="gato-det-sheet">
-    <div class="gato-det-img-wrap"><img id="logro-det-img" src="" alt=""></div>
+    <div class="gato-det-img-wrap"><img id="logro-det-img" class="marco-logro" src="" alt=""></div>
     <div class="gato-det-nombre" id="logro-det-nombre"></div>
     <div class="gato-det-estado" id="logro-det-estado"></div>
     <div class="gato-det-txt" id="logro-det-txt"></div>
@@ -1982,7 +1991,7 @@ select option { background: var(--card-solid); color: var(--ink); }
     <span class="gato-spark" style="bottom:120px;right:20px;animation-delay:1.3s">✧</span>
     <span class="gato-spark" style="top:76px;left:50%;animation-delay:0.6s">✦</span>
     <div class="gato-reveal-eyebrow">Nuevo nivel desbloqueado</div>
-    <div class="gato-reveal-stage"><span class="gato-reveal-ring-burst"></span><img id="reveal-nivel-img" src="" alt=""><span class="gato-reveal-lvl-badge" id="reveal-nivel-badge"></span></div>
+    <div class="gato-reveal-stage"><span class="gato-reveal-ring-burst"></span><img id="reveal-nivel-img" class="marco-nivel" src="" alt=""><span class="gato-reveal-lvl-badge" id="reveal-nivel-badge"></span></div>
     <div class="gato-reveal-nombre" id="reveal-nivel-nombre"></div>
     <div class="gato-reveal-sub" id="reveal-nivel-sub"></div>
     <div class="gato-reveal-porque"><b>Cómo llegaste aquí</b><span id="reveal-nivel-porque"></span></div>
@@ -5498,7 +5507,7 @@ function renderArmario() {
     const equipado = (nv.n === nivelActual && skin === 'nivel') || skin === 'nivel-' + nv.n;
     return '<div class="gato-especial-card unlocked armario-item" data-skin="nivel-' + nv.n + '">' +
       (equipado ? '<span class="gato-especial-check">✓</span>' : '') +
-      '<img src="gato-nivel-' + nv.n + '.png" alt="">' +
+      '<img class="marco-nivel" src="gato-nivel-' + nv.n + '.png" alt="">' +
       '<div class="nombre">Nivel ' + nv.n + '</div>' +
       '<div class="req">' + nv.nombre + '</div>' +
     '</div>';
@@ -5508,7 +5517,7 @@ function renderArmario() {
     const equipado = skin === e.id;
     return '<div class="gato-especial-card unlocked armario-item' + (e.negativo ? ' negativo' : '') + '" data-skin="' + e.id + '">' +
       (equipado ? '<span class="gato-especial-check">✓</span>' : '') +
-      '<img src="' + e.archivo + '" alt="">' +
+      '<img class="marco-logro" src="' + e.archivo + '" alt="">' +
       '<div class="nombre">' + e.nombre + '</div>' +
       '<div class="req">Logro</div>' +
     '</div>';
@@ -5582,7 +5591,7 @@ function renderPanelNivelesGato() {
   const nivelActual = nivelActualGato();
   document.getElementById('gato-panel-niveles').innerHTML = NIVELES_GATO.map(function(nv) {
     return '<div class="gato-nivel-row' + (nv.n === nivelActual ? ' actual' : '') + '" data-nivel="' + nv.n + '">' +
-      '<img src="gato-nivel-' + nv.n + '.png" alt="">' +
+      '<img class="marco-nivel" src="gato-nivel-' + nv.n + '.png" alt="">' +
       '<div class="n">Nivel ' + nv.n + ' · ' + nv.nombre + '<small>' + XP_POR_NIVEL[nv.n] + ' XP</small></div>' +
       '<span class="chev">›</span>' +
     '</div>';
@@ -5605,7 +5614,7 @@ function renderPanelEspecialesGato() {
     const prog = !tiene && e.progreso ? e.progreso() : null;
     return '<div class="gato-especial-card' + (tiene ? ' unlocked' : ' bloqueado') + (e.negativo ? ' negativo' : '') + '" data-skin="' + e.id + '">' +
       (estaEquipado ? '<span class="gato-especial-check">✓</span>' : (tiene ? '' : '<span class="gato-especial-check gato-especial-candado">' + (e.negativo ? '🩹' : '🔒') + '</span>')) +
-      '<img src="' + e.archivo + '" alt="">' +
+      '<img class="marco-logro" src="' + e.archivo + '" alt="">' +
       '<div class="nombre">' + e.nombre + '</div>' +
       '<div class="req">' + (tiene ? (estaEquipado ? 'En uso' : 'Toca para ver') : 'Bloqueado') + '</div>' +
       (prog ? '<div class="prog">' + prog.actual + '/' + prog.meta + ' ' + prog.unidad + '</div>' : '') +
@@ -5945,7 +5954,10 @@ function renderPantallaGato() {
     ? ESPECIALES_GATO.find(function(e) { return e.id === skin && (config.gatoLogrosDesbloqueados || []).indexOf(skin) !== -1; })
     : null;
 
-  document.getElementById('gato-avatar-img').src = imagenAvatarGato();
+  const avatarImgEl = document.getElementById('gato-avatar-img');
+  avatarImgEl.src = imagenAvatarGato();
+  avatarImgEl.classList.toggle('marco-logro', !!especialEquipado);
+  avatarImgEl.classList.toggle('marco-nivel', !especialEquipado);
   document.getElementById('gato-avatar-nivel').textContent = especialEquipado
     ? especialEquipado.nombre + ' · Logro equipado'
     : 'Nivel ' + nivel + ' · ' + nivelInfo.nombre;
