@@ -1235,9 +1235,9 @@ select option { background: var(--card-solid); color: var(--ink); }
   </div>
 
   <div class="card">
-    <div class="card-lbl">Kashly (gamificación)</div>
-    <div style="font-size:9.5px;color:var(--muted);margin:6px 0 14px;line-height:1.5">Reinicia tu XP, nivel, logros y notificaciones para empezar de nuevo. Tus gastos, ingresos y presupuesto no se ven afectados.</div>
-    <button type="button" class="btn-danger" id="btn-reiniciar-gato" style="width:100%">Reiniciar progreso de Kashly</button>
+    <div class="card-lbl">Configuración inicial</div>
+    <div style="font-size:9.5px;color:var(--muted);margin:6px 0 14px;line-height:1.5">Borra tu ingreso, meta de ahorro, saldo inicial, saldo ahorrado y tipo de presupuesto, y vuelve a abrir la Configuración inicial para capturarlos de nuevo. Tus gastos, ingresos y presupuesto registrados en "Agregar" no se ven afectados.</div>
+    <button type="button" class="btn-danger" id="btn-reiniciar-config-inicial" style="width:100%">Reiniciar mis valores</button>
   </div>
 
   <div class="card">
@@ -4846,39 +4846,36 @@ function renderNivelTab() {
   const hayNoLeidas = (config.gatoNotificaciones || []).some(function(n) { return n.leida !== true; });
   if (dot) dot.style.display = (config.gatoNivelPendienteRevelar || hayNoLeidas) ? 'block' : 'none';
 }
-// --- Reinicia todo el progreso de gamificación (XP, nivel, logros,
-// notificaciones) sin tocar gastos, ingresos ni presupuesto. ---
-function reiniciarProgresoGato() {
-  if (!confirm('¿Reiniciar tu progreso de Kashly?\n\nPerderás tu XP, nivel, logros y notificaciones.\n\nTus gastos, ingresos y presupuesto NO se borran.')) return;
+// --- Reinicia los valores de Configuración inicial (ingreso, meta de
+// ahorro, saldo inicial, saldo ahorrado, tipo de presupuesto) y el ahorro
+// automático acumulado, sin tocar gastos/ingresos/presupuesto registrados
+// en "Agregar". Útil si algo quedó mal capturado y se quiere volver a
+// llenar la Configuración inicial desde cero. ---
+function reiniciarConfigFinanciera() {
+  if (!confirm('¿Reiniciar tus valores de Configuración inicial?\n\nSe borran tu ingreso, meta de ahorro, saldo inicial, saldo ahorrado y tipo de presupuesto.\n\nTus gastos, ingresos y presupuesto registrados en "Agregar" NO se borran.')) return;
   const valores = {
-    gatoXP: 0,
-    gatoNivelPendienteRevelar: null,
-    gatoHistorialNiveles: [],
-    gatoXPLog: [],
-    gatoLogrosDesbloqueados: [],
-    gatoSkinEquipado: 'nivel',
-    gatoBoost: null,
-    gatoBoostsDisponibles: 0,
-    rachaDias: {},
-    gatoMesBonusOtorgado: {},
-    gatoBonusPeriodo: {},
-    gatoUltimoDiaEvaluado: null,
-    diasUso: [],
-    gatoHistorialBackfillV1: true,
-    gatoNotificaciones: [],
-    gatoNotifNoLeidas: 0,
-    gatoNotifPresupuestoMes: {},
-    gatoNotif75Nivel: {}
+    ingresoMensualEstimado: null,
+    frecuenciaPago: null,
+    metaAhorro: null,
+    saldoInicial: null,
+    saldoAhorrado: null,
+    tipoPresupuesto: null,
+    ahorroAutomaticoAcumulado: 0,
+    ahorroAutoPeriodos: {},
+    categoriaOverrides: {},
+    configInicialCerrada: false
   };
   Object.keys(valores).forEach(function(k) {
     config[k] = valores[k];
     guardarConSincronizacion({ action: 'set-config', key: k, value: valores[k] });
   });
-  renderGato();
-  renderNivelTab();
-  showToast('Tu progreso de Kashly se reinició');
+  cargarFormAjustes();
+  render();
+  renderPresupuesto();
+  showToast('Tus valores se reiniciaron');
+  abrirConfigInicial();
 }
-document.getElementById('btn-reiniciar-gato').addEventListener('click', reiniciarProgresoGato);
+document.getElementById('btn-reiniciar-config-inicial').addEventListener('click', reiniciarConfigFinanciera);
 
 const NOTIF_ICONOS = { presupuesto: '⚠', xpsemanal: '✦', cercanivel: '→', logro: '🏆', nivel: '★' };
 // Notificaciones guardadas antes de que existiera el campo "tipo" no lo
