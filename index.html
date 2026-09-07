@@ -2955,6 +2955,7 @@ document.getElementById('form-gasto').addEventListener('submit', function(e) {
   guardarCacheLocal();
   if (tipo === 'gasto' || tipo === 'ingreso') otorgarXP(5, tipo === 'gasto' ? 'Registraste un gasto' : 'Registraste un ingreso');
   if (tipo === 'gasto') { otorgarBonusPeriodoSiCorresponde(); evaluarNotifPresupuesto(); }
+  if (tipo === 'ingreso') acreditarAhorroAutomaticoSiCorresponde();
   render();
   document.getElementById('form-gasto').reset();
   document.getElementById('fecha').valueAsDate = new Date();
@@ -4120,6 +4121,15 @@ function acreditarAhorroAutomaticoSiCorresponde() {
   if (!periodo) return;
   const acreditados = Object.assign({}, config.ahorroAutoPeriodos || {});
   if (acreditados[periodo.key]) return;
+  // El ahorro automático de un periodo solo se acredita una vez que ya
+  // registraste al menos un ingreso de ese periodo — si no, "Disponible"
+  // se vería negativo por dinero apartado de un sueldo que aún no llega.
+  const yaTieneIngresoDelPeriodo = gastos.some(function(g) {
+    if (g.tipo !== 'ingreso') return false;
+    const p = periodoDe(g.fecha, 'quincena');
+    return p && p.key === periodo.key;
+  });
+  if (!yaTieneIngresoDelPeriodo) return;
   const metaAhorroPeriodo = meta / periodosPorMes();
   acreditados[periodo.key] = true;
   config.ahorroAutoPeriodos = acreditados;
