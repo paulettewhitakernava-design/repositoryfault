@@ -2953,7 +2953,8 @@ document.getElementById('form-gasto').addEventListener('submit', function(e) {
   // hay internet, el envío se encola y se reintenta solo (ver apiPost/encolar).
   gastos.unshift(mov);
   guardarCacheLocal();
-  if (tipo === 'gasto' || tipo === 'ingreso') otorgarXP(5, tipo === 'gasto' ? 'Registraste un gasto' : 'Registraste un ingreso');
+  if (tipo === 'gasto') otorgarXP(8, 'Registraste un gasto');
+  if (tipo === 'ingreso') otorgarXP(15, 'Registraste un ingreso');
   if (tipo === 'gasto') { otorgarBonusPeriodoSiCorresponde(); evaluarNotifPresupuesto(); }
   if (tipo === 'ingreso') acreditarAhorroAutomaticoSiCorresponde();
   render();
@@ -3900,6 +3901,15 @@ function gastoDePeriodo(periodoKey, modo) {
   });
   return total;
 }
+function gastoPorCategoriaDePeriodo(periodoKey, modo) {
+  const out = {};
+  gastos.forEach(function(g) {
+    if (g.tipo !== 'gasto' || !g.categoria) return;
+    const p = periodoDe(g.fecha, modo);
+    if (p && p.key === periodoKey) out[g.categoria] = (out[g.categoria] || 0) + (Number(g.monto) || 0);
+  });
+  return out;
+}
 function ahorroDePeriodo(periodoKey, modo) {
   let total = 0;
   gastos.forEach(function(g) {
@@ -3944,7 +3954,7 @@ function tieneAhorroAlgunaVez() {
 }
 
 // --- Niveles principales: ahora se otorgan por XP total acumulada de por vida ---
-const XP_POR_NIVEL = { 1: 0, 2: 800, 3: 1800, 4: 3000, 5: 4500, 6: 6200, 7: 8000, 8: 10000, 9: 12000, 10: 15000 };
+const XP_POR_NIVEL = { 1: 0, 2: 250, 3: 650, 4: 1300, 5: 2200, 6: 3350, 7: 3600, 8: 3850, 9: 4100, 10: 4350 };
 const NIVELES_GATO = [
   { n: 1, nombre: 'Inicial', descripcion: 'Todos empiezan aquí. Estás dando tus primeros pasos para tomar el control de tu dinero.' },
   { n: 2, nombre: 'Aprendiz', descripcion: 'Ya tienes lo básico claro: registras, revisas y empiezas a tomar decisiones más conscientes.' },
@@ -4144,7 +4154,25 @@ function evaluarDiaSiCorresponde() {
   ayerDate.setDate(ayerDate.getDate() - 1);
   const ayerISO = ayerDate.getFullYear() + '-' + String(ayerDate.getMonth() + 1).padStart(2, '0') + '-' + String(ayerDate.getDate()).padStart(2, '0');
   const p = periodoDe(ayerISO, 'quincena');
-  if (p && config.gatoUltimoDiaEvaluado) {
+  // Si el usuario dejó de usar la app por 1 mes o más, el XP diario por
+  // mantenerte en presupuesto deja de sumarse (no tendría sentido premiar
+  // días que ni siquiera se registraron) y se avisa una sola vez.
+  let inactivoUnMes = false;
+  if (config.gatoUltimoDiaEvaluado) {
+    const diasSinUsar = Math.round((new Date(hoy + 'T00:00:00') - new Date(config.gatoUltimoDiaEvaluado + 'T00:00:00')) / 86400000);
+    inactivoUnMes = diasSinUsar >= 30;
+  }
+  if (inactivoUnMes) {
+    if (!config.gatoAvisoInactividadDado) {
+      agregarNotificacion('Se pausó tu XP diario', 'Como no usaste Kashly por un mes, tu XP diario por mantenerte dentro del presupuesto dejó de sumarse. Registra tus gastos para reactivarlo.', { tipo: 'xpsemanal' });
+      config.gatoAvisoInactividadDado = true;
+      guardarConSincronizacion({ action: 'set-config', key: 'gatoAvisoInactividadDado', value: true });
+    }
+  } else if (p && config.gatoUltimoDiaEvaluado) {
+    if (config.gatoAvisoInactividadDado) {
+      config.gatoAvisoInactividadDado = false;
+      guardarConSincronizacion({ action: 'set-config', key: 'gatoAvisoInactividadDado', value: false });
+    }
     const techo = techoGastoPeriodo('quincena');
     const gastoAcum = gastos.filter(function(g) {
       if (g.tipo !== 'gasto') return false;
@@ -4158,21 +4186,31 @@ function evaluarDiaSiCorresponde() {
     if (keys.length > 60) keys.slice(0, keys.length - 60).forEach(function(k) { delete dias[k]; });
     config.rachaDias = dias;
     guardarConSincronizacion({ action: 'set-config', key: 'rachaDias', value: dias });
-    if (bien) {
-      otorgarXP(5, 'Te mantuviste dentro de presupuesto');
-      const racha = rachaDiasSeguidos();
-      if (racha > 0 && racha % 30 === 0) {
-        otorgarXP(30, racha + ' días seguidos sin exceder tu presupuesto');
-      } else if (racha > 0 && racha % 7 === 0) {
-        otorgarXP(15, 'Racha de ' + racha + ' días dentro de presupuesto');
-        agregarNotificacion('XP semanal acreditada', 'Tu XP semanal fue acreditada. Revisa tu progreso en la pestaña de niveles.', { tipo: 'xpsemanal' });
-      }
-    }
+    if (bien) otorgarXP(5, 'Te mantuviste dentro de presupuesto');
   }
   evaluarNotifPresupuesto();
+  evaluarBonoFinPeriodoSiCorresponde(ayerISO);
   evaluarBonusMensualSiCorresponde(ayerISO);
   config.gatoUltimoDiaEvaluado = hoy;
   guardarConSincronizacion({ action: 'set-config', key: 'gatoUltimoDiaEvaluado', value: hoy });
+}
+// --- Bono de fin de periodo: si el periodo de pago que acaba de terminar
+// no excedió el presupuesto, +25 XP una sola vez por periodo. Distinto del
+// bono diario (+5): este se otorga completo hasta que cierra el periodo. ---
+function evaluarBonoFinPeriodoSiCorresponde(ayerISO) {
+  const pHoy = periodoDe(hoyISO(), 'quincena');
+  const pAyer = periodoDe(ayerISO, 'quincena');
+  if (!pHoy || !pAyer || pHoy.key === pAyer.key) return;
+  const otorgados = Object.assign({}, config.gatoBonoFinPeriodo || {});
+  if (otorgados[pAyer.key]) return;
+  const techo = techoGastoPeriodo('quincena');
+  const gasto = gastoDePeriodo(pAyer.key, 'quincena');
+  if (techo <= 0 || gasto <= techo) {
+    otorgarXP(25, 'No excediste tu presupuesto de ' + pAyer.label);
+  }
+  otorgados[pAyer.key] = true;
+  config.gatoBonoFinPeriodo = otorgados;
+  guardarConSincronizacion({ action: 'set-config', key: 'gatoBonoFinPeriodo', value: otorgados });
 }
 // --- Bonos mensuales: cuando el mes (o ciclo mensual, según la frecuencia
 // de pago) que acaba de terminar cumple cada condición, se otorgan una
@@ -4183,12 +4221,28 @@ function evaluarBonusMensualSiCorresponde(ayerISO) {
   if (!mesHoy || !mesAyer || mesHoy.key === mesAyer.key) return;
   const otorgados = Object.assign({}, config.gatoMesBonusOtorgado || {});
   if (otorgados[mesAyer.key]) return;
-  const ingreso = ingresoDePeriodo(mesAyer.key, 'mensual');
   const gasto = gastoDePeriodo(mesAyer.key, 'mensual');
   const ahorro = ahorroDePeriodo(mesAyer.key, 'mensual');
   const meta = Number(config.metaAhorro) || 0;
-  if (ingreso > gasto) otorgarXP(10, 'Terminaste el mes con saldo positivo');
-  if (meta > 0 && ahorro >= meta) otorgarXP(50, 'Alcanzaste tu meta de ahorro mensual');
+  const techoMes = techoGastoPeriodo('mensual');
+  if (techoMes > 0 && gasto <= techoMes) otorgarXP(25, 'Cumpliste tu presupuesto todo el mes');
+  if (meta > 0 && ahorro >= meta) otorgarXP(25, 'Llegaste a tu meta de ahorro mensual');
+  if (meta > 0 && ahorro > meta) otorgarXP(50, 'Ahorraste más de tu meta mensual');
+
+  const diaAntesDelMes = new Date(mesAyer.start - 24 * 60 * 60 * 1000);
+  const mesAnterior = periodoDe(
+    diaAntesDelMes.getFullYear() + '-' + String(diaAntesDelMes.getMonth() + 1).padStart(2, '0') + '-' + String(diaAntesDelMes.getDate()).padStart(2, '0'),
+    'mensual'
+  );
+  if (mesAnterior) {
+    const catActual = gastoPorCategoriaDePeriodo(mesAyer.key, 'mensual');
+    const catAnterior = gastoPorCategoriaDePeriodo(mesAnterior.key, 'mensual');
+    const bajoAlguna = Object.keys(catAnterior).some(function(cat) {
+      return catAnterior[cat] > 0 && (catActual[cat] || 0) < catAnterior[cat];
+    });
+    if (bajoAlguna) otorgarXP(40, 'Redujiste gastos en una categoría');
+  }
+
   otorgados[mesAyer.key] = true;
   config.gatoMesBonusOtorgado = otorgados;
   guardarConSincronizacion({ action: 'set-config', key: 'gatoMesBonusOtorgado', value: otorgados });
@@ -4396,27 +4450,27 @@ function rachaReduccionGasto() {
 }
 
 const ESPECIALES_GATO = [
-  { id: 'sincargas', nombre: 'Sin cargas', archivo: 'gato-especial-sincargas.png', xp: 150,
+  { id: 'sincargas', nombre: 'Sin cargas', archivo: 'gato-especial-sincargas.png', xp: 50,
     requisito: 'Registra todos tus gastos durante 30 días seguidos sin fallar.',
     explicacion: 'Durante un mes completo, registraste cada gasto sin olvidar ninguno. Tus finanzas ya no tienen cargas ocultas.',
     cumple: function() { return diasConTiposSeguidos(['gasto'], 30); },
     progreso: function() { return { actual: Math.min(30, diasConTiposRacha(['gasto'])), meta: 30, unidad: 'días' }; } },
-  { id: 'cuspide', nombre: 'Cúspide', archivo: 'gato-especial-cuspide.png', xp: 80,
+  { id: 'cuspide', nombre: 'Cúspide', archivo: 'gato-especial-cuspide.png', xp: 30,
     requisito: 'Usa Kashly todos los días durante 2 semanas seguidas.',
     explicacion: 'Entraste a la app 14 días seguidos. Estás en la cima del hábito financiero.',
     cumple: function() { return diasUsoConsecutivos(14); },
     progreso: function() { return { actual: Math.min(14, diasUsoRacha()), meta: 14, unidad: 'días' }; } },
-  { id: 'libre', nombre: 'Libre', archivo: 'gato-especial-libre.png', xp: 150,
+  { id: 'libre', nombre: 'Libre', archivo: 'gato-especial-libre.png', xp: 50,
     requisito: 'Registra al menos un ingreso y un gasto en cada una de 4 semanas seguidas.',
     explicacion: 'Cuatro semanas seguidas registrando tanto ingresos como gastos. Tu dinero ya se mueve con libertad y claridad.',
     cumple: function() { return semanasConTiposSeguidas(['gasto', 'ingreso'], 4); },
     progreso: function() { return { actual: Math.min(4, semanasConTiposRacha(['gasto', 'ingreso'])), meta: 4, unidad: 'semanas' }; } },
-  { id: 'dominio', nombre: 'Dominio', archivo: 'gato-especial-dominio.png', xp: 250,
+  { id: 'dominio', nombre: 'Dominio', archivo: 'gato-especial-dominio.png', xp: 120,
     requisito: 'Crea y sigue un presupuesto personalizado durante 3 meses seguidos.',
     explicacion: 'Durante tres meses, creaste un presupuesto y te mantuviste dentro de él. Eso es dominio de tu dinero.',
     cumple: function() { return rachaDentroDePresupuesto('mensual') >= 3; },
     progreso: function() { return { actual: Math.min(3, rachaDentroDePresupuesto('mensual')), meta: 3, unidad: 'meses' }; } },
-  { id: 'ascendido', nombre: 'Ascendido', archivo: 'gato-especial-ascendido.png', xp: 300, boost: true,
+  { id: 'ascendido', nombre: 'Ascendido', archivo: 'gato-especial-ascendido.png', xp: 150, boost: true,
     requisito: 'Alcanza tu meta de ahorro mensual 6 meses seguidos.',
     explicacion: 'Seis meses seguidos cumpliendo tu meta de ahorro. Tu disciplina te ha llevado a otro nivel. Además ganaste 1 uso de Doble XP.',
     cumple: function() { return rachaMetaAhorro('mensual') >= 6; },
@@ -4431,7 +4485,7 @@ const ESPECIALES_GATO = [
     explicacion: 'Dos meses terminaste con más ingresos que gastos. Tu dinero cierra en positivo y tú más despreocupado.',
     cumple: function() { return mesesConSaldoPositivo() >= 2; },
     progreso: function() { return { actual: Math.min(2, mesesConSaldoPositivo()), meta: 2, unidad: 'meses' }; } },
-  { id: 'mago', nombre: 'Mago del dinero', archivo: 'gato-especial-mago.png', xp: 250, boost: true,
+  { id: 'mago', nombre: 'Mago del dinero', archivo: 'gato-especial-mago.png', xp: 160, boost: true,
     requisito: 'Reduce tus gastos totales al menos 10% frente a tu promedio de los 3 meses anteriores, durante 2 meses seguidos.',
     explicacion: 'Dos meses seguidos gastaste al menos 10% menos que tu promedio anterior. Eso no es suerte, es magia financiera. Además ganaste 1 uso de Doble XP.',
     cumple: function() { return rachaReduccionGasto() >= 2; },
