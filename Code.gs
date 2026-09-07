@@ -49,7 +49,11 @@ function getSheet() {
   let sheet = ss.getSheetByName('Movimientos');
   if (!sheet) {
     sheet = ss.insertSheet('Movimientos');
-    sheet.appendRow(['id', 'monto', 'fecha', 'nota', 'tipo', 'categoria']);
+    sheet.appendRow(['id', 'monto', 'fecha', 'nota', 'tipo', 'categoria', 'cuentaId']);
+  } else if (sheet.getRange(1, 7).getValue() === '') {
+    // Hoja creada antes de que existiera "Mis tarjetas": se le agrega la
+    // columna sin tocar las filas que ya tenía.
+    sheet.getRange(1, 7).setValue('cuentaId');
   }
   return sheet;
 }
@@ -76,14 +80,15 @@ function obtenerMovimientos() {
       fecha: normalizarFecha(r[2]),
       nota: String(r[3] || ''),
       tipo: String(r[4] || '').trim().toLowerCase(),
-      categoria: String(r[5] || '').trim().toLowerCase()
+      categoria: String(r[5] || '').trim().toLowerCase(),
+      cuentaId: String(r[6] || '')
     }))
     .reverse();
 }
 
 function guardarMovimiento(mov) {
   const sheet = getSheet();
-  sheet.appendRow([String(mov.id), Number(mov.monto), mov.fecha, mov.nota || '', mov.tipo, mov.categoria || '']);
+  sheet.appendRow([String(mov.id), Number(mov.monto), mov.fecha, mov.nota || '', mov.tipo, mov.categoria || '', mov.cuentaId || '']);
   return true;
 }
 
@@ -92,8 +97,8 @@ function actualizarMovimiento(mov) {
   const data = sheet.getDataRange().getValues();
   for (let i = 1; i < data.length; i++) {
     if (String(data[i][0]) === String(mov.id)) {
-      sheet.getRange(i + 1, 1, 1, 6).setValues([[
-        String(mov.id), Number(mov.monto), mov.fecha, mov.nota || '', mov.tipo, mov.categoria || ''
+      sheet.getRange(i + 1, 1, 1, 7).setValues([[
+        String(mov.id), Number(mov.monto), mov.fecha, mov.nota || '', mov.tipo, mov.categoria || '', mov.cuentaId || (String(data[i][6] || ''))
       ]]);
       return true;
     }

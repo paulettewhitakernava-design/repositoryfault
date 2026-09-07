@@ -639,6 +639,7 @@ select option { background: var(--card-solid); color: var(--ink); }
   background: radial-gradient(120% 130% at -10% -25%, rgba(255,138,92,0.30), transparent 55%), var(--card-solid);
   border: 1px solid rgba(255,209,102,0.22); animation: rise 0.5s ease both;
 }
+.gato-hero-card.con-flotantes { padding-top: 78px; }
 .gato-hero-clickzone { display: block; width: 100%; background: none; border: none; padding: 0; margin: 0; text-align: left; cursor: pointer; color: inherit; font: inherit; }
 .gato-hero-row { display: flex; align-items: center; gap: 16px; position: relative; z-index: 1; }
 .gato-stage-wrap { width: 108px; height: 108px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; position: relative; }
@@ -966,6 +967,62 @@ select option { background: var(--card-solid); color: var(--ink); }
 @media (prefers-reduced-motion: reduce) {
   .ci-blob-1, .ci-blob-2, .ci-blob-3, .ci-cat-img, .ci-cat-spark, .ci-paw.on.actual { animation: none !important; }
 }
+
+/* ---- Cuentas / Mis tarjetas ---- */
+.cuenta-activa-linea { font-size: 12px; color: #7a6ea3; margin: 2px 0 10px; }
+.cuenta-chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+.cuenta-chip { padding: 9px 14px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1.5px solid transparent; font-size: 12px; font-weight: 700; color: var(--muted); cursor: pointer; }
+.cuenta-chip.sel { border-color: #7f6fd6; background: rgba(127,111,214,0.16); color: #f3f0fb; }
+
+#overlay-mis-tarjetas .sheet, #overlay-cuenta-editar .sheet { background: linear-gradient(180deg, #241a35, #1a1428); border: 0.5px solid #3a2d52; }
+.bank-card { width: 100%; aspect-ratio: 1.8; border-radius: 18px; padding: 15px 17px; margin-bottom: 12px; position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; box-shadow: 0 12px 22px -14px rgba(0,0,0,0.55); }
+.bank-card::after { content: ''; position: absolute; width: 130px; height: 130px; border-radius: 50%; background: rgba(255,255,255,0.08); top: -55px; right: -35px; }
+.bank-card-top { display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 1; }
+.bank-card-ico { width: 30px; height: 30px; border-radius: 9px; background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.bank-card-active { font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; background: rgba(255,255,255,0.22); padding: 3px 8px; border-radius: 999px; align-self: flex-start; color: #fff; }
+.bank-card-bottom { position: relative; z-index: 1; }
+.bank-card-name { font-size: 12.5px; font-weight: 600; opacity: 0.9; margin-bottom: 2px; color: #fff; }
+.bank-card-bal { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 600; color: #fff; }
+.bank-card.dim { opacity: 0.55; }
+.bank-add { display: flex; align-items: center; justify-content: center; gap: 6px; border: 1.5px dashed #3a2d52; border-radius: 16px; padding: 14px; font-size: 12.5px; font-weight: 700; color: var(--muted); cursor: pointer; margin-top: 4px; }
+.cuenta-color-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+.cuenta-color-dot { width: 32px; height: 32px; border-radius: 50%; position: relative; cursor: pointer; flex-shrink: 0; }
+.cuenta-color-dot.sel::after { content: '✓'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+.cuenta-icon-row { display: flex; gap: 10px; margin-top: 4px; }
+.cuenta-icon-opt { width: 46px; height: 46px; border-radius: 13px; background: rgba(255,255,255,0.06); border: 1.5px solid transparent; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; }
+.cuenta-icon-opt.sel { border-color: #7f6fd6; background: rgba(127,111,214,0.15); }
+
+/* ---- Íconos flotantes (estilo Coin Master) ---- */
+.float-badge { position: absolute; top: 16px; width: 52px; border-radius: 16px; padding: 8px 6px; text-align: center; border: 1.5px solid; background: none; cursor: pointer; transition: transform 0.2s ease; z-index: 3; }
+.float-badge:active { transform: scale(0.9); }
+.float-badge.trophy { left: 12px; background: linear-gradient(180deg, #3a2d1a, #241a35); border-color: #f2b544; }
+.float-badge.mission { right: 12px; background: linear-gradient(180deg, #2a1a45, #1a1428); border-color: #7f6fd6; display: none; }
+.float-badge.mission.show { display: block; }
+.float-ico { font-size: 20px; display: block; margin-bottom: 4px; }
+.float-cnt { display: block; font-size: 11px; font-weight: 500; font-family: 'Manrope', sans-serif; }
+.float-badge.trophy .float-cnt, .float-badge.trophy .float-ico { color: #f2b544; }
+.float-badge.mission .float-cnt, .float-badge.mission .float-ico { color: #b8a8f0; }
+.float-badge.pulsando { animation: floatPulse 1.2s ease-in-out infinite; }
+@keyframes floatPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+.gato-hero-card { position: relative; }
+
+/* ---- Modal de misión ---- */
+#overlay-mision .sheet { border-radius: 20px; border: 1.5px solid #7f6fd6; padding: 20px 18px 22px; position: relative; overflow: hidden; background: radial-gradient(circle at 50% 30%, #2a1a45, #14101f 70%); }
+.mm-spark { position: absolute; color: #b8a8f0; font-size: 12px; }
+.mm-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; position: relative; z-index: 1; }
+.mm-head-lbl { font-size: 12px; color: #b8a8f0; text-transform: uppercase; letter-spacing: 0.03em; font-weight: 700; }
+.mm-timer { display: flex; align-items: center; gap: 4px; background: #1a1428; border-radius: 8px; padding: 3px 8px; font-size: 11px; font-weight: 700; color: #f2b544; }
+.mm-icon { width: 64px; height: 64px; border-radius: 16px; background: linear-gradient(135deg, #7f6fd6, #4a3d8f); margin: 0 auto 14px; display: flex; align-items: center; justify-content: center; font-size: 30px; position: relative; z-index: 1; }
+.mm-title { font-size: 16px; font-weight: 500; color: #f3f0fb; text-align: center; margin-bottom: 5px; position: relative; z-index: 1; }
+.mm-reward { font-size: 12px; color: #8b7fb0; text-align: center; margin-bottom: 18px; position: relative; z-index: 1; }
+.mm-seg-row { display: flex; gap: 6px; margin-bottom: 8px; position: relative; z-index: 1; flex-wrap: wrap; }
+.mm-seg { flex: 1; min-width: 12px; height: 8px; border-radius: 4px; background: #3a2d52; }
+.mm-seg.on { background: #7f6fd6; }
+.mm-sub { font-size: 11px; color: #6a5f8a; text-align: center; margin-bottom: 18px; position: relative; z-index: 1; }
+.mm-btn { display: block; width: 100%; text-align: center; padding: 13px; border-radius: 999px; background: linear-gradient(135deg, #7f6fd6, #4a3d8f); color: #fff; font-weight: 700; font-size: 13px; position: relative; z-index: 1; border: none; cursor: pointer; }
+.mm-completada { display: none; text-align: center; position: relative; z-index: 1; }
+.mm-completada-check { width: 52px; height: 52px; border-radius: 50%; background: #1e3a2c; color: #6fe3a8; font-size: 24px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; }
+.mm-completada-xp { color: #6fe3a8; font-weight: 700; font-size: 13px; margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -1008,11 +1065,15 @@ select option { background: var(--card-solid); color: var(--ink); }
   <div class="card">
     <div class="card-lbl-row">
       <div class="card-lbl" style="margin-bottom:0">Total ahorrado</div>
-      <button type="button" class="icon-btn" id="btn-editar-saldo" aria-label="Editar saldo ahorrado">
-        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-      </button>
+      <div style="display:flex;gap:8px">
+        <button type="button" class="icon-btn" id="btn-abrir-mis-tarjetas" aria-label="Mis tarjetas">💳</button>
+        <button type="button" class="icon-btn" id="btn-editar-saldo" aria-label="Editar saldo ahorrado">
+          <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        </button>
+      </div>
     </div>
     <div class="card-num" id="sum-ahorro">$0</div>
+    <div class="cuenta-activa-linea" id="cuenta-activa-linea">🗂 Tarjeta principal</div>
     <div class="card-split">
       <div><span class="up" id="sum-ingreso">$0</span><span>Ingresos</span></div>
       <div><span class="down" id="sum-gasto">$0</span><span>Gastos</span></div>
@@ -1020,7 +1081,7 @@ select option { background: var(--card-solid); color: var(--ink); }
     </div>
   </div>
 
-  <div class="gato-hero-card" id="gato-hero-card">
+  <div class="gato-hero-card con-flotantes" id="gato-hero-card">
     <button type="button" class="gato-hero-clickzone" id="btn-gato-perfil" aria-label="Ver a tu gato">
       <div class="gato-hero-row">
         <div class="gato-stage-wrap"><span class="gato-aura"></span><img class="gato-img" id="gato-img-actual" src="" alt="Tu gato"></div>
@@ -1035,6 +1096,12 @@ select option { background: var(--card-solid); color: var(--ink); }
         </div>
         <span class="gato-hero-chev">›</span>
       </div>
+    </button>
+    <button type="button" class="float-badge trophy" id="btn-float-trophy" aria-label="Logros financieros">
+      <span class="float-ico">🏆</span><span class="float-cnt" id="float-trophy-count">0/8</span>
+    </button>
+    <button type="button" class="float-badge mission" id="btn-float-mission" aria-label="Misión de la semana">
+      <span class="float-ico">🎯</span><span class="float-cnt" id="float-mission-count">0/4</span>
     </button>
   </div>
   <div class="gato-nivel-tab" id="gato-nivel-tab"><img id="gato-nivel-tab-img" src="" alt=""><span>¡Subiste de nivel! Toca aquí</span></div>
@@ -1199,6 +1266,10 @@ select option { background: var(--card-solid); color: var(--ink); }
       <button type="button" class="btn-saldo" id="btn-saldo-agregar">Saldo Ahorrado</button>
     </div>
 
+    <div id="campo-cuenta-add" style="display:none">
+      <label class="field-label">¿De qué cuenta?</label>
+      <div class="cuenta-chip-row" id="cuenta-chip-row"></div>
+    </div>
     <div id="campo-categoria-add" style="display:none">
       <label class="field-label" for="categoria">Categoría</label>
       <select id="categoria"></select>
@@ -1462,6 +1533,54 @@ select option { background: var(--card-solid); color: var(--ink); }
       <button type="button" class="ci-btn back" id="ci-btn-back" style="display:none">Atrás</button>
       <button type="button" class="ci-btn next" id="ci-btn-next" style="flex:1">Siguiente</button>
     </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay-mis-tarjetas">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h2>Mis tarjetas</h2><button type="button" class="sheet-close" id="mis-tarjetas-close" aria-label="Cerrar">✕</button></div>
+    <div id="mis-tarjetas-lista"></div>
+    <div class="bank-add" id="btn-nueva-tarjeta">+ Agregar tarjeta</div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay-cuenta-editar">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-head"><h2 id="cuenta-editar-titulo">Editar tarjeta</h2><button type="button" class="sheet-close" id="cuenta-editar-close" aria-label="Cerrar">✕</button></div>
+    <label class="field-label" for="cuenta-nombre-input">Nombre</label>
+    <input type="text" id="cuenta-nombre-input" placeholder="ej. Efectivo">
+    <label class="field-label" for="cuenta-balance-input" style="margin-top:14px">Balance inicial</label>
+    <input type="number" id="cuenta-balance-input" placeholder="0.00" step="0.01">
+    <label class="field-label" style="margin-top:14px">Color</label>
+    <div class="cuenta-color-row" id="cuenta-color-row"></div>
+    <label class="field-label" style="margin-top:14px">Ícono</label>
+    <div class="cuenta-icon-row" id="cuenta-icon-row"></div>
+    <button type="button" class="btn-add" id="btn-guardar-cuenta" style="margin-top:16px">Guardar</button>
+    <button type="button" class="btn-danger" id="btn-eliminar-cuenta" style="width:100%;margin-top:10px;display:none">Eliminar tarjeta</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay-mision">
+  <div class="sheet">
+    <span class="mm-spark" style="top:14px;left:20px">✦</span>
+    <span class="mm-spark" style="top:18px;right:64px">✦</span>
+    <div class="mm-head">
+      <span class="mm-head-lbl">Misión de la semana</span>
+      <span class="mm-timer" id="mm-timer"><span>⏱</span><span id="mm-timer-txt">3d 14h</span></span>
+    </div>
+    <div class="mm-icon" id="mm-icono">🎯</div>
+    <div class="mm-title" id="mm-titulo">—</div>
+    <div class="mm-reward" id="mm-recompensa">Recompensa: +0 XP</div>
+    <div class="mm-seg-row" id="mm-segmentos"></div>
+    <div class="mm-sub" id="mm-sub">0 de 0</div>
+    <div class="mm-completada" id="mm-completada">
+      <div class="mm-completada-check">✓</div>
+      <div class="mm-title" style="margin-bottom:2px">Misión cumplida</div>
+      <div class="mm-completada-xp" id="mm-completada-xp">+15 XP</div>
+    </div>
+    <button type="button" class="mm-btn" id="mm-btn-cerrar">Entendido</button>
   </div>
 </div>
 
@@ -2916,6 +3035,8 @@ function iniciarConDatos(datosGastos, datosConfig, offline) {
   config = datosConfig || {};
   if (!offline) config = reconciliarConCacheLocal(config);
   registrarUsoDiario();
+  inicializarCuentasSiCorresponde();
+  asignarMisionSemanalSiCorresponde();
   acreditarAhorroAutomaticoSiCorresponde();
   evaluarDiaSiCorresponde();
   cargarCategorias();
@@ -2988,7 +3109,8 @@ document.getElementById('form-gasto').addEventListener('submit', function(e) {
 
   const tipo = toggleAdd.get();
   const categoria = tipo === 'gasto' ? document.getElementById('categoria').value : '';
-  const mov = { id: String(Date.now()), monto, fecha, nota, tipo, categoria };
+  const cuentaId = cuentaSeleccionadaForm || cuentaPrincipalId();
+  const mov = { id: String(Date.now()), monto, fecha, nota, tipo, categoria, cuentaId: cuentaId };
 
   // Se guarda de inmediato en el dispositivo y se muestra al instante; si no
   // hay internet, el envío se encola y se reintenta solo (ver apiPost/encolar).
@@ -2998,6 +3120,7 @@ document.getElementById('form-gasto').addEventListener('submit', function(e) {
   if (tipo === 'ingreso') otorgarXP(15, 'Registraste un ingreso');
   if (tipo === 'gasto') { otorgarBonusPeriodoSiCorresponde(); evaluarNotifPresupuesto(); }
   if (tipo === 'ingreso') acreditarAhorroAutomaticoSiCorresponde();
+  if (tipo === 'gasto' || tipo === 'ingreso') evaluarProgresoMisionYGuardar();
   render();
   document.getElementById('form-gasto').reset();
   document.getElementById('fecha').valueAsDate = new Date();
@@ -3098,7 +3221,9 @@ document.getElementById('form-edit').addEventListener('submit', function(e) {
 
   const tipoEdit = toggleEdit.get();
   const categoriaEdit = tipoEdit === 'gasto' ? document.getElementById('edit-categoria').value : '';
-  const mov = { id: editandoId, monto, fecha, nota, tipo: tipoEdit, categoria: categoriaEdit };
+  const idxActual = gastos.findIndex(g => String(g.id) === String(editandoId));
+  const cuentaIdActual = idxActual !== -1 ? gastos[idxActual].cuentaId : undefined;
+  const mov = { id: editandoId, monto, fecha, nota, tipo: tipoEdit, categoria: categoriaEdit, cuentaId: cuentaIdActual };
 
   const idx = gastos.findIndex(g => String(g.id) === String(mov.id));
   if (idx !== -1) gastos[idx] = mov;
@@ -3553,6 +3678,9 @@ function render() {
   renderPresupuesto();
   renderGato();
   renderAjustesResumen();
+  renderCuentaActivaLinea();
+  renderFloatIcons();
+  renderSelectorCuentaForm();
 }
 
 function hoyISO() {
@@ -4186,6 +4314,347 @@ function acreditarAhorroAutomaticoSiCorresponde() {
   guardarConSincronizacion({ action: 'set-config', key: 'ahorroAutoPeriodos', value: acreditados });
   guardarConSincronizacion({ action: 'set-config', key: 'ahorroAutomaticoAcumulado', value: config.ahorroAutomaticoAcumulado });
 }
+
+// ==================================================================
+// --- Cuentas / "Mis tarjetas": una capa ligera de organización.     --
+// --- El balance de cada tarjeta se calcula solo, a partir de los    --
+// --- movimientos que se le asignaron; no toca Disponible/Total      --
+// --- ahorrado (esos siguen siendo el cálculo global de siempre).    --
+// ==================================================================
+const CUENTA_COLORES = [
+  'linear-gradient(135deg,#7f6fd6,#4a3d8f)',
+  'linear-gradient(135deg,#3fb88a,#1f7a5c)',
+  'linear-gradient(135deg,#ff9ede,#c65fa8)',
+  'linear-gradient(135deg,#f2b544,#e8823c)',
+  'linear-gradient(135deg,#ff8a5c,#c9432a)',
+  'linear-gradient(135deg,#8cbeff,#4d7fc9)',
+  'linear-gradient(135deg,#ff6b7a,#b8323f)',
+  'linear-gradient(135deg,#5fd6c8,#2f8f83)'
+];
+const CUENTA_ICONOS = ['💵', '💳', '🏦'];
+
+function inicializarCuentasSiCorresponde() {
+  if (config.cuentas && config.cuentas.length) return;
+  const cuenta = { id: 'default', nombre: 'Tarjeta principal', color: CUENTA_COLORES[0], icono: '💳', balanceInicial: 0, archivada: false };
+  config.cuentas = [cuenta];
+  config.cuentaActivaId = 'default';
+  guardarConSincronizacion({ action: 'set-config', key: 'cuentas', value: config.cuentas });
+  guardarConSincronizacion({ action: 'set-config', key: 'cuentaActivaId', value: 'default' });
+}
+function cuentasTodas() { return config.cuentas || []; }
+function cuentasActivasLista() { return cuentasTodas().filter(function(c) { return !c.archivada; }); }
+function cuentaPorId(id) { return cuentasTodas().find(function(c) { return c.id === id; }); }
+function cuentaPrincipalId() { return (cuentasTodas()[0] || {}).id; }
+function cuentaIdDeMov(g) { return g.cuentaId || cuentaPrincipalId(); }
+function cuentaActivaObj() { return cuentaPorId(config.cuentaActivaId) || cuentasActivasLista()[0]; }
+function balanceDeCuenta(id) {
+  let bal = Number((cuentaPorId(id) || {}).balanceInicial) || 0;
+  gastos.forEach(function(g) {
+    if (cuentaIdDeMov(g) !== id) return;
+    if (g.tipo === 'ingreso') bal += Number(g.monto) || 0;
+    if (g.tipo === 'gasto' || g.tipo === 'ahorro') bal -= Number(g.monto) || 0;
+  });
+  return bal;
+}
+function cuentaTieneMovimientos(id) { return gastos.some(function(g) { return cuentaIdDeMov(g) === id; }); }
+function guardarCuentas() { guardarConSincronizacion({ action: 'set-config', key: 'cuentas', value: config.cuentas }); }
+function establecerCuentaActiva(id) {
+  config.cuentaActivaId = id;
+  guardarConSincronizacion({ action: 'set-config', key: 'cuentaActivaId', value: id });
+  renderCuentaActivaLinea();
+  renderMisTarjetas();
+}
+function renderCuentaActivaLinea() {
+  const el = document.getElementById('cuenta-activa-linea');
+  if (!el) return;
+  const c = cuentaActivaObj();
+  el.textContent = '🗂 ' + (c ? c.nombre : 'Tarjeta principal');
+}
+function renderMisTarjetas() {
+  const cont = document.getElementById('mis-tarjetas-lista');
+  if (!cont) return;
+  const cuentas = cuentasActivasLista();
+  cont.innerHTML = cuentas.map(function(c) {
+    const esActiva = c.id === config.cuentaActivaId;
+    return '<div class="bank-card' + (esActiva ? '' : ' dim') + '" style="background:' + c.color + '" data-id="' + c.id + '">' +
+      '<div class="bank-card-top"><div class="bank-card-ico">' + c.icono + '</div>' + (esActiva ? '<span class="bank-card-active">Activa</span>' : '') + '</div>' +
+      '<div class="bank-card-bottom"><div class="bank-card-name">' + c.nombre + '</div><div class="bank-card-bal">' + fmt(balanceDeCuenta(c.id)) + '</div></div>' +
+    '</div>';
+  }).join('');
+  cont.querySelectorAll('.bank-card').forEach(function(el) {
+    el.addEventListener('click', function() {
+      if (el.dataset.id === config.cuentaActivaId) { abrirEditarCuenta(el.dataset.id); return; }
+      establecerCuentaActiva(el.dataset.id);
+    });
+  });
+}
+let cuentaEnEdicionId = null;
+let cuentaColorSel = CUENTA_COLORES[0];
+let cuentaIconoSel = CUENTA_ICONOS[1];
+function renderSelectoresCuentaEdit() {
+  document.getElementById('cuenta-color-row').innerHTML = CUENTA_COLORES.map(function(col) {
+    return '<div class="cuenta-color-dot' + (col === cuentaColorSel ? ' sel' : '') + '" style="background:' + col + '" data-color="' + col + '"></div>';
+  }).join('');
+  document.getElementById('cuenta-icon-row').innerHTML = CUENTA_ICONOS.map(function(ico) {
+    return '<div class="cuenta-icon-opt' + (ico === cuentaIconoSel ? ' sel' : '') + '" data-icon="' + ico + '">' + ico + '</div>';
+  }).join('');
+  document.querySelectorAll('#cuenta-color-row .cuenta-color-dot').forEach(function(el) {
+    el.addEventListener('click', function() { cuentaColorSel = el.dataset.color; renderSelectoresCuentaEdit(); });
+  });
+  document.querySelectorAll('#cuenta-icon-row .cuenta-icon-opt').forEach(function(el) {
+    el.addEventListener('click', function() { cuentaIconoSel = el.dataset.icon; renderSelectoresCuentaEdit(); });
+  });
+}
+function abrirEditarCuenta(id) {
+  cuentaEnEdicionId = id;
+  const esNueva = !id;
+  const c = id ? cuentaPorId(id) : null;
+  document.getElementById('cuenta-editar-titulo').textContent = esNueva ? 'Nueva tarjeta' : 'Editar tarjeta';
+  document.getElementById('cuenta-nombre-input').value = c ? c.nombre : '';
+  document.getElementById('cuenta-balance-input').value = c ? c.balanceInicial : '';
+  document.getElementById('cuenta-balance-input').disabled = !esNueva;
+  cuentaColorSel = c ? c.color : CUENTA_COLORES[(cuentasTodas().length) % CUENTA_COLORES.length];
+  cuentaIconoSel = c ? c.icono : CUENTA_ICONOS[1];
+  renderSelectoresCuentaEdit();
+  const btnEliminar = document.getElementById('btn-eliminar-cuenta');
+  if (!esNueva && cuentasTodas().length > 1) {
+    btnEliminar.style.display = 'block';
+    btnEliminar.textContent = cuentaTieneMovimientos(id) ? 'Archivar tarjeta' : 'Eliminar tarjeta';
+  } else {
+    btnEliminar.style.display = 'none';
+  }
+  document.getElementById('overlay-cuenta-editar').classList.add('show');
+}
+document.getElementById('btn-abrir-mis-tarjetas').addEventListener('click', function() {
+  renderMisTarjetas();
+  document.getElementById('overlay-mis-tarjetas').classList.add('show');
+});
+document.getElementById('mis-tarjetas-close').addEventListener('click', function() {
+  document.getElementById('overlay-mis-tarjetas').classList.remove('show');
+});
+document.getElementById('overlay-mis-tarjetas').addEventListener('click', function(e) {
+  if (e.target.id === 'overlay-mis-tarjetas') this.classList.remove('show');
+});
+document.getElementById('btn-nueva-tarjeta').addEventListener('click', function() { abrirEditarCuenta(null); });
+document.getElementById('cuenta-editar-close').addEventListener('click', function() {
+  document.getElementById('overlay-cuenta-editar').classList.remove('show');
+});
+document.getElementById('overlay-cuenta-editar').addEventListener('click', function(e) {
+  if (e.target.id === 'overlay-cuenta-editar') this.classList.remove('show');
+});
+document.getElementById('btn-guardar-cuenta').addEventListener('click', function() {
+  const nombre = document.getElementById('cuenta-nombre-input').value.trim();
+  if (!nombre) { showToast('Ponle un nombre a tu tarjeta', true); return; }
+  if (!config.cuentas) config.cuentas = [];
+  if (cuentaEnEdicionId) {
+    const c = cuentaPorId(cuentaEnEdicionId);
+    c.nombre = nombre;
+    c.color = cuentaColorSel;
+    c.icono = cuentaIconoSel;
+  } else {
+    const balance = parseFloat(document.getElementById('cuenta-balance-input').value) || 0;
+    config.cuentas.push({ id: 'c' + Date.now(), nombre: nombre, color: cuentaColorSel, icono: cuentaIconoSel, balanceInicial: balance, archivada: false });
+  }
+  guardarCuentas();
+  renderMisTarjetas();
+  renderCuentaActivaLinea();
+  renderSelectorCuentaForm();
+  document.getElementById('overlay-cuenta-editar').classList.remove('show');
+  showToast('Tarjeta guardada');
+});
+document.getElementById('btn-eliminar-cuenta').addEventListener('click', function() {
+  if (!cuentaEnEdicionId) return;
+  const conMovs = cuentaTieneMovimientos(cuentaEnEdicionId);
+  const c = cuentaPorId(cuentaEnEdicionId);
+  if (!confirm(conMovs ? '¿Archivar "' + c.nombre + '"? Ya no podrás elegirla, pero sus movimientos se conservan.' : '¿Eliminar "' + c.nombre + '"?')) return;
+  if (conMovs) {
+    c.archivada = true;
+  } else {
+    config.cuentas = config.cuentas.filter(function(x) { return x.id !== cuentaEnEdicionId; });
+  }
+  if (config.cuentaActivaId === cuentaEnEdicionId) establecerCuentaActiva(cuentaPrincipalId());
+  guardarCuentas();
+  renderMisTarjetas();
+  renderCuentaActivaLinea();
+  renderSelectorCuentaForm();
+  document.getElementById('overlay-cuenta-editar').classList.remove('show');
+  showToast(conMovs ? 'Tarjeta archivada' : 'Tarjeta eliminada');
+});
+let cuentaSeleccionadaForm = null;
+function renderSelectorCuentaForm() {
+  const wrap = document.getElementById('campo-cuenta-add');
+  const row = document.getElementById('cuenta-chip-row');
+  if (!wrap || !row) return;
+  const activas = cuentasActivasLista();
+  if (activas.length < 2) { wrap.style.display = 'none'; cuentaSeleccionadaForm = cuentaPrincipalId(); return; }
+  wrap.style.display = 'block';
+  if (!cuentaSeleccionadaForm || !cuentaPorId(cuentaSeleccionadaForm) || cuentaPorId(cuentaSeleccionadaForm).archivada) {
+    cuentaSeleccionadaForm = config.cuentaActivaId;
+  }
+  row.innerHTML = activas.map(function(c) {
+    return '<div class="cuenta-chip' + (c.id === cuentaSeleccionadaForm ? ' sel' : '') + '" data-id="' + c.id + '">' + c.icono + ' ' + c.nombre + '</div>';
+  }).join('');
+  row.querySelectorAll('.cuenta-chip').forEach(function(el) {
+    el.addEventListener('click', function() {
+      cuentaSeleccionadaForm = el.dataset.id;
+      renderSelectorCuentaForm();
+    });
+  });
+}
+
+// ==================================================================
+// --- Misiones semanales rotativas (estilo Coin Master): máximo 1    --
+// --- activa, se asigna cada lunes, progreso en tiempo real. La      --
+// --- recompensa se aplica como XP normal al completarse (todavía no --
+// --- existe el Cofre de recompensas para retenerla ahí).            --
+// ==================================================================
+const MISIONES_CATALOGO = [
+  { id: 'dias4', titulo: 'Registra tus gastos 4 días diferentes esta semana', tipo: 'registrar_n_dias', meta: 4, xp: 15, icono: '🎯' },
+  { id: 'noocio', titulo: 'Esta semana, no gastes en Antojos/Ocio', tipo: 'no_gastar_categoria', categoria: 'entretenimiento', meta: 7, xp: 20, icono: '👛' },
+  { id: 'comida', titulo: 'Mantente dentro de tu presupuesto de Comida toda la semana', tipo: 'no_exceder_presupuesto_categoria', categoria: 'alimentacion', meta: 7, xp: 20, icono: '👛' },
+  { id: 'ingreso1', titulo: 'Registra al menos 1 ingreso esta semana', tipo: 'registrar_ingreso', meta: 1, xp: 10, icono: '🪙' },
+  { id: 'transporte500', titulo: 'Gasta menos de $500 en Transporte esta semana', tipo: 'gastar_menos_que_x', categoria: 'transporte', limite: 500, meta: 7, xp: 15, icono: '👛' }
+];
+function diasTranscurridosSemana(fechaISO) {
+  const d = new Date(fechaISO + 'T00:00:00');
+  return ((d.getDay() + 6) % 7) + 1;
+}
+function evaluarProgresoMision(mision) {
+  const t = MISIONES_CATALOGO.find(function(m) { return m.id === mision.templateId; });
+  if (!t) return mision;
+  const semanaKey = mision.semanaKey;
+  const diasElapsed = Math.min(t.meta, diasTranscurridosSemana(hoyISO()));
+  let progreso = mision.progreso || 0;
+  let estado = mision.estado;
+
+  if (t.tipo === 'registrar_n_dias') {
+    const dias = {};
+    gastos.forEach(function(g) { if (g.tipo === 'gasto' && semanaKeyDe(g.fecha) === semanaKey) dias[g.fecha] = true; });
+    progreso = Math.min(t.meta, Object.keys(dias).length);
+  } else if (t.tipo === 'registrar_ingreso') {
+    const n = gastos.filter(function(g) { return g.tipo === 'ingreso' && semanaKeyDe(g.fecha) === semanaKey; }).length;
+    progreso = Math.min(t.meta, n);
+  } else if (t.tipo === 'no_gastar_categoria') {
+    const violado = gastos.some(function(g) { return g.tipo === 'gasto' && g.categoria === t.categoria && semanaKeyDe(g.fecha) === semanaKey; });
+    if (violado) estado = 'fallida';
+    else progreso = diasElapsed;
+  } else if (t.tipo === 'no_exceder_presupuesto_categoria' || t.tipo === 'gastar_menos_que_x') {
+    const totalCat = gastos.filter(function(g) { return g.tipo === 'gasto' && g.categoria === t.categoria && semanaKeyDe(g.fecha) === semanaKey; })
+      .reduce(function(s, g) { return s + Number(g.monto); }, 0);
+    let limite = t.limite;
+    if (limite === undefined) {
+      const p = calcularPresupuesto('quincena');
+      const fila = p.filas.find(function(f) { return f.cat === t.categoria; });
+      limite = fila ? fila.limite : Infinity;
+    }
+    if (totalCat > limite) estado = 'fallida';
+    else progreso = diasElapsed;
+  }
+
+  if (estado === 'activa' && progreso >= t.meta) estado = 'completada';
+  mision.progreso = progreso;
+  mision.estado = estado;
+  return mision;
+}
+function evaluarProgresoMisionYGuardar() {
+  if (!config.misionActual) return;
+  const antes = config.misionActual.estado;
+  const m = evaluarProgresoMision(Object.assign({}, config.misionActual));
+  config.misionActual = m;
+  guardarConSincronizacion({ action: 'set-config', key: 'misionActual', value: m });
+  if (antes !== 'completada' && m.estado === 'completada' && !m.notificoCompletada) {
+    const t = MISIONES_CATALOGO.find(function(x) { return x.id === m.templateId; });
+    otorgarXP(t.xp, 'Misión cumplida: ' + t.titulo);
+    m.notificoCompletada = true;
+    config.misionActual = m;
+    guardarConSincronizacion({ action: 'set-config', key: 'misionActual', value: m });
+    agregarNotificacion('¡Misión cumplida!', 'Cumpliste "' + t.titulo + '". +' + t.xp + ' XP.', { tipo: 'logro' });
+    showToast('¡Misión cumplida! +' + t.xp + ' XP 🎯');
+  }
+  renderFloatIcons();
+}
+function asignarMisionSemanalSiCorresponde() {
+  const semanaKey = semanaKeyDe(hoyISO());
+  let mision = config.misionActual;
+  if (!mision || mision.semanaKey !== semanaKey) {
+    const anteriorId = mision ? mision.templateId : null;
+    let candidatos = MISIONES_CATALOGO.filter(function(m) { return m.id !== anteriorId; });
+    if (!candidatos.length) candidatos = MISIONES_CATALOGO.slice();
+    const elegida = candidatos[Math.floor(Math.random() * candidatos.length)];
+    mision = { templateId: elegida.id, semanaKey: semanaKey, progreso: 0, estado: 'activa', notificoCompletada: false };
+    config.misionActual = mision;
+    guardarConSincronizacion({ action: 'set-config', key: 'misionActual', value: mision });
+  }
+  evaluarProgresoMisionYGuardar();
+}
+function textoCuentaRegresivaSemana() {
+  const hoy = new Date();
+  const idx = (hoy.getDay() + 6) % 7; // 0=lunes..6=domingo
+  const domingo = new Date(hoy);
+  domingo.setDate(hoy.getDate() + (6 - idx));
+  domingo.setHours(23, 59, 59, 999);
+  let diffMs = domingo.getTime() - hoy.getTime();
+  if (diffMs < 0) diffMs = 0;
+  const diffH = Math.floor(diffMs / 3600000);
+  return Math.floor(diffH / 24) + 'd ' + (diffH % 24) + 'h';
+}
+function renderFloatIcons() {
+  const trophyCount = document.getElementById('float-trophy-count');
+  if (trophyCount) trophyCount.textContent = (config.gatoLogrosDesbloqueados || []).length + '/' + ESPECIALES_GATO.length;
+
+  const missionBadge = document.getElementById('btn-float-mission');
+  const missionCount = document.getElementById('float-mission-count');
+  if (!missionBadge) return;
+  const m = config.misionActual;
+  if (!m || m.estado === 'fallida') { missionBadge.classList.remove('show'); return; }
+  missionBadge.classList.add('show');
+  const t = MISIONES_CATALOGO.find(function(x) { return x.id === m.templateId; });
+  const meta = t ? t.meta : 1;
+  missionCount.textContent = Math.min(m.progreso, meta) + '/' + meta;
+  missionBadge.classList.toggle('pulsando', m.progreso > 0 || m.estado === 'completada');
+}
+function abrirModalMision() {
+  const m = config.misionActual;
+  if (!m) return;
+  const t = MISIONES_CATALOGO.find(function(x) { return x.id === m.templateId; });
+  if (!t) return;
+  document.getElementById('mm-icono').textContent = t.icono || '🎯';
+  document.getElementById('mm-titulo').textContent = t.titulo;
+  document.getElementById('mm-recompensa').textContent = 'Recompensa: +' + t.xp + ' XP';
+  const meta = t.meta;
+  const progreso = Math.min(m.progreso, meta);
+  const segs = document.getElementById('mm-segmentos');
+  segs.innerHTML = '';
+  for (let i = 0; i < meta; i++) {
+    const s = document.createElement('div');
+    s.className = 'mm-seg' + (i < progreso ? ' on' : '');
+    segs.appendChild(s);
+  }
+  const unidad = t.tipo === 'registrar_ingreso' ? (meta === 1 ? 'vez' : 'veces') : 'días';
+  document.getElementById('mm-sub').textContent = progreso + ' de ' + meta + ' ' + unidad;
+
+  const completada = m.estado === 'completada';
+  document.getElementById('mm-completada').style.display = completada ? 'block' : 'none';
+  document.getElementById('mm-timer').style.display = completada ? 'none' : 'flex';
+  document.getElementById('mm-icono').style.display = completada ? 'none' : 'flex';
+  document.getElementById('mm-titulo').style.display = completada ? 'none' : 'block';
+  document.getElementById('mm-recompensa').style.display = completada ? 'none' : 'block';
+  document.getElementById('mm-segmentos').style.display = completada ? 'none' : 'flex';
+  document.getElementById('mm-sub').style.display = completada ? 'none' : 'block';
+  if (completada) document.getElementById('mm-completada-xp').textContent = '+' + t.xp + ' XP';
+  else document.getElementById('mm-timer-txt').textContent = textoCuentaRegresivaSemana();
+
+  document.getElementById('overlay-mision').classList.add('show');
+}
+document.getElementById('btn-float-trophy').addEventListener('click', function() { abrirSheetGato('especiales'); });
+document.getElementById('btn-float-mission').addEventListener('click', abrirModalMision);
+document.getElementById('mm-btn-cerrar').addEventListener('click', function() {
+  document.getElementById('overlay-mision').classList.remove('show');
+});
+document.getElementById('overlay-mision').addEventListener('click', function(e) {
+  if (e.target.id === 'overlay-mision') this.classList.remove('show');
+});
+
 function evaluarDiaSiCorresponde() {
   const hoy = hoyISO();
   if (config.gatoUltimoDiaEvaluado === hoy) return;
@@ -4857,7 +5326,7 @@ document.getElementById('overlay-logro-detalle').addEventListener('click', funct
   if (e.target.id === 'overlay-logro-detalle') this.classList.remove('show');
 });
 
-function abrirSheetGato() {
+function abrirSheetGato(tabInicial) {
   document.getElementById('gato-sheet-img').src = imagenAvatarGato();
   const nivel = nivelActualGato();
   const nivelInfo = NIVELES_GATO.find(function(nv) { return nv.n === nivel; });
@@ -4865,6 +5334,9 @@ function abrirSheetGato() {
   document.getElementById('gato-sheet-animo').textContent = NOMBRES_ANIMO[mostrandoRadiante() ? 'radiante' : estadoAnimoBase()];
   renderPanelNivelesGato();
   renderPanelEspecialesGato();
+  const tab = tabInicial || 'niveles';
+  document.querySelectorAll('.gato-tab-btn').forEach(function(b) { b.classList.toggle('activo', b.dataset.tab === tab); });
+  document.querySelectorAll('.gato-panel').forEach(function(p) { p.classList.toggle('activo', p.id === 'gato-panel-' + tab); });
   document.getElementById('overlay-gato').classList.add('show');
 }
 
