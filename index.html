@@ -814,11 +814,12 @@ select option { background: var(--card-solid); color: var(--ink); }
   background: rgba(255,255,255,0.03); cursor: pointer; position: relative;
 }
 .gato-especial-card.bloqueado { border-color: var(--line); }
-.gato-especial-card.bloqueado img { filter: brightness(0) saturate(0); opacity: 0.3; }
+.gato-especial-card.bloqueado img.marco-nivel { filter: brightness(0) saturate(0); opacity: 0.3; }
+.gato-especial-card.bloqueado .marco-logro-wrap { filter: brightness(0) saturate(0); opacity: 0.3; }
 .gato-especial-card.unlocked { box-shadow: inset 0 0 0 1px rgba(255,209,102,0.4), 0 0 14px -4px rgba(255,209,102,0.5); }
 .gato-especial-card.negativo.unlocked { box-shadow: inset 0 0 0 1px rgba(255,138,92,0.5), 0 0 14px -4px rgba(255,138,92,0.55); background: rgba(255,138,92,0.06); }
 .gato-especial-card.negativo .nombre { color: var(--accent); }
-.gato-especial-card img { width: 84px; height: 84px; object-fit: contain; margin-bottom: 8px; }
+.gato-especial-card img, .gato-especial-card .marco-logro-wrap { width: 84px; height: 84px; margin: 0 auto 8px; display: block; }
 .gato-especial-card .nombre { font-size: 10.5px; font-weight: 700; margin-bottom: 2px; }
 .gato-especial-card .req { font-size: 8.5px; color: var(--muted); line-height: 1.35; }
 .gato-especial-card .prog { font-size: 7.5px; color: var(--gold); font-weight: 700; margin-top: 4px; }
@@ -828,12 +829,26 @@ select option { background: var(--card-solid); color: var(--ink); }
 }
 .gato-especial-check.gato-especial-candado { background: rgba(0,0,0,0.5); font-size: 7.5px; }
 .marco-nivel { background-image: url('recuadro-niveles.png'); background-size: contain; background-position: center; background-repeat: no-repeat; }
-.marco-logro { background-image: url('recuadro-logrosfinancieros.png'); background-size: contain; background-position: center; background-repeat: no-repeat; }
-.gato-especial-card img.marco-nivel, .gato-especial-card img.marco-logro { box-sizing: border-box; padding: 11px; }
+.marco-logro, .marco-logro-wrap { background-image: url('recuadro-logrosfinancieros.png'); background-size: contain; background-position: center; background-repeat: no-repeat; }
+.marco-logro-wrap { position: relative; }
+.marco-logro-wrap img { width: 100%; height: 100%; object-fit: contain; display: block; box-sizing: border-box; }
+.marco-logro-label {
+  position: absolute; left: 50%; bottom: 8%; transform: translateX(-50%); width: 60%;
+  text-align: center; font-family: 'Space Grotesk', sans-serif; font-weight: 800; color: #fce9ff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.45); line-height: 1.05; pointer-events: none; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+}
+.gato-especial-card img.marco-nivel { box-sizing: border-box; padding: 11px; }
+.gato-especial-card .marco-logro-wrap img { padding: 11px; }
+.gato-especial-card .marco-logro-label { font-size: 6.5px; bottom: 9%; }
 .gato-info-img-wrap img.marco-nivel { box-sizing: border-box; padding: 18px; }
-.gato-det-img-wrap img.marco-logro { box-sizing: border-box; padding: 18px; }
+.gato-det-img-wrap .marco-logro-wrap { width: 100%; height: 100%; }
+.gato-det-img-wrap .marco-logro-wrap img { padding: 18px; }
+.gato-det-img-wrap .marco-logro-label { font-size: 9.5px; }
 .gato-reveal-stage img.marco-nivel { box-sizing: border-box; padding: 16px; }
 .gato-life-stage .gato-img.marco-nivel, .gato-life-stage .gato-img.marco-logro { box-sizing: border-box; padding: 26px; }
+.gato-life-stage .marco-logro-label { font-size: 12px; bottom: 12%; display: none; }
+.gato-life-stage .marco-logro-label.show { display: block; }
 .gato-nivel-row img.marco-nivel { box-sizing: border-box; padding: 4px; }
 
 /* Detalle de logro */
@@ -944,7 +959,7 @@ select option { background: var(--card-solid); color: var(--ink); }
 .ci-input { width: 100%; background: rgba(255,255,255,0.1); border: 2px solid transparent; border-radius: 18px; padding: 14px 16px; color: #fff; font-size: 16px; font-weight: 700; font-family: 'Space Grotesk', sans-serif; margin-bottom: 18px; transition: border-color 0.2s ease, box-shadow 0.2s ease; }
 .ci-input:focus { border-color: var(--gold); outline: none; box-shadow: 0 0 0 4px rgba(255,209,102,0.18); }
 .ci-input::placeholder { color: rgba(255,255,255,0.35); font-weight: 500; }
-.ci-help { font-size: 10.5px; color: #cbb9e0; line-height: 1.55; margin: -8px 0 18px; padding: 11px 13px; background: rgba(255,255,255,0.06); border-radius: 14px; border-left: 3px solid var(--accent-2); }
+.ci-help { font-size: 10.5px; color: #cbb9e0; line-height: 1.55; margin: -8px 0 18px; padding: 11px 13px; background: rgba(15,10,28,0.65); backdrop-filter: blur(3px); border-radius: 14px; border-left: 3px solid var(--accent-2); }
 .ci-help b { color: var(--gold); }
 .ci-chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
 .ci-chip { flex: 0 0 auto; padding: 10px 15px; border-radius: 999px; background: rgba(255,255,255,0.08); border: none; font-size: 11.5px; font-weight: 700; color: #cbb9e0; font-family: 'Manrope', sans-serif; cursor: pointer; transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease; }
@@ -1350,6 +1365,7 @@ select option { background: var(--card-solid); color: var(--ink); }
     </div>
     <div style="margin-top:14px">
       <label class="field-label">¿Esto se repite?</label>
+      <div style="font-size:10.5px;color:var(--muted);margin:-2px 0 8px;line-height:1.4">Actívalo si es un gasto o ingreso fijo (renta, suscripción, nómina, etc.) y Kashly lo va a registrar solo cada vez que toque, sin que tengas que volver a capturarlo.</div>
       <div class="cuenta-chip-row" id="recurrente-toggle-row">
         <div class="cuenta-chip sel" data-val="no">No</div>
         <div class="cuenta-chip" data-val="si">Sí</div>
@@ -1600,11 +1616,11 @@ select option { background: var(--card-solid); color: var(--ink); }
         <div class="ci-q">¿Qué tipo de presupuesto quieres llevar?</div>
         <div class="ci-plan-card" data-plan="estricto">
           <div class="ci-plan-top"><span class="ci-plan-name">Estricto</span><div class="ci-plan-check"></div></div>
-          <div class="ci-plan-desc">Tu presupuesto total no cambia. Si gastas más en una categoría, otra baja automáticamente. Ideal si quieres control total y no salirte del presupuesto.</div>
+          <div class="ci-plan-desc">Tu meta de ahorro nunca se toca. Si quieres subirle el límite a una categoría, se lo tienes que quitar a otra — y si ninguna tiene espacio, no podrás subirlo. Ideal si no quieres que nada le baje a tu ahorro.</div>
         </div>
         <div class="ci-plan-card" data-plan="flexible">
           <div class="ci-plan-top"><span class="ci-plan-name">Flexible</span><div class="ci-plan-check"></div></div>
-          <div class="ci-plan-desc">Tu presupuesto total puede cambiar cada mes. Si quieres gastar más, puedes hacerlo, pero el sistema te avisa. Ideal si prefieres flexibilidad.</div>
+          <div class="ci-plan-desc">Si te quedas sin espacio para subirle el límite a una categoría, puedes elegir bajar tu meta de ahorro para cubrir la diferencia (siempre te lo pregunta antes). Ideal si prefieres ajustar tu meta cuando haga falta.</div>
         </div>
       </div>
     </div>
@@ -1747,6 +1763,7 @@ select option { background: var(--card-solid); color: var(--ink); }
     <div class="gato-life-stage" id="gato-life-stage" role="button" tabindex="0" aria-label="Ver tu armario">
       <span class="gato-mote"></span><span class="gato-mote"></span><span class="gato-mote"></span>
       <img class="gato-img" id="gato-avatar-img" src="" alt="Tu nivel">
+      <span class="marco-logro-label" id="gato-avatar-logro-label"></span>
     </div>
     <div class="gato-avatar-nivel" id="gato-avatar-nivel">Nivel 1 · Inicial</div>
     <div class="gato-vit-sub" id="gato-avatar-sub">0 / 100 XP</div>
@@ -1963,7 +1980,7 @@ select option { background: var(--card-solid); color: var(--ink); }
 
 <div class="overlay" id="overlay-logro-detalle">
   <div class="gato-det-sheet">
-    <div class="gato-det-img-wrap"><img id="logro-det-img" class="marco-logro" src="" alt=""></div>
+    <div class="gato-det-img-wrap"><div class="marco-logro-wrap"><img id="logro-det-img" src="" alt=""><span class="marco-logro-label" id="logro-det-label"></span></div></div>
     <div class="gato-det-nombre" id="logro-det-nombre"></div>
     <div class="gato-det-estado" id="logro-det-estado"></div>
     <div class="gato-det-txt" id="logro-det-txt"></div>
@@ -3789,11 +3806,12 @@ function render() {
   const totalAhorroMov = gastos.filter(g => g.tipo === 'ahorro').reduce((s, g) => s + Number(g.monto), 0);
   const saldoManual = Number(config.saldoAhorrado) || 0;
   const ahorroAuto = Number(config.ahorroAutomaticoAcumulado) || 0;
-  // El ahorro automático (tu meta de ahorro repartida por periodo) sí cuenta
-  // como ahorro real, pero el ahorro manual que registras en "Agregar" no
-  // debe restarse de Disponible: es dinero que ya tenías, no parte del
-  // ingreso de este periodo.
-  const totalAhorro = totalAhorroMov + saldoManual + ahorroAuto;
+  // El ahorro automático (tu meta de ahorro repartida por periodo) se aparta
+  // de Disponible para que no lo gastes, pero todavía no es dinero que hayas
+  // movido de verdad a tu ahorro — por eso no se suma a Total ahorrado. Total
+  // ahorrado solo refleja lo que registraste a mano o lo que la app detectó
+  // que ya guardaste (los "Cierre de quincena/mes" que aceptaste).
+  const totalAhorro = totalAhorroMov + saldoManual;
   const saldoInicial = Number(config.saldoInicial) || 0;
   const disponible = saldoInicial + (totalIngreso - ahorroAuto) - totalGasto;
 
@@ -4035,10 +4053,10 @@ function renderPresupuesto() {
 
   if (totalLimite > 0 && totalGastado > totalLimite) {
     warningEl.style.display = 'block';
-    warningEl.textContent = 'Ya alcanzaste tu límite de gasto para este periodo.';
+    warningEl.textContent = 'Ya alcanzaste tu límite de gasto para este periodo. Para seguir gastando sin salirte del presupuesto, deja de gastar en tus categorías o baja tu meta de ahorro en Ajustes para liberar más Disponible.';
   } else if (totalLimite > 0 && totalGastado >= totalLimite * 0.9) {
     warningEl.style.display = 'block';
-    warningEl.textContent = 'Estás cerca de alcanzar tu límite de gasto para este periodo.';
+    warningEl.textContent = 'Estás cerca de alcanzar tu límite de gasto para este periodo. Puedes bajar el ritmo de tus gastos o, si necesitas más margen, bajar tu meta de ahorro en Ajustes.';
   } else {
     warningEl.style.display = 'none';
   }
@@ -5517,7 +5535,7 @@ function renderArmario() {
     const equipado = skin === e.id;
     return '<div class="gato-especial-card unlocked armario-item' + (e.negativo ? ' negativo' : '') + '" data-skin="' + e.id + '">' +
       (equipado ? '<span class="gato-especial-check">✓</span>' : '') +
-      '<img class="marco-logro" src="' + e.archivo + '" alt="">' +
+      '<div class="marco-logro-wrap"><img src="' + e.archivo + '" alt=""><span class="marco-logro-label">' + e.nombre + '</span></div>' +
       '<div class="nombre">' + e.nombre + '</div>' +
       '<div class="req">Logro</div>' +
     '</div>';
@@ -5614,7 +5632,7 @@ function renderPanelEspecialesGato() {
     const prog = !tiene && e.progreso ? e.progreso() : null;
     return '<div class="gato-especial-card' + (tiene ? ' unlocked' : ' bloqueado') + (e.negativo ? ' negativo' : '') + '" data-skin="' + e.id + '">' +
       (estaEquipado ? '<span class="gato-especial-check">✓</span>' : (tiene ? '' : '<span class="gato-especial-check gato-especial-candado">' + (e.negativo ? '🩹' : '🔒') + '</span>')) +
-      '<img class="marco-logro" src="' + e.archivo + '" alt="">' +
+      '<div class="marco-logro-wrap"><img src="' + e.archivo + '" alt=""><span class="marco-logro-label">' + e.nombre + '</span></div>' +
       '<div class="nombre">' + e.nombre + '</div>' +
       '<div class="req">' + (tiene ? (estaEquipado ? 'En uso' : 'Toca para ver') : 'Bloqueado') + '</div>' +
       (prog ? '<div class="prog">' + prog.actual + '/' + prog.meta + ' ' + prog.unidad + '</div>' : '') +
@@ -5638,6 +5656,7 @@ function abrirDetalleLogro(id) {
   const equipado = config.gatoSkinEquipado === id;
 
   document.getElementById('logro-det-img').src = e.archivo;
+  document.getElementById('logro-det-label').textContent = e.nombre;
   document.getElementById('logro-det-nombre').textContent = e.nombre;
   const estadoEl = document.getElementById('logro-det-estado');
   estadoEl.textContent = tiene ? '✓ Desbloqueado' : '🔒 Bloqueado';
@@ -5958,6 +5977,9 @@ function renderPantallaGato() {
   avatarImgEl.src = imagenAvatarGato();
   avatarImgEl.classList.toggle('marco-logro', !!especialEquipado);
   avatarImgEl.classList.toggle('marco-nivel', !especialEquipado);
+  const avatarLabelEl = document.getElementById('gato-avatar-logro-label');
+  avatarLabelEl.classList.toggle('show', !!especialEquipado);
+  avatarLabelEl.textContent = especialEquipado ? especialEquipado.nombre : '';
   document.getElementById('gato-avatar-nivel').textContent = especialEquipado
     ? especialEquipado.nombre + ' · Logro equipado'
     : 'Nivel ' + nivel + ' · ' + nivelInfo.nombre;
@@ -6136,6 +6158,34 @@ document.getElementById('btn-ver-mas').addEventListener('click', function() {
   mostrarTodos = !mostrarTodos;
   render();
 });
+
+// En varios navegadores móviles, si la página ya estaba desplazada hacia
+// abajo, un elemento "position: fixed" (como cualquier .overlay) puede
+// dibujarse mal alineado con lo que el usuario realmente está viendo hasta
+// que ocurre un repintado. Bloquear el scroll del fondo mientras hay un
+// overlay abierto (y restaurarlo exactamente donde estaba al cerrarlo)
+// evita ese salto, de paso impide que el fondo se mueva detrás del overlay.
+(function() {
+  let scrollGuardado = 0;
+  let bloqueado = false;
+  function actualizarBloqueoScroll() {
+    const hayOverlayAbierto = !!document.querySelector('.overlay.show');
+    if (hayOverlayAbierto && !bloqueado) {
+      scrollGuardado = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = -scrollGuardado + 'px';
+      document.body.style.width = '100%';
+      bloqueado = true;
+    } else if (!hayOverlayAbierto && bloqueado) {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      window.scrollTo(0, scrollGuardado);
+      bloqueado = false;
+    }
+  }
+  new MutationObserver(actualizarBloqueoScroll).observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class'] });
+})();
 
 cargarDatos();
 </script>
