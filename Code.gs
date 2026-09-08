@@ -94,8 +94,18 @@ function obtenerMovimientos() {
     .reverse();
 }
 
+// En una conexión inestable, el cliente puede recibir un error de red aunque
+// esta escritura ya haya llegado y se haya guardado — en ese caso reintenta
+// el mismo "add" más tarde (ver encolar/procesarCola en el cliente). Sin
+// esta verificación, ese reintento duplicaba el movimiento entero.
 function guardarMovimiento(mov) {
   const sheet = getSheet();
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(mov.id)) {
+      return true; // ya existe, no lo vuelvas a agregar
+    }
+  }
   sheet.appendRow([String(mov.id), Number(mov.monto), mov.fecha, mov.nota || '', mov.tipo, mov.categoria || '', mov.cuentaId || '', mov.origenRecurrenteId || '']);
   return true;
 }
