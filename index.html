@@ -9,6 +9,8 @@
 <meta name="apple-mobile-web-app-title" content="Kashly">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preload" as="image" href="recuadro-niveles.png">
+<link rel="preload" as="image" href="recuadro-logrosfinancieros.png">
 <title>Kashly</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Manrope:wght@400;500;600;700&display=swap');
@@ -846,9 +848,6 @@ select option { background: var(--card-solid); color: var(--ink); }
 .gato-det-img-wrap .marco-logro-wrap img { padding: 18px; }
 .gato-det-img-wrap .marco-logro-label { font-size: 9.5px; }
 .gato-reveal-stage img.marco-nivel { box-sizing: border-box; padding: 16px; }
-.gato-life-stage .gato-img.marco-nivel, .gato-life-stage .gato-img.marco-logro { box-sizing: border-box; padding: 26px; }
-.gato-life-stage .marco-logro-label { font-size: 12px; bottom: 12%; display: none; }
-.gato-life-stage .marco-logro-label.show { display: block; }
 .gato-nivel-row img.marco-nivel { box-sizing: border-box; padding: 4px; }
 
 /* Detalle de logro */
@@ -1038,9 +1037,9 @@ select option { background: var(--card-solid); color: var(--ink); }
 .float-badge.chest.sin-pendientes { filter: grayscale(1); opacity: 0.5; }
 .float-ico-img { width: 56px; height: 56px; object-fit: contain; display: block; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5)); }
 .float-cnt {
-  display: block; margin: -8px auto 0; width: fit-content; padding: 1px 8px; border-radius: 999px; position: relative;
-  font-size: 10px; font-weight: 700; font-family: 'Manrope', sans-serif; color: #fff2d8;
-  background: rgba(20,15,10,0.85); border: 1px solid rgba(255,209,102,0.4);
+  display: block; margin: -8px auto 0; width: fit-content; min-width: 34px; padding: 2px 12px; border-radius: 999px; position: relative;
+  font-size: 10px; font-weight: 800; font-family: 'Manrope', sans-serif; color: #2a2438; text-align: center;
+  background: #fff; box-shadow: 0 2px 6px -1px rgba(0,0,0,0.4);
 }
 .float-dot { position: absolute; top: -3px; right: -3px; width: 9px; height: 9px; border-radius: 50%; background: #ff4d4d; border: 2px solid #14101f; display: none; }
 .float-dot.show { display: block; }
@@ -1059,29 +1058,31 @@ select option { background: var(--card-solid); color: var(--ink); }
 @keyframes mmPopIn { 0% { transform: scale(0.7); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 .mm-glow { position: absolute; inset: -50%; background: radial-gradient(circle, rgba(242,181,68,0.22), transparent 60%); animation: mmGlowPulse 2.4s ease-in-out infinite; pointer-events: none; }
 @keyframes mmGlowPulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.12); } }
-.mm-corner { position: absolute; width: 22px; height: 22px; border: 2px solid #f2b544; opacity: 0.75; }
-.mm-corner.tl { top: 9px; left: 9px; border-right: none; border-bottom: none; border-radius: 8px 0 0 0; }
-.mm-corner.tr { top: 9px; right: 9px; border-left: none; border-bottom: none; border-radius: 0 8px 0 0; }
-.mm-corner.bl { bottom: 9px; left: 9px; border-right: none; border-top: none; border-radius: 0 0 0 8px; }
-.mm-corner.br { bottom: 9px; right: 9px; border-left: none; border-top: none; border-radius: 0 0 8px 0; }
 .mm-spark { position: absolute; color: #f2b544; font-size: 13px; z-index: 1; animation: gatoSparkle 1.9s ease-in-out infinite; }
 .mm-spark.s1 { top: 20px; left: 30px; animation-delay: 0s; }
 .mm-spark.s2 { top: 26px; right: 34px; animation-delay: 0.5s; }
 .mm-spark.s3 { bottom: 90px; left: 18px; animation-delay: 1s; }
 .mm-spark.s4 { bottom: 96px; right: 20px; animation-delay: 1.5s; }
-.mm-gato-wrap { text-align: center; margin: -6px 0 4px; position: relative; z-index: 1; animation: mmGatoPop 0.55s cubic-bezier(.34,1.56,.64,1) 0.15s both; }
-.mm-gato-wrap img { width: 108px; filter: drop-shadow(0 10px 14px rgba(0,0,0,0.5)); }
+.mm-gato-wrap { text-align: center; margin: 2px 0 10px; position: relative; z-index: 1; animation: mmGatoPop 0.55s cubic-bezier(.34,1.56,.64,1) 0.15s both; }
+.mm-gato-wrap img { width: 190px; filter: drop-shadow(0 14px 18px rgba(0,0,0,0.55)); }
 @keyframes mmGatoPop { 0% { transform: translateY(18px) scale(0.6); opacity: 0; } 70% { transform: translateY(-4px) scale(1.05); opacity: 1; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
-.mm-ribbon { text-align: center; margin: 4px 0 18px; position: relative; z-index: 1; }
+.mm-ribbon { text-align: center; margin: 0 0 8px; position: relative; z-index: 1; }
 .mm-ribbon span { display: inline-block; background: linear-gradient(135deg, #7f6fd6, #4a3d8f); color: #fff; font-size: 11.5px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; padding: 8px 20px; border-radius: 999px; box-shadow: 0 6px 18px -6px rgba(127,111,214,0.75); }
-.mm-timer { display: flex; align-items: center; justify-content: center; gap: 5px; background: #1a1428; border: 1px solid #f2b544; border-radius: 999px; padding: 5px 15px; font-size: 12.5px; font-weight: 800; color: #f2b544; margin: 0 auto 18px; width: fit-content; position: relative; z-index: 1; animation: mmTimerPulse 1s ease-in-out infinite; }
-@keyframes mmTimerPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(242,181,68,0.45); } 50% { box-shadow: 0 0 0 7px rgba(242,181,68,0); } }
-.mm-icon-wrap { position: relative; width: 84px; height: 84px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; }
-.mm-icon-rays { position: absolute; inset: -22px; background: conic-gradient(from 0deg, transparent, rgba(242,181,68,0.4), transparent 30%); border-radius: 50%; animation: mmRaysSpin 6s linear infinite; }
-@keyframes mmRaysSpin { to { transform: rotate(360deg); } }
-.mm-icon { width: 72px; height: 72px; border-radius: 20px; background: linear-gradient(135deg, #7f6fd6, #4a3d8f); display: flex; align-items: center; justify-content: center; font-size: 34px; position: relative; z-index: 1; box-shadow: 0 12px 28px -10px rgba(127,111,214,0.85); }
-.mm-title { font-size: 16px; font-weight: 600; color: #f3f0fb; text-align: center; margin-bottom: 5px; position: relative; z-index: 1; }
-.mm-reward { font-size: 12px; color: #8b7fb0; text-align: center; margin-bottom: 18px; position: relative; z-index: 1; }
+.mm-timer {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  background: linear-gradient(135deg, #ffdd8a, #f2b544); border: none; border-radius: 999px;
+  padding: 9px 22px; font-size: 17px; font-weight: 800; color: #2a1608; margin: 0 auto 14px; width: fit-content;
+  position: relative; z-index: 1; box-shadow: 0 0 0 0 rgba(242,181,68,0.55), 0 8px 20px -8px rgba(242,181,68,0.8);
+  animation: mmTimerPulse 1s ease-in-out infinite;
+}
+@keyframes mmTimerPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(242,181,68,0.55), 0 8px 20px -8px rgba(242,181,68,0.8); } 50% { box-shadow: 0 0 0 8px rgba(242,181,68,0), 0 8px 20px -8px rgba(242,181,68,0.8); } }
+.mm-title { font-size: 19px; font-weight: 800; color: #fff; text-align: center; margin-bottom: 12px; position: relative; z-index: 1; line-height: 1.3; }
+.mm-reward {
+  display: flex; align-items: center; justify-content: center; gap: 7px; width: fit-content; margin: 0 auto 18px;
+  background: rgba(111,227,168,0.14); border: 1.5px solid rgba(111,227,168,0.5); border-radius: 999px; padding: 8px 20px;
+  font-size: 19px; font-weight: 800; color: #6fe3a8; text-align: center; position: relative; z-index: 1;
+}
+.mm-reward-ico { font-size: 17px; }
 .mm-seg-row { display: flex; gap: 6px; margin-bottom: 8px; position: relative; z-index: 1; flex-wrap: wrap; }
 .mm-seg { flex: 1; min-width: 12px; height: 9px; border-radius: 4px; background: #3a2d52; transition: background 0.2s ease; }
 .mm-seg.on { background: linear-gradient(135deg, #7f6fd6, #b8a8f0); box-shadow: 0 0 8px -1px rgba(127,111,214,0.8); }
@@ -1668,17 +1669,12 @@ select option { background: var(--card-solid); color: var(--ink); }
 <div class="overlay" id="overlay-mision">
   <div class="sheet mm-sheet">
     <div class="mm-glow"></div>
-    <div class="mm-corner tl"></div><div class="mm-corner tr"></div><div class="mm-corner bl"></div><div class="mm-corner br"></div>
     <span class="mm-spark s1">✦</span><span class="mm-spark s2">✧</span><span class="mm-spark s3">✦</span><span class="mm-spark s4">✧</span>
-    <div class="mm-gato-wrap"><img src="gato-mision-semanal.png" alt=""></div>
     <div class="mm-ribbon"><span>Misión de la semana</span></div>
+    <div class="mm-gato-wrap"><img src="gato-mision-semanal.png" alt=""></div>
     <div class="mm-timer" id="mm-timer"><span class="mm-timer-ico">⏱</span><span id="mm-timer-txt">3d 14h</span></div>
-    <div class="mm-icon-wrap">
-      <div class="mm-icon-rays"></div>
-      <div class="mm-icon" id="mm-icono">🎯</div>
-    </div>
     <div class="mm-title" id="mm-titulo">—</div>
-    <div class="mm-reward" id="mm-recompensa">Recompensa: +0 XP</div>
+    <div class="mm-reward" id="mm-recompensa"><span class="mm-reward-ico">⚡</span><span id="mm-recompensa-xp">+0 XP</span></div>
     <div class="mm-seg-row" id="mm-segmentos"></div>
     <div class="mm-sub" id="mm-sub">0 de 0</div>
     <div class="mm-completada" id="mm-completada">
@@ -1687,7 +1683,7 @@ select option { background: var(--card-solid); color: var(--ink); }
       <div class="mm-completada-xp" id="mm-completada-xp">+15 XP</div>
       <div class="mm-completada-sub">Ábrelo desde tu Cofre de recompensas 🎁</div>
     </div>
-    <button type="button" class="mm-btn" id="mm-btn-cerrar">Entendido</button>
+    <button type="button" class="mm-btn" id="mm-btn-cerrar">¡Acepto el reto! 🎯</button>
   </div>
 </div>
 
@@ -1763,7 +1759,6 @@ select option { background: var(--card-solid); color: var(--ink); }
     <div class="gato-life-stage" id="gato-life-stage" role="button" tabindex="0" aria-label="Ver tu armario">
       <span class="gato-mote"></span><span class="gato-mote"></span><span class="gato-mote"></span>
       <img class="gato-img" id="gato-avatar-img" src="" alt="Tu nivel">
-      <span class="marco-logro-label" id="gato-avatar-logro-label"></span>
     </div>
     <div class="gato-avatar-nivel" id="gato-avatar-nivel">Nivel 1 · Inicial</div>
     <div class="gato-vit-sub" id="gato-avatar-sub">0 / 100 XP</div>
@@ -4950,9 +4945,8 @@ function abrirModalMision() {
   if (!m) return;
   const t = MISIONES_CATALOGO.find(function(x) { return x.id === m.templateId; });
   if (!t) return;
-  document.getElementById('mm-icono').textContent = t.icono || '🎯';
   document.getElementById('mm-titulo').textContent = t.titulo;
-  document.getElementById('mm-recompensa').textContent = 'Recompensa: +' + t.xp + ' XP';
+  document.getElementById('mm-recompensa-xp').textContent = '+' + t.xp + ' XP';
   const meta = t.meta;
   const progreso = Math.min(m.progreso, meta);
   const segs = document.getElementById('mm-segmentos');
@@ -4968,13 +4962,13 @@ function abrirModalMision() {
   const completada = m.estado === 'completada';
   document.getElementById('mm-completada').style.display = completada ? 'block' : 'none';
   document.getElementById('mm-timer').style.display = completada ? 'none' : 'flex';
-  document.querySelector('.mm-icon-wrap').style.display = completada ? 'none' : 'flex';
   document.getElementById('mm-titulo').style.display = completada ? 'none' : 'block';
-  document.getElementById('mm-recompensa').style.display = completada ? 'none' : 'block';
+  document.getElementById('mm-recompensa').style.display = completada ? 'none' : 'flex';
   document.getElementById('mm-segmentos').style.display = completada ? 'none' : 'flex';
   document.getElementById('mm-sub').style.display = completada ? 'none' : 'block';
   if (completada) document.getElementById('mm-completada-xp').textContent = '+' + t.xp + ' XP';
   else document.getElementById('mm-timer-txt').textContent = textoCuentaRegresivaSemana();
+  document.getElementById('mm-btn-cerrar').textContent = completada ? 'Entendido' : '¡Acepto el reto! 🎯';
 
   document.getElementById('overlay-mision').classList.add('show');
 }
@@ -5975,11 +5969,6 @@ function renderPantallaGato() {
 
   const avatarImgEl = document.getElementById('gato-avatar-img');
   avatarImgEl.src = imagenAvatarGato();
-  avatarImgEl.classList.toggle('marco-logro', !!especialEquipado);
-  avatarImgEl.classList.toggle('marco-nivel', !especialEquipado);
-  const avatarLabelEl = document.getElementById('gato-avatar-logro-label');
-  avatarLabelEl.classList.toggle('show', !!especialEquipado);
-  avatarLabelEl.textContent = especialEquipado ? especialEquipado.nombre : '';
   document.getElementById('gato-avatar-nivel').textContent = especialEquipado
     ? especialEquipado.nombre + ' · Logro equipado'
     : 'Nivel ' + nivel + ' · ' + nivelInfo.nombre;
