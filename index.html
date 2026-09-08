@@ -2538,6 +2538,7 @@ function aplicarYGuardarMeta(val, freq, dia1, dia2, semanaDia, ingresoMensual) {
   } else if (freq === 'semanal') {
     config.semanaDia = semanaDia;
   }
+  recalcularAhorroAutomatico();
   actualizarTextosPeriodo();
   render();
   showToast('Meta guardada');
@@ -2806,6 +2807,7 @@ document.getElementById('ci-btn-next').addEventListener('click', function() {
   config.saldoInicial = saldoInicial;
   config.saldoAhorrado = saldoAhorrado;
   config.tipoPresupuesto = tipoPresupuesto;
+  recalcularAhorroAutomatico();
 
   guardarConSincronizacion({ action: 'set-config', key: 'ingresoMensualEstimado', value: ingreso });
   guardarConSincronizacion({ action: 'set-config', key: 'frecuenciaPago', value: freq });
@@ -3168,6 +3170,7 @@ function iniciarConDatos(datosGastos, datosConfig, offline) {
   asignarMisionSemanalSiCorresponde();
   generarMovimientosRecurrentesSiCorresponde();
   acreditarAhorroAutomaticoSiCorresponde();
+  recalcularAhorroAutomatico();
   evaluarDiaSiCorresponde();
   cargarCategorias();
   poblarSelectsCategoria();
@@ -4459,6 +4462,24 @@ function acreditarAhorroAutomaticoSiCorresponde() {
   config.ahorroAutomaticoAcumulado = (Number(config.ahorroAutomaticoAcumulado) || 0) + metaAhorroPeriodo;
   guardarConSincronizacion({ action: 'set-config', key: 'ahorroAutoPeriodos', value: acreditados });
   guardarConSincronizacion({ action: 'set-config', key: 'ahorroAutomaticoAcumulado', value: config.ahorroAutomaticoAcumulado });
+}
+
+// Cada periodo que ya se acreditó se calculó con la meta de ahorro que
+// estuviera vigente en ese momento. Si después cambias tu meta, esos
+// periodos ya acreditados se quedaban con el monto viejo para siempre —
+// aunque hoy quisieras apartar menos (o más), Disponible seguía
+// descontando lo que decidiste antes. Esto recalcula todo lo ya
+// acreditado usando tu meta ACTUAL, para que un cambio de meta se refleje
+// de inmediato en vez de solo aplicar a partir del siguiente periodo.
+function recalcularAhorroAutomatico() {
+  const periodos = config.ahorroAutoPeriodos || {};
+  const cantidad = Object.keys(periodos).length;
+  if (cantidad === 0) return;
+  const meta = Number(config.metaAhorro) || 0;
+  const nuevoAcumulado = Math.round((meta / periodosPorMes()) * cantidad * 100) / 100;
+  if (nuevoAcumulado === (Number(config.ahorroAutomaticoAcumulado) || 0)) return;
+  config.ahorroAutomaticoAcumulado = nuevoAcumulado;
+  guardarConSincronizacion({ action: 'set-config', key: 'ahorroAutomaticoAcumulado', value: nuevoAcumulado });
 }
 
 // ==================================================================
