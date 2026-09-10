@@ -3326,17 +3326,20 @@ function attachSwipe(itemEl) {
   });
 }
 
+// Si el movimiento se registró antes de que existiera este control, no trae
+// xpOtorgado guardado — se usa el valor base (sin boost) como mejor
+// estimado, para no dejar sin revisar los movimientos viejos.
+function revertirXPDeMovimiento(mov) {
+  if (!mov || (mov.tipo !== 'gasto' && mov.tipo !== 'ingreso')) return;
+  const xp = mov.xpOtorgado !== undefined ? mov.xpOtorgado : (mov.tipo === 'gasto' ? 8 : 15);
+  quitarXP(xp, 'Borraste un ' + mov.tipo + ' registrado');
+}
+
 function eliminarMovimientoDirecto(id) {
   const mov = gastos.find(function(g) { return String(g.id) === String(id); });
   gastos = gastos.filter(function(g) { return String(g.id) !== String(id); });
   guardarCacheLocal();
-  if (mov && (mov.tipo === 'gasto' || mov.tipo === 'ingreso')) {
-    // Si el movimiento se registró antes de que existiera este control, no
-    // trae xpOtorgado guardado — se usa el valor base (sin boost) como mejor
-    // estimado, para no dejar sin revisar los movimientos viejos.
-    const xp = mov.xpOtorgado !== undefined ? mov.xpOtorgado : (mov.tipo === 'gasto' ? 8 : 15);
-    quitarXP(xp, 'Borraste un ' + mov.tipo + ' registrado');
-  }
+  revertirXPDeMovimiento(mov);
   render();
   apiPost({ action: 'delete', id: id }).then(function(res) {
     if (!res || !res.ok) throw new Error();
@@ -3404,8 +3407,10 @@ document.getElementById('btn-eliminar').addEventListener('click', function() {
   if (!editandoId) return;
   const id = editandoId;
 
+  const mov = gastos.find(function(g) { return String(g.id) === String(id); });
   gastos = gastos.filter(g => String(g.id) !== String(id));
   guardarCacheLocal();
+  revertirXPDeMovimiento(mov);
   render();
   cerrarDetalle();
 
