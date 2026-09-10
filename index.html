@@ -2167,6 +2167,18 @@ function guardarConSincronizacion(payload) {
   guardarCacheLocal();
   apiPost(payload).catch(function() { encolar(payload); });
 }
+// Guarda varias claves de config en UN solo viaje al servidor en vez de uno
+// por clave. Cada gasto/ingreso que registras ya dispara de por sí varias
+// escrituras (el XP, el registro de XP, a veces el nivel...); mandarlas por
+// separado significa varias idas y vueltas a Apps Script (que de por sí no
+// es instantáneo) antes de que el aviso de "guardando..." desaparezca. El
+// llamador ya debe haber actualizado config[key] para cada clave antes de
+// llamar esto — aquí solo se sincroniza con el servidor.
+function guardarVariosConSincronizacion(valores) {
+  guardarCacheLocal();
+  const payload = { action: 'set-config-batch', valores: valores };
+  apiPost(payload).catch(function() { encolar(payload); });
+}
 function actualizarIndicadorOffline() {
   const pendientes = leerCola().length;
   const el = document.getElementById('offline-banner');
@@ -2556,12 +2568,14 @@ function aplicarYGuardarMeta(val, freq, dia1, dia2, semanaDia, ingresoMensual) {
   actualizarTextosPeriodo();
   render();
   showToast('Meta guardada');
-  guardarConSincronizacion({ action: 'set-config', key: 'metaAhorro', value: val });
-  guardarConSincronizacion({ action: 'set-config', key: 'ingresoMensualEstimado', value: ingresoMensual });
-  guardarConSincronizacion({ action: 'set-config', key: 'frecuenciaPago', value: freq });
-  guardarConSincronizacion({ action: 'set-config', key: 'quincenaDia1', value: config.quincenaDia1 || 1 });
-  guardarConSincronizacion({ action: 'set-config', key: 'quincenaDia2', value: config.quincenaDia2 || 16 });
-  guardarConSincronizacion({ action: 'set-config', key: 'semanaDia', value: config.semanaDia !== undefined ? config.semanaDia : 5 });
+  guardarVariosConSincronizacion({
+    metaAhorro: val,
+    ingresoMensualEstimado: ingresoMensual,
+    frecuenciaPago: freq,
+    quincenaDia1: config.quincenaDia1 || 1,
+    quincenaDia2: config.quincenaDia2 || 16,
+    semanaDia: config.semanaDia !== undefined ? config.semanaDia : 5
+  });
 }
 
 const TEXTO_INFO_INGRESO_MENSUAL =
@@ -2822,12 +2836,14 @@ document.getElementById('ci-btn-next').addEventListener('click', function() {
   config.saldoAhorrado = saldoAhorrado;
   config.tipoPresupuesto = tipoPresupuesto;
 
-  guardarConSincronizacion({ action: 'set-config', key: 'ingresoMensualEstimado', value: ingreso });
-  guardarConSincronizacion({ action: 'set-config', key: 'frecuenciaPago', value: freq });
-  guardarConSincronizacion({ action: 'set-config', key: 'metaAhorro', value: meta });
-  guardarConSincronizacion({ action: 'set-config', key: 'saldoInicial', value: saldoInicial });
-  guardarConSincronizacion({ action: 'set-config', key: 'saldoAhorrado', value: saldoAhorrado });
-  guardarConSincronizacion({ action: 'set-config', key: 'tipoPresupuesto', value: tipoPresupuesto });
+  guardarVariosConSincronizacion({
+    ingresoMensualEstimado: ingreso,
+    frecuenciaPago: freq,
+    metaAhorro: meta,
+    saldoInicial: saldoInicial,
+    saldoAhorrado: saldoAhorrado,
+    tipoPresupuesto: tipoPresupuesto
+  });
 
   actualizarTextosPeriodo();
   cargarFormAjustes();
@@ -4397,9 +4413,13 @@ function evaluarNotifPresupuesto() {
     agregarNotificacion('Presupuesto en advertencia', 'Ya usaste entre 50% y 89% de tu presupuesto ' + freq + '. Revisa tus categorías antes de que termine el periodo.', { tipo: 'presupuesto' });
     estado.advertencia = true;
   }
+  const cambio = estado.alerta !== (otorgados[mes.key] || {}).alerta || estado.advertencia !== (otorgados[mes.key] || {}).advertencia;
   otorgados[mes.key] = estado;
   config.gatoNotifPresupuestoMes = otorgados;
-  guardarConSincronizacion({ action: 'set-config', key: 'gatoNotifPresupuestoMes', value: otorgados });
+  // Esto se llama en cada gasto registrado, pero casi nunca cruza un umbral
+  // nuevo — evitar el viaje al servidor cuando no hay nada que avisar de
+  // verdad es una de las peticiones "gratis" que más se repiten.
+  if (cambio) guardarConSincronizacion({ action: 'set-config', key: 'gatoNotifPresupuestoMes', value: otorgados });
 }
 // Avisa una sola vez por nivel objetivo, cuando el avance hacia el
 // siguiente nivel llega al 75%.
@@ -4428,28 +4448,29 @@ function otorgarXP(cantidad, motivo) {
   const total = cantidad * mult;
   const nivelAntes = nivelActualGato();
   config.gatoXP = totalXPGato() + total;
-  guardarConSincronizacion({ action: 'set-config', key: 'gatoXP', value: config.gatoXP });
 
   const log = (config.gatoXPLog || []).slice();
   log.push({ fechaISO: hoyISO(), cantidad: total, motivo: motivo || 'XP ganada' });
   if (log.length > 500) log.splice(0, log.length - 500);
   config.gatoXPLog = log;
-  guardarConSincronizacion({ action: 'set-config', key: 'gatoXPLog', value: log });
+
+  const cambios = { gatoXP: config.gatoXP, gatoXPLog: log };
 
   const nivelDespues = nivelActualGato();
   if (nivelDespues > nivelAntes) {
     config.gatoNivelPendienteRevelar = nivelDespues;
-    guardarConSincronizacion({ action: 'set-config', key: 'gatoNivelPendienteRevelar', value: nivelDespues });
     const historial = (config.gatoHistorialNiveles || []).slice();
     historial.push({ nivel: nivelDespues, fechaISO: hoyISO(), resumen: resumenXPActual() });
     if (historial.length > 20) historial.splice(0, historial.length - 20);
     config.gatoHistorialNiveles = historial;
-    guardarConSincronizacion({ action: 'set-config', key: 'gatoHistorialNiveles', value: historial });
+    cambios.gatoNivelPendienteRevelar = nivelDespues;
+    cambios.gatoHistorialNiveles = historial;
     const nivelInfo = NIVELES_GATO.find(function(nv) { return nv.n === nivelDespues; });
     agregarNotificacion('¡Subiste de nivel!',
       '¡Subiste de nivel! Ahora eres Nivel ' + nivelDespues + ' · ' + (nivelInfo ? nivelInfo.nombre : '') + '. Sigue así para desbloquear más diseños de Kashly.',
       { nivel: nivelDespues, tipo: 'nivel' });
   }
+  guardarVariosConSincronizacion(cambios);
   evaluarNotifCercaNivel();
   return total;
 }
@@ -4461,13 +4482,13 @@ function otorgarXP(cantidad, motivo) {
 function quitarXP(cantidad, motivo) {
   if (!cantidad) return;
   config.gatoXP = Math.max(0, totalXPGato() - cantidad);
-  guardarConSincronizacion({ action: 'set-config', key: 'gatoXP', value: config.gatoXP });
 
   const log = (config.gatoXPLog || []).slice();
   log.push({ fechaISO: hoyISO(), cantidad: -cantidad, motivo: motivo || 'XP retirada' });
   if (log.length > 500) log.splice(0, log.length - 500);
   config.gatoXPLog = log;
-  guardarConSincronizacion({ action: 'set-config', key: 'gatoXPLog', value: log });
+
+  guardarVariosConSincronizacion({ gatoXP: config.gatoXP, gatoXPLog: log });
 }
 
 // --- Racha semanal: una vez por día evalúa si el día anterior se mantuvo
@@ -4873,15 +4894,23 @@ function evaluarProgresoMision(mision) {
 }
 function evaluarProgresoMisionYGuardar() {
   if (!config.misionActual) return;
-  const antes = config.misionActual.estado;
+  const antes = config.misionActual;
   const m = evaluarProgresoMision(Object.assign({}, config.misionActual));
-  config.misionActual = m;
-  guardarConSincronizacion({ action: 'set-config', key: 'misionActual', value: m });
-  if (antes !== 'completada' && m.estado === 'completada' && !m.notificoCompletada) {
-    const t = MISIONES_CATALOGO.find(function(x) { return x.id === m.templateId; });
+  let notificarCompletada = false;
+  if (antes.estado !== 'completada' && m.estado === 'completada' && !m.notificoCompletada) {
     m.notificoCompletada = true;
-    config.misionActual = m;
+    notificarCompletada = true;
+  }
+  config.misionActual = m;
+  // Esto se llama en cada gasto/ingreso registrado, aunque la mayoría no
+  // toque la misión activa (categoría distinta, ya estaba completada, etc.)
+  // — evitar el viaje al servidor cuando nada cambió de verdad es una de
+  // las peticiones "gratis" que más se repiten.
+  if (m.progreso !== antes.progreso || m.estado !== antes.estado || notificarCompletada) {
     guardarConSincronizacion({ action: 'set-config', key: 'misionActual', value: m });
+  }
+  if (notificarCompletada) {
+    const t = MISIONES_CATALOGO.find(function(x) { return x.id === m.templateId; });
     agregarNotificacion('¡Misión cumplida!', 'Cumpliste "' + t.titulo + '". Abre tu Cofre de recompensas para reclamar +' + t.xp + ' XP.', { tipo: 'logro' });
     showToast('¡Misión cumplida! Reclámala en tu Cofre 🎁');
   }
@@ -5831,10 +5860,8 @@ function reiniciarConfigFinanciera() {
     categoriaOverrides: {},
     configInicialCerrada: false
   };
-  Object.keys(valores).forEach(function(k) {
-    config[k] = valores[k];
-    guardarConSincronizacion({ action: 'set-config', key: k, value: valores[k] });
-  });
+  Object.keys(valores).forEach(function(k) { config[k] = valores[k]; });
+  guardarVariosConSincronizacion(valores);
   cargarFormAjustes();
   render();
   renderPresupuesto();
@@ -5856,10 +5883,8 @@ function reiniciarProgresoGato() {
     gatoLogrosDesbloqueados: [],
     gatoSkinEquipado: 'nivel'
   };
-  Object.keys(valores).forEach(function(k) {
-    config[k] = valores[k];
-    guardarConSincronizacion({ action: 'set-config', key: k, value: valores[k] });
-  });
+  Object.keys(valores).forEach(function(k) { config[k] = valores[k]; });
+  guardarVariosConSincronizacion(valores);
   render();
   renderPantallaGato();
   showToast('Tu progreso se reinició');

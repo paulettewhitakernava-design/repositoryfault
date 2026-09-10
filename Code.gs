@@ -31,6 +31,9 @@ function doPost(e) {
     } else if (body.action === 'set-config') {
       guardarConfigValor(body.key, body.value);
       result = { ok: true };
+    } else if (body.action === 'set-config-batch') {
+      guardarConfigValores(body.valores);
+      result = { ok: true };
     } else {
       result = { ok: false, error: 'Acción no soportada: ' + body.action };
     }
@@ -213,23 +216,48 @@ function guardarConfigValor(clave, valor) {
   const lock = LockService.getScriptLock();
   lock.waitLock(10000);
   try {
-    const sheet = getConfigSheet();
-    const data = sheet.getDataRange().getValues();
-    const texto = (typeof valor === 'object') ? JSON.stringify(valor) : valor;
-    for (let i = 1; i < data.length; i++) {
-      if (data[i][0] === clave) {
-        const celda = sheet.getRange(i + 1, 2);
-        // Forzar texto plano: si no, Sheets convierte solo un valor como
-        // "2026-09-03" en una fecha interna, y al leerlo de vuelta ya no
-        // coincide con el string que espera el cliente.
-        celda.setNumberFormat('@').setValue(texto);
-        return true;
-      }
-    }
-    sheet.appendRow([clave, texto]);
-    sheet.getRange(sheet.getLastRow(), 2).setNumberFormat('@').setValue(texto);
+    escribirValorConfig(getConfigSheet(), clave, valor);
     return true;
   } finally {
     lock.releaseLock();
   }
+}
+
+// Registrar un gasto/ingreso normalmente cambia varias claves de config a la
+// vez (el XP, el registro de XP, a veces el nivel...). Antes cada una viajaba
+// como su propia petición a Apps Script (que de por sí no responde al
+// instante), así que el aviso de "guardando cambios pendientes..." tardaba
+// en desaparecer. Esto guarda un lote entero bajo un solo bloqueo y una
+// sola lectura de la hoja, en vez de una ida y vuelta por clave.
+function guardarConfigValores(valores) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const sheet = getConfigSheet();
+    Object.keys(valores).forEach(function(clave) {
+      escribirValorConfig(sheet, clave, valores[clave]);
+    });
+    return true;
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+// Debe llamarse ya con el LockService tomado (guardarConfigValor y
+// guardarConfigValores lo hacen antes de invocarla).
+function escribirValorConfig(sheet, clave, valor) {
+  const data = sheet.getDataRange().getValues();
+  const texto = (typeof valor === 'object') ? JSON.stringify(valor) : valor;
+  for (let i = 1; i < data.length; i++) {
+    if (data[i][0] === clave) {
+      const celda = sheet.getRange(i + 1, 2);
+      // Forzar texto plano: si no, Sheets convierte solo un valor como
+      // "2026-09-03" en una fecha interna, y al leerlo de vuelta ya no
+      // coincide con el string que espera el cliente.
+      celda.setNumberFormat('@').setValue(texto);
+      return;
+    }
+  }
+  sheet.appendRow([clave, texto]);
+  sheet.getRange(sheet.getLastRow(), 2).setNumberFormat('@').setValue(texto);
 }
