@@ -1436,6 +1436,12 @@ select option { background: var(--card-solid); color: var(--ink); }
   </div>
 
   <div class="card">
+    <div class="card-lbl">Kashly financiero</div>
+    <div style="font-size:9.5px;color:var(--muted);margin:6px 0 14px;line-height:1.5">Borra tu XP, tu nivel y los logros/diseños que hayas desbloqueado, y vuelves a empezar desde Nivel 1. Tus gastos, ingresos y presupuesto registrados en "Agregar" no se ven afectados.</div>
+    <button type="button" class="btn-danger" id="btn-reiniciar-progreso-gato" style="width:100%">Reiniciar mi progreso</button>
+  </div>
+
+  <div class="card">
     <div class="card-lbl">Acerca de</div>
     <div class="acerca-txt">Kashly · v1.0<br>Tu control de gastos, ingresos y presupuesto.</div>
   </div>
@@ -5836,6 +5842,29 @@ function reiniciarConfigFinanciera() {
   abrirConfigInicial();
 }
 document.getElementById('btn-reiniciar-config-inicial').addEventListener('click', reiniciarConfigFinanciera);
+
+// --- Reinicia tu progreso de Kashly financiero: XP, nivel, logros y diseño
+// equipado vuelven a cero. No toca tus gastos, ingresos, presupuesto ni
+// configuración financiera — solo la parte de gamificación. ---
+function reiniciarProgresoGato() {
+  if (!confirm('¿Reiniciar tu progreso de Kashly financiero?\n\nTu XP vuelve a 0, regresas a Nivel 1, y se borran los logros financieros y diseños que hayas desbloqueado.\n\nTus gastos, ingresos y presupuesto registrados en "Agregar" NO se borran.')) return;
+  const valores = {
+    gatoXP: 0,
+    gatoXPLog: [],
+    gatoNivelPendienteRevelar: null,
+    gatoHistorialNiveles: [],
+    gatoLogrosDesbloqueados: [],
+    gatoSkinEquipado: 'nivel'
+  };
+  Object.keys(valores).forEach(function(k) {
+    config[k] = valores[k];
+    guardarConSincronizacion({ action: 'set-config', key: k, value: valores[k] });
+  });
+  render();
+  renderPantallaGato();
+  showToast('Tu progreso se reinició');
+}
+document.getElementById('btn-reiniciar-progreso-gato').addEventListener('click', reiniciarProgresoGato);
 
 const NOTIF_ICONOS = { presupuesto: '⚠', xpsemanal: '✦', cercanivel: '→', logro: '🏆', nivel: '★' };
 // Notificaciones guardadas antes de que existiera el campo "tipo" no lo
