@@ -94,46 +94,72 @@ function obtenerMovimientos() {
     .reverse();
 }
 
-// En una conexión inestable, el cliente puede recibir un error de red aunque
-// esta escritura ya haya llegado y se haya guardado — en ese caso reintenta
-// el mismo "add" más tarde (ver encolar/procesarCola en el cliente). Sin
-// esta verificación, ese reintento duplicaba el movimiento entero.
+// Cuando el usuario borra o edita varios movimientos muy seguido, el cliente
+// dispara varias peticiones casi al mismo tiempo, y Apps Script puede
+// ejecutar dos doPost en paralelo. Sin bloqueo, dos ejecuciones leían la
+// hoja con las mismas filas antes de que la otra borrara/insertara una, y al
+// actuar sobre un número de fila que ya había cambiado, terminaban borrando
+// la fila equivocada o dejando la fila objetivo intacta sin avisar del
+// error — de ahí movimientos que "no se borraban bien" al hacerlo rápido.
 function guardarMovimiento(mov) {
-  const sheet = getSheet();
-  const data = sheet.getDataRange().getValues();
-  for (let i = 1; i < data.length; i++) {
-    if (String(data[i][0]) === String(mov.id)) {
-      return true; // ya existe, no lo vuelvas a agregar
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const sheet = getSheet();
+    const data = sheet.getDataRange().getValues();
+    for (let i = 1; i < data.length; i++) {
+      // En una conexión inestable, el cliente puede recibir un error de red
+      // aunque esta escritura ya haya llegado y se haya guardado — en ese
+      // caso reintenta el mismo "add" más tarde (ver encolar/procesarCola en
+      // el cliente). Sin esta verificación, ese reintento duplicaba el
+      // movimiento entero.
+      if (String(data[i][0]) === String(mov.id)) {
+        return true; // ya existe, no lo vuelvas a agregar
+      }
     }
+    sheet.appendRow([String(mov.id), Number(mov.monto), mov.fecha, mov.nota || '', mov.tipo, mov.categoria || '', mov.cuentaId || '', mov.origenRecurrenteId || '']);
+    return true;
+  } finally {
+    lock.releaseLock();
   }
-  sheet.appendRow([String(mov.id), Number(mov.monto), mov.fecha, mov.nota || '', mov.tipo, mov.categoria || '', mov.cuentaId || '', mov.origenRecurrenteId || '']);
-  return true;
 }
 
 function actualizarMovimiento(mov) {
-  const sheet = getSheet();
-  const data = sheet.getDataRange().getValues();
-  for (let i = 1; i < data.length; i++) {
-    if (String(data[i][0]) === String(mov.id)) {
-      sheet.getRange(i + 1, 1, 1, 8).setValues([[
-        String(mov.id), Number(mov.monto), mov.fecha, mov.nota || '', mov.tipo, mov.categoria || '', mov.cuentaId || (String(data[i][6] || '')), mov.origenRecurrenteId || (String(data[i][7] || ''))
-      ]]);
-      return true;
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const sheet = getSheet();
+    const data = sheet.getDataRange().getValues();
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][0]) === String(mov.id)) {
+        sheet.getRange(i + 1, 1, 1, 8).setValues([[
+          String(mov.id), Number(mov.monto), mov.fecha, mov.nota || '', mov.tipo, mov.categoria || '', mov.cuentaId || (String(data[i][6] || '')), mov.origenRecurrenteId || (String(data[i][7] || ''))
+        ]]);
+        return true;
+      }
     }
+    throw new Error('Movimiento no encontrado');
+  } finally {
+    lock.releaseLock();
   }
-  throw new Error('Movimiento no encontrado');
 }
 
 function eliminarMovimiento(id) {
-  const sheet = getSheet();
-  const data = sheet.getDataRange().getValues();
-  for (let i = 1; i < data.length; i++) {
-    if (String(data[i][0]) === String(id)) {
-      sheet.deleteRow(i + 1);
-      break;
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const sheet = getSheet();
+    const data = sheet.getDataRange().getValues();
+    for (let i = 1; i < data.length; i++) {
+      if (String(data[i][0]) === String(id)) {
+        sheet.deleteRow(i + 1);
+        break;
+      }
     }
+    return true;
+  } finally {
+    lock.releaseLock();
   }
-  return true;
 }
 
 // ---- Config: meta de ahorro, cierres de mes ya preguntados, presupuestos por
