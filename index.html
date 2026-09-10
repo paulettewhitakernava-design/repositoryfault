@@ -2143,6 +2143,15 @@ function procesarCola() {
     if (res && res.ok) {
       guardarCola(cola.slice(1));
       procesarCola();
+    } else {
+      // El servidor sí respondió, pero rechazó el cambio (no es un problema
+      // de red) — reintentar exactamente lo mismo nunca lo va a resolver, y
+      // dejaba el aviso de "guardando..." pegado para siempre aunque hubiera
+      // buena conexión. Se descarta ese cambio puntual y se avisa, en vez de
+      // bloquear el resto de la cola con algo que no se puede arreglar solo.
+      guardarCola(cola.slice(1));
+      showToast('No se pudo guardar un cambio pendiente; puede que ya no exista', true);
+      procesarCola();
     }
   }).catch(function() {
     procesandoCola = false;
