@@ -3267,8 +3267,8 @@ document.getElementById('form-gasto').addEventListener('submit', function(e) {
   // hay internet, el envío se encola y se reintenta solo (ver apiPost/encolar).
   gastos.unshift(mov);
   guardarCacheLocal();
-  if (tipo === 'gasto') otorgarXP(8, 'Registraste un gasto');
-  if (tipo === 'ingreso') otorgarXP(15, 'Registraste un ingreso');
+  if (tipo === 'gasto') mov.xpOtorgado = otorgarXP(8, 'Registraste un gasto');
+  if (tipo === 'ingreso') mov.xpOtorgado = otorgarXP(15, 'Registraste un ingreso');
   if (tipo === 'gasto') { otorgarBonusPeriodoSiCorresponde(); evaluarNotifPresupuesto(); }
   if (tipo === 'gasto' || tipo === 'ingreso') evaluarProgresoMisionYGuardar();
   render();
@@ -3327,8 +3327,16 @@ function attachSwipe(itemEl) {
 }
 
 function eliminarMovimientoDirecto(id) {
+  const mov = gastos.find(function(g) { return String(g.id) === String(id); });
   gastos = gastos.filter(function(g) { return String(g.id) !== String(id); });
   guardarCacheLocal();
+  if (mov && (mov.tipo === 'gasto' || mov.tipo === 'ingreso')) {
+    // Si el movimiento se registró antes de que existiera este control, no
+    // trae xpOtorgado guardado — se usa el valor base (sin boost) como mejor
+    // estimado, para no dejar sin revisar los movimientos viejos.
+    const xp = mov.xpOtorgado !== undefined ? mov.xpOtorgado : (mov.tipo === 'gasto' ? 8 : 15);
+    quitarXP(xp, 'Borraste un ' + mov.tipo + ' registrado');
+  }
   render();
   apiPost({ action: 'delete', id: id }).then(function(res) {
     if (!res || !res.ok) throw new Error();
@@ -3374,7 +3382,8 @@ document.getElementById('form-edit').addEventListener('submit', function(e) {
   const categoriaEdit = tipoEdit === 'gasto' ? document.getElementById('edit-categoria').value : '';
   const idxActual = gastos.findIndex(g => String(g.id) === String(editandoId));
   const cuentaIdActual = idxActual !== -1 ? gastos[idxActual].cuentaId : undefined;
-  const mov = { id: editandoId, monto, fecha, nota, tipo: tipoEdit, categoria: categoriaEdit, cuentaId: cuentaIdActual };
+  const xpOtorgadoActual = idxActual !== -1 ? gastos[idxActual].xpOtorgado : undefined;
+  const mov = { id: editandoId, monto, fecha, nota, tipo: tipoEdit, categoria: categoriaEdit, cuentaId: cuentaIdActual, xpOtorgado: xpOtorgadoActual };
 
   const idx = gastos.findIndex(g => String(g.id) === String(mov.id));
   if (idx !== -1) gastos[idx] = mov;
@@ -4431,6 +4440,23 @@ function otorgarXP(cantidad, motivo) {
       { nivel: nivelDespues, tipo: 'nivel' });
   }
   evaluarNotifCercaNivel();
+  return total;
+}
+
+// Al borrar un gasto o ingreso se le quita exactamente el XP que ese
+// movimiento otorgó (guardado en mov.xpOtorgado al registrarlo) — así no
+// sirve de nada registrar movimientos de mentira solo para ganar XP y
+// luego borrarlos. Nunca baja de 0.
+function quitarXP(cantidad, motivo) {
+  if (!cantidad) return;
+  config.gatoXP = Math.max(0, totalXPGato() - cantidad);
+  guardarConSincronizacion({ action: 'set-config', key: 'gatoXP', value: config.gatoXP });
+
+  const log = (config.gatoXPLog || []).slice();
+  log.push({ fechaISO: hoyISO(), cantidad: -cantidad, motivo: motivo || 'XP retirada' });
+  if (log.length > 500) log.splice(0, log.length - 500);
+  config.gatoXPLog = log;
+  guardarConSincronizacion({ action: 'set-config', key: 'gatoXPLog', value: log });
 }
 
 // --- Racha semanal: una vez por día evalúa si el día anterior se mantuvo
@@ -4714,10 +4740,10 @@ function generarMovimientosRecurrentesSiCorresponde() {
         cuentaId: r.cuentaId || cuentaPrincipalId(),
         origenRecurrenteId: r.id
       };
+      if (mov.tipo === 'gasto') mov.xpOtorgado = otorgarXP(8, 'Registraste un gasto');
+      if (mov.tipo === 'ingreso') mov.xpOtorgado = otorgarXP(15, 'Registraste un ingreso');
       gastos.unshift(mov);
       apiPost({ action: 'add', mov: mov }).catch(function() { encolar({ action: 'add', mov: mov }); });
-      if (mov.tipo === 'gasto') otorgarXP(8, 'Registraste un gasto');
-      if (mov.tipo === 'ingreso') otorgarXP(15, 'Registraste un ingreso');
       r.proximaFechaEjecucion = siguienteFechaRecurrente(r.proximaFechaEjecucion, r.frecuencia);
       huboCambios = true;
       iter++;

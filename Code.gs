@@ -49,7 +49,7 @@ function getSheet() {
   let sheet = ss.getSheetByName('Movimientos');
   if (!sheet) {
     sheet = ss.insertSheet('Movimientos');
-    sheet.appendRow(['id', 'monto', 'fecha', 'nota', 'tipo', 'categoria', 'cuentaId', 'origenRecurrenteId']);
+    sheet.appendRow(['id', 'monto', 'fecha', 'nota', 'tipo', 'categoria', 'cuentaId', 'origenRecurrenteId', 'xpOtorgado']);
   } else {
     if (sheet.getRange(1, 7).getValue() === '') {
       // Hoja creada antes de que existiera "Mis tarjetas": se le agrega la
@@ -60,6 +60,11 @@ function getSheet() {
       // Hoja creada antes de "Transacciones recurrentes": misma lógica, se
       // agrega la columna nueva sin afectar las filas existentes.
       sheet.getRange(1, 8).setValue('origenRecurrenteId');
+    }
+    if (sheet.getRange(1, 9).getValue() === '') {
+      // Hoja creada antes de que se guardara cuánto XP otorgó cada
+      // movimiento (para poder quitarlo si se borra) — misma lógica.
+      sheet.getRange(1, 9).setValue('xpOtorgado');
     }
   }
   return sheet;
@@ -89,7 +94,8 @@ function obtenerMovimientos() {
       tipo: String(r[4] || '').trim().toLowerCase(),
       categoria: String(r[5] || '').trim().toLowerCase(),
       cuentaId: String(r[6] || ''),
-      origenRecurrenteId: String(r[7] || '')
+      origenRecurrenteId: String(r[7] || ''),
+      xpOtorgado: r[8] === '' || r[8] === null || r[8] === undefined ? undefined : Number(r[8])
     }))
     .reverse();
 }
@@ -117,7 +123,7 @@ function guardarMovimiento(mov) {
         return true; // ya existe, no lo vuelvas a agregar
       }
     }
-    sheet.appendRow([String(mov.id), Number(mov.monto), mov.fecha, mov.nota || '', mov.tipo, mov.categoria || '', mov.cuentaId || '', mov.origenRecurrenteId || '']);
+    sheet.appendRow([String(mov.id), Number(mov.monto), mov.fecha, mov.nota || '', mov.tipo, mov.categoria || '', mov.cuentaId || '', mov.origenRecurrenteId || '', mov.xpOtorgado === undefined ? '' : Number(mov.xpOtorgado)]);
     return true;
   } finally {
     lock.releaseLock();
@@ -132,8 +138,8 @@ function actualizarMovimiento(mov) {
     const data = sheet.getDataRange().getValues();
     for (let i = 1; i < data.length; i++) {
       if (String(data[i][0]) === String(mov.id)) {
-        sheet.getRange(i + 1, 1, 1, 8).setValues([[
-          String(mov.id), Number(mov.monto), mov.fecha, mov.nota || '', mov.tipo, mov.categoria || '', mov.cuentaId || (String(data[i][6] || '')), mov.origenRecurrenteId || (String(data[i][7] || ''))
+        sheet.getRange(i + 1, 1, 1, 9).setValues([[
+          String(mov.id), Number(mov.monto), mov.fecha, mov.nota || '', mov.tipo, mov.categoria || '', mov.cuentaId || (String(data[i][6] || '')), mov.origenRecurrenteId || (String(data[i][7] || '')), mov.xpOtorgado === undefined ? (data[i][8] === '' ? '' : Number(data[i][8])) : Number(mov.xpOtorgado)
         ]]);
         return true;
       }
