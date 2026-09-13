@@ -1067,51 +1067,47 @@ select option { background: var(--card-solid); color: var(--ink); }
 @keyframes floatPulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
 .gato-hero-card { position: relative; }
 
-/* ---- Modal de misión: dramático, estilo evento de Coin Master ---- */
+/* ---- Modal de misión: marco dorado con destello en loop, recompensa como
+   bandera integrada en la barra de progreso ---- */
 #overlay-mision, #overlay-cofre, #overlay-racha { z-index: 42; }
 #overlay-mision .sheet.mm-sheet {
-  border-radius: 24px; border: 2px solid #f2b544; padding: 30px 20px 22px; position: relative; overflow: hidden;
-  background: radial-gradient(circle at 50% 15%, #3a2a55 0%, #1a1428 65%);
-  box-shadow: 0 0 0 1px rgba(242,181,68,0.25), 0 24px 60px -15px rgba(0,0,0,0.75), 0 0 46px -6px rgba(127,111,214,0.55);
+  border-radius: 22px; border: 1.5px solid rgba(255,209,102,0.32); padding: 26px 20px 22px; position: relative; overflow: hidden;
+  background: #211a3a;
+  box-shadow: 0 20px 40px -18px rgba(0,0,0,0.6);
   animation: mmPopIn 0.4s cubic-bezier(.34,1.56,.64,1) both;
 }
 @keyframes mmPopIn { 0% { transform: scale(0.7); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-.mm-glow { position: absolute; inset: -50%; background: radial-gradient(circle, rgba(242,181,68,0.22), transparent 60%); animation: mmGlowPulse 2.4s ease-in-out infinite; pointer-events: none; }
-@keyframes mmGlowPulse { 0%, 100% { opacity: 0.5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.12); } }
-.mm-spark { position: absolute; color: #f2b544; font-size: 13px; z-index: 1; animation: gatoSparkle 1.9s ease-in-out infinite; }
-.mm-spark.s1 { top: 20px; left: 30px; animation-delay: 0s; }
-.mm-spark.s2 { top: 26px; right: 34px; animation-delay: 0.5s; }
-.mm-spark.s3 { bottom: 90px; left: 18px; animation-delay: 1s; }
-.mm-spark.s4 { bottom: 96px; right: 20px; animation-delay: 1.5s; }
-.mm-gato-wrap { text-align: center; margin: 2px 0 10px; position: relative; z-index: 1; animation: mmGatoPop 0.55s cubic-bezier(.34,1.56,.64,1) 0.15s both; }
-.mm-gato-wrap img { width: 190px; filter: drop-shadow(0 14px 18px rgba(0,0,0,0.55)); }
-@keyframes mmGatoPop { 0% { transform: translateY(18px) scale(0.6); opacity: 0; } 70% { transform: translateY(-4px) scale(1.05); opacity: 1; } 100% { transform: translateY(0) scale(1); opacity: 1; } }
-.mm-ribbon { text-align: center; margin: 0 0 8px; position: relative; z-index: 1; }
-.mm-ribbon span { display: inline-block; background: linear-gradient(135deg, #7f6fd6, #4a3d8f); color: #fff; font-size: 11.5px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; padding: 8px 20px; border-radius: 999px; box-shadow: 0 6px 18px -6px rgba(127,111,214,0.75); }
-.mm-timer {
-  display: flex; align-items: center; justify-content: center; gap: 6px;
-  background: linear-gradient(135deg, #ffdd8a, #f2b544); border: none; border-radius: 999px;
-  padding: 9px 22px; font-size: 17px; font-weight: 800; color: #2a1608; margin: 0 auto 14px; width: fit-content;
-  position: relative; z-index: 1; box-shadow: 0 0 0 0 rgba(242,181,68,0.55), 0 8px 20px -8px rgba(242,181,68,0.8);
-  animation: mmTimerPulse 1s ease-in-out infinite;
-}
-@keyframes mmTimerPulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(242,181,68,0.55), 0 8px 20px -8px rgba(242,181,68,0.8); } 50% { box-shadow: 0 0 0 8px rgba(242,181,68,0), 0 8px 20px -8px rgba(242,181,68,0.8); } }
-.mm-title { font-size: 19px; font-weight: 800; color: #fff; text-align: center; margin-bottom: 12px; position: relative; z-index: 1; line-height: 1.3; }
-.mm-reward {
-  display: flex; align-items: center; justify-content: center; gap: 7px; width: fit-content; margin: 0 auto 18px;
-  background: rgba(111,227,168,0.14); border: 1.5px solid rgba(111,227,168,0.5); border-radius: 999px; padding: 8px 20px;
-  font-size: 19px; font-weight: 800; color: #6fe3a8; text-align: center; position: relative; z-index: 1;
-}
-.mm-reward-ico { font-size: 17px; }
-.mm-seg-row { display: flex; gap: 6px; margin-bottom: 8px; position: relative; z-index: 1; flex-wrap: wrap; }
-.mm-seg { flex: 1; min-width: 12px; height: 9px; border-radius: 4px; background: #3a2d52; transition: background 0.2s ease; }
-.mm-seg.on { background: linear-gradient(135deg, #7f6fd6, #b8a8f0); box-shadow: 0 0 8px -1px rgba(127,111,214,0.8); }
-.mm-sub { font-size: 11px; color: #6a5f8a; text-align: center; margin-bottom: 18px; position: relative; z-index: 1; }
-.mm-btn { display: block; width: 100%; text-align: center; padding: 14px; border-radius: 999px; background: linear-gradient(135deg, #7f6fd6, #4a3d8f); color: #fff; font-weight: 800; font-size: 13px; position: relative; z-index: 1; border: none; cursor: pointer; box-shadow: 0 10px 24px -10px rgba(127,111,214,0.7); }
+.mm-sweep { position: absolute; inset: 0; border-radius: 22px; overflow: hidden; pointer-events: none; }
+.mm-sweep::before { content: ''; position: absolute; top: 0; bottom: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255,209,102,0.16), transparent); transform: translateX(-140%); animation: mmSweepLoop 4.5s ease-in-out infinite; animation-delay: 1s; }
+@keyframes mmSweepLoop { 0%, 17% { transform: translateX(-140%); } 35%, 100% { transform: translateX(240%); } }
+.mm-spark { position: absolute; top: 14px; right: 18px; color: #ffd166; font-size: 13px; z-index: 1; animation: mmSparkLoop 4.5s ease-in-out infinite; animation-delay: 1.2s; }
+@keyframes mmSparkLoop { 0%, 78% { opacity: 0; transform: scale(0.4) rotate(-15deg); } 86% { opacity: 1; transform: scale(1.15) rotate(0); } 94% { opacity: 0; transform: scale(0.9) rotate(10deg); } 100% { opacity: 0; } }
+.mm-eyebrow-row { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 14px; position: relative; z-index: 1; }
+.mm-eyebrow { font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 800; color: #ffd166; }
+.mm-eyebrow-dot { width: 3px; height: 3px; border-radius: 50%; background: #ffd166; animation: mmDotTwinkle 2.4s ease-in-out infinite; }
+.mm-eyebrow-dot.d2 { animation-delay: 1.2s; }
+@keyframes mmDotTwinkle { 0%, 100% { opacity: 0.25; transform: scale(1); } 50% { opacity: 1; transform: scale(1.6); } }
+.mm-gato-wrap { text-align: center; margin: 0 0 10px; height: 104px; display: flex; align-items: center; justify-content: center; position: relative; z-index: 1; animation: mmGatoPop 0.5s cubic-bezier(.22,.9,.32,1.1) 0.15s both; }
+.mm-gato-wrap img { width: 104px; filter: drop-shadow(0 8px 10px rgba(0,0,0,0.4)); }
+@keyframes mmGatoPop { 0% { opacity: 0; transform: translateY(14px) scale(0.85); } 70% { opacity: 1; transform: translateY(-3px) scale(1.03); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+.mm-title { font-size: 15px; font-weight: 600; color: #fff; text-align: center; margin-bottom: 18px; line-height: 1.4; position: relative; z-index: 1; }
+.mm-lbl-row { display: flex; justify-content: space-between; font-size: 10.5px; color: #928cae; margin-bottom: 6px; position: relative; z-index: 1; }
+.mm-lbl-row b { color: #fff; font-weight: 700; }
+.mm-clock-ico { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; vertical-align: -2px; margin-right: 3px; }
+.mm-clock-hand { transform-origin: 12px 12px; animation: mmClockTick 8s linear infinite; }
+@keyframes mmClockTick { to { transform: rotate(360deg); } }
+.mm-bar-wrap { height: 9px; border-radius: 6px; background: rgba(255,255,255,0.08); margin: 0 0 26px; position: relative; z-index: 1; }
+.mm-bar-fill { height: 100%; border-radius: 6px; width: 0%; position: relative; background-image: repeating-linear-gradient(90deg, #7cf5c4 0, #7f6fd6 8px, #7cf5c4 16px); background-size: 200% 100%; animation: mmBarBreathe 2.6s ease-in-out infinite; transition: width 0.6s cubic-bezier(.3,.8,.3,1); }
+@keyframes mmBarBreathe { 0%, 100% { background-position: 0% 0; } 50% { background-position: 12% 0; } }
+.mm-badge { position: absolute; left: 100%; top: 50%; transform: translate(-50%, -50%); background: #ffd166; color: #2a1608; font-size: 9.5px; font-weight: 800; padding: 4px 9px; border-radius: 999px; box-shadow: 0 3px 8px -1px rgba(0,0,0,0.4); white-space: nowrap; animation: mmBadgeFloat 2.6s ease-in-out infinite; }
+@keyframes mmBadgeFloat { 0%, 100% { transform: translate(-50%, -50%); } 50% { transform: translate(-50%, calc(-50% - 3px)); } }
+.mm-btn { display: block; width: 100%; text-align: center; padding: 13px; border-radius: 999px; background: #ffd166; color: #2a1608; font-weight: 700; font-size: 13px; border: none; cursor: pointer; position: relative; z-index: 1; overflow: hidden; }
+.mm-btn-sheen { position: absolute; top: 0; bottom: 0; width: 36%; background: linear-gradient(115deg, transparent, rgba(255,255,255,0.65), transparent); transform: translateX(-160%); animation: mmBtnSheen 4.5s ease-in-out infinite; animation-delay: 2.2s; }
+@keyframes mmBtnSheen { 0%, 20% { transform: translateX(-160%); } 35%, 100% { transform: translateX(280%); } }
 .mm-completada { display: none; text-align: center; position: relative; z-index: 1; }
-.mm-completada-check { width: 58px; height: 58px; border-radius: 50%; background: #1e3a2c; color: #6fe3a8; font-size: 26px; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; box-shadow: 0 0 0 6px rgba(111,227,168,0.12); animation: mmCheckPop 0.5s cubic-bezier(.34,1.56,.64,1) both; }
+.mm-completada-check { width: 58px; height: 58px; border-radius: 50%; background: #1e3a2c; color: #7cf5c4; font-size: 26px; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; box-shadow: 0 0 0 6px rgba(124,245,196,0.12); animation: mmCheckPop 0.5s cubic-bezier(.34,1.56,.64,1) both; }
 @keyframes mmCheckPop { 0% { transform: scale(0.4); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-.mm-completada-xp { color: #6fe3a8; font-weight: 800; font-size: 15px; margin-top: 4px; }
+.mm-completada-xp { color: #7cf5c4; font-weight: 800; font-size: 15px; margin-top: 4px; }
 .mm-completada-sub { font-size: 11px; color: #8b7fb0; margin-top: 10px; }
 
 /* ---- Cofre de recompensas ---- */
@@ -1694,22 +1690,27 @@ select option { background: var(--card-solid); color: var(--ink); }
 
 <div class="overlay" id="overlay-mision">
   <div class="sheet mm-sheet">
-    <div class="mm-glow"></div>
-    <span class="mm-spark s1">✦</span><span class="mm-spark s2">✧</span><span class="mm-spark s3">✦</span><span class="mm-spark s4">✧</span>
-    <div class="mm-ribbon"><span>Misión de la semana</span></div>
+    <div class="mm-sweep"></div>
+    <span class="mm-spark">✦</span>
+    <div class="mm-eyebrow-row" id="mm-eyebrow-row">
+      <span class="mm-eyebrow-dot"></span>
+      <span class="mm-eyebrow">Misión de la semana</span>
+      <span class="mm-eyebrow-dot d2"></span>
+    </div>
     <div class="mm-gato-wrap"><img src="gato-mision-semanal.png" alt=""></div>
-    <div class="mm-timer" id="mm-timer"><span class="mm-timer-ico">⏱</span><span id="mm-timer-txt">3d 14h</span></div>
     <div class="mm-title" id="mm-titulo">—</div>
-    <div class="mm-reward" id="mm-recompensa"><span class="mm-reward-ico">⚡</span><span id="mm-recompensa-xp">+0 XP</span></div>
-    <div class="mm-seg-row" id="mm-segmentos"></div>
-    <div class="mm-sub" id="mm-sub">0 de 0</div>
+    <div class="mm-lbl-row" id="mm-lbl-row">
+      <span><svg class="mm-clock-ico" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line class="mm-clock-hand" x1="12" y1="12" x2="12" y2="7"/><line x1="12" y1="12" x2="15" y2="14"/></svg>Termina en <b id="mm-timer-txt">3d 14h</b></span>
+      <span id="mm-sub">0 de 0</span>
+    </div>
+    <div class="mm-bar-wrap" id="mm-bar-wrap"><div class="mm-bar-fill" id="mm-bar-fill" style="width:0%"><span class="mm-badge" id="mm-badge">+0 XP</span></div></div>
     <div class="mm-completada" id="mm-completada">
       <div class="mm-completada-check">✓</div>
       <div class="mm-title" style="margin-bottom:2px">Misión cumplida</div>
       <div class="mm-completada-xp" id="mm-completada-xp">+15 XP</div>
       <div class="mm-completada-sub">Ábrelo desde tu Cofre de recompensas 🎁</div>
     </div>
-    <button type="button" class="mm-btn" id="mm-btn-cerrar">¡Acepto el reto! 🎯</button>
+    <button type="button" class="mm-btn" id="mm-btn-cerrar">¡Acepto el reto! 🎯<span class="mm-btn-sheen"></span></button>
   </div>
 </div>
 
@@ -5030,29 +5031,22 @@ function abrirModalMision() {
   const t = MISIONES_CATALOGO.find(function(x) { return x.id === m.templateId; });
   if (!t) return;
   document.getElementById('mm-titulo').textContent = t.titulo;
-  document.getElementById('mm-recompensa-xp').textContent = '+' + t.xp + ' XP';
+  document.getElementById('mm-badge').textContent = '+' + t.xp + ' XP';
   const meta = t.meta;
   const progreso = Math.min(m.progreso, meta);
-  const segs = document.getElementById('mm-segmentos');
-  segs.innerHTML = '';
-  for (let i = 0; i < meta; i++) {
-    const s = document.createElement('div');
-    s.className = 'mm-seg' + (i < progreso ? ' on' : '');
-    segs.appendChild(s);
-  }
+  document.getElementById('mm-bar-fill').style.width = (Math.round((progreso / meta) * 100)) + '%';
   const unidad = t.tipo === 'registrar_ingreso' ? (meta === 1 ? 'vez' : 'veces') : 'días';
   document.getElementById('mm-sub').textContent = progreso + ' de ' + meta + ' ' + unidad;
 
   const completada = m.estado === 'completada';
   document.getElementById('mm-completada').style.display = completada ? 'block' : 'none';
-  document.getElementById('mm-timer').style.display = completada ? 'none' : 'flex';
+  document.getElementById('mm-eyebrow-row').style.display = completada ? 'none' : 'flex';
   document.getElementById('mm-titulo').style.display = completada ? 'none' : 'block';
-  document.getElementById('mm-recompensa').style.display = completada ? 'none' : 'flex';
-  document.getElementById('mm-segmentos').style.display = completada ? 'none' : 'flex';
-  document.getElementById('mm-sub').style.display = completada ? 'none' : 'block';
+  document.getElementById('mm-lbl-row').style.display = completada ? 'none' : 'flex';
+  document.getElementById('mm-bar-wrap').style.display = completada ? 'none' : 'block';
   if (completada) document.getElementById('mm-completada-xp').textContent = '+' + t.xp + ' XP';
   else document.getElementById('mm-timer-txt').textContent = textoCuentaRegresivaSemana();
-  document.getElementById('mm-btn-cerrar').textContent = completada ? 'Entendido' : '¡Acepto el reto! 🎯';
+  document.getElementById('mm-btn-cerrar').innerHTML = (completada ? 'Entendido' : '¡Acepto el reto! 🎯') + '<span class="mm-btn-sheen"></span>';
 
   document.getElementById('overlay-mision').classList.add('show');
 }
