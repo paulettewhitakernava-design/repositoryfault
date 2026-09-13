@@ -91,6 +91,7 @@ h1 { font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 22px
   animation: rise 0.5s ease both;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 20px 44px -28px rgba(0,0,0,0.65);
 }
 .card-lbl { font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
 .card-lbl-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
@@ -493,6 +494,7 @@ select option { background: var(--card-solid); color: var(--ink); }
   border-radius: 24px;
   padding: 22px;
   animation: sheetPop 0.22s cubic-bezier(.32,.72,0,1);
+  box-shadow: 0 -20px 60px -24px rgba(0,0,0,0.7);
 }
 .sheet-handle { display: none; }
 .sheet-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
@@ -639,7 +641,8 @@ select option { background: var(--card-solid); color: var(--ink); }
 .gato-hero-card {
   border-radius: 26px; padding: 24px; position: relative; overflow: hidden; margin-bottom: 20px;
   background: radial-gradient(120% 130% at -10% -25%, rgba(255,138,92,0.30), transparent 55%), var(--card-solid);
-  border: 1px solid rgba(255,209,102,0.22); animation: rise 0.5s ease both;
+  border: 1px solid rgba(255,209,102,0.26); animation: rise 0.5s ease both;
+  box-shadow: 0 20px 46px -26px rgba(255,138,92,0.35), 0 20px 44px -28px rgba(0,0,0,0.6);
 }
 .gato-hero-clickzone { display: block; width: 100%; background: none; border: none; padding: 0; margin: 0; text-align: left; cursor: pointer; color: inherit; font: inherit; }
 .gato-hero-row { display: flex; align-items: center; gap: 16px; position: relative; z-index: 1; }
@@ -652,7 +655,7 @@ select option { background: var(--card-solid); color: var(--ink); }
 .gato-animo-txt { font-size: 10.5px; color: var(--accent-2); font-weight: 600; }
 .gato-info-btn { width: 16px; height: 16px; border-radius: 50%; background: rgba(255,255,255,0.14); color: var(--ink); font-size: 7.5px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .gato-bar { height: 9px; border-radius: 5px; background: rgba(0,0,0,0.28); overflow: hidden; }
-.gato-bar-fill { height: 100%; border-radius: 5px; position: relative; background: linear-gradient(90deg, var(--accent), var(--gold)); transition: width 0.4s ease; animation: gatoBarBreathe 2.4s ease-in-out infinite; }
+.gato-bar-fill { height: 100%; border-radius: 5px; position: relative; background: linear-gradient(90deg, var(--accent), var(--gold)); transition: width 0.4s ease; animation: gatoBarBreathe 2.4s ease-in-out infinite; box-shadow: 0 0 10px -1px rgba(255,209,102,0.55); }
 .gato-bar-fill::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(255,255,255,0.35), transparent 45%); border-radius: inherit; }
 .gato-progreso-txt { font-size: 9px; color: var(--muted); margin-top: 7px; line-height: 1.4; }
 .gato-hero-chev { color: var(--muted); font-size: 13px; align-self: flex-start; flex-shrink: 0; }
